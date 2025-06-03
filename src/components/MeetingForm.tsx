@@ -1,35 +1,25 @@
 
 import React, { useState } from 'react';
+import { Card, CardHeader, CardContent } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { Switch } from '@/components/ui/switch';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import {
-  Card,
-  CardHeader,
-  CardPreview,
-  Text,
-  Input,
-  Label,
-  Button,
-  Textarea,
-  Switch,
-  Combobox,
-  Option,
-  Field,
-  Avatar,
-  Badge,
-  Divider,
-  TabList,
-  Tab,
-  TabValue,
-} from '@fluentui/react-components';
-import {
-  CalendarLtr24Regular,
-  Clock24Regular,
-  Location24Regular,
-  Video24Regular,
-  People24Regular,
-  Add24Regular,
-  Dismiss24Regular,
-  Send24Regular,
-} from '@fluentui/react-icons';
+  Calendar,
+  Clock,
+  MapPin,
+  Video,
+  Users,
+  Plus,
+  X,
+  Send,
+} from 'lucide-react';
 
 interface Attendee {
   id: string;
@@ -49,7 +39,6 @@ const MeetingForm = () => {
   const [endTime, setEndTime] = useState('');
   const [description, setDescription] = useState('');
   const [agenda, setAgenda] = useState('');
-  const [selectedTab, setSelectedTab] = useState<TabValue>('details');
 
   const mockAvailability = [
     { time: '9:00 AM', status: 'free' },
@@ -78,205 +67,226 @@ const MeetingForm = () => {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'free': return '#107c10';
-      case 'busy': return '#d13438';
-      case 'tentative': return '#faa06b';
-      default: return '#8a8886';
+      case 'free': return 'bg-green-500';
+      case 'busy': return 'bg-red-500';
+      case 'tentative': return 'bg-yellow-500';
+      default: return 'bg-gray-500';
     }
   };
 
   return (
     <div className="max-w-4xl mx-auto p-6 bg-gray-50 min-h-screen">
-      <Card className="bg-white shadow-lg border-0">
+      <Card className="bg-white shadow-lg">
         <CardHeader>
           <div className="flex items-center gap-3 mb-4">
-            <CalendarLtr24Regular className="text-blue-600" />
-            <Text size={600} weight="semibold" className="text-gray-900">
+            <Calendar className="text-blue-600 h-6 w-6" />
+            <h1 className="text-2xl font-semibold text-gray-900">
               New Meeting
-            </Text>
+            </h1>
           </div>
         </CardHeader>
         
-        <CardPreview className="p-6 pt-0">
-          <TabList selectedValue={selectedTab} onTabSelect={(_, data) => setSelectedTab(data.value)}>
-            <Tab value="details">Meeting Details</Tab>
-            <Tab value="scheduling">Scheduling Assistant</Tab>
-          </TabList>
+        <CardContent className="p-6 pt-0">
+          <Tabs defaultValue="details" className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="details">Meeting Details</TabsTrigger>
+              <TabsTrigger value="scheduling">Scheduling Assistant</TabsTrigger>
+            </TabsList>
 
-          <div className="mt-6">
-            {selectedTab === 'details' && (
-              <div className="space-y-6">
-                <Field label="Title" required>
+            <TabsContent value="details" className="space-y-6 mt-6">
+              <div className="space-y-2">
+                <Label htmlFor="title" className="text-sm font-medium">
+                  Title *
+                </Label>
+                <Input
+                  id="title"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  placeholder="Add a title"
+                  className="w-full"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <Label htmlFor="startDate" className="text-sm font-medium">
+                    Start Date
+                  </Label>
                   <Input
-                    value={title}
-                    onChange={(_, data) => setTitle(data.value)}
-                    placeholder="Add a title"
+                    id="startDate"
+                    type="date"
+                    value={startDate}
+                    onChange={(e) => setStartDate(e.target.value)}
                     className="w-full"
                   />
-                </Field>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <Field label="Start Date">
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="startTime" className="text-sm font-medium">
+                      Start Time
+                    </Label>
                     <Input
-                      type="date"
-                      value={startDate}
-                      onChange={(_, data) => setStartDate(data.value)}
+                      id="startTime"
+                      type="time"
+                      value={startTime}
+                      onChange={(e) => setStartTime(e.target.value)}
                       className="w-full"
                     />
-                  </Field>
-                  <div className="grid grid-cols-2 gap-4">
-                    <Field label="Start Time">
-                      <Input
-                        type="time"
-                        value={startTime}
-                        onChange={(_, data) => setStartTime(data.value)}
-                        className="w-full"
-                      />
-                    </Field>
-                    <Field label="End Time">
-                      <Input
-                        type="time"
-                        value={endTime}
-                        onChange={(_, data) => setEndTime(data.value)}
-                        className="w-full"
-                      />
-                    </Field>
                   </div>
-                </div>
-
-                <div className="space-y-4">
-                  <Label className="text-sm font-semibold">Meeting Options</Label>
-                  <div className="flex items-center gap-3 p-4 bg-blue-50 rounded-lg">
-                    <Video24Regular className="text-blue-600" />
-                    <div className="flex-1">
-                      <Text weight="semibold">Teams meeting</Text>
-                      <Text size={200} className="text-gray-600">Join this meeting online</Text>
-                    </div>
-                    <Switch
-                      checked={isTeamsMeeting}
-                      onChange={(_, data) => setIsTeamsMeeting(data.checked)}
-                    />
-                  </div>
-                </div>
-
-                {!isTeamsMeeting && (
-                  <Field label="Location">
-                    <div className="flex items-center gap-2">
-                      <Location24Regular className="text-gray-600" />
-                      <Input
-                        value={location}
-                        onChange={(_, data) => setLocation(data.value)}
-                        placeholder="Add location"
-                        className="flex-1"
-                      />
-                    </div>
-                  </Field>
-                )}
-
-                <div className="space-y-4">
-                  <Label className="text-sm font-semibold flex items-center gap-2">
-                    <People24Regular />
-                    Attendees
-                  </Label>
-                  <div className="flex gap-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="endTime" className="text-sm font-medium">
+                      End Time
+                    </Label>
                     <Input
-                      value={newAttendeeEmail}
-                      onChange={(_, data) => setNewAttendeeEmail(data.value)}
-                      placeholder="Enter email address"
-                      className="flex-1"
-                      onKeyDown={(e) => e.key === 'Enter' && addAttendee()}
+                      id="endTime"
+                      type="time"
+                      value={endTime}
+                      onChange={(e) => setEndTime(e.target.value)}
+                      className="w-full"
                     />
-                    <Button
-                      appearance="primary"
-                      icon={<Add24Regular />}
-                      onClick={addAttendee}
-                    >
-                      Add
-                    </Button>
                   </div>
-                  
-                  {attendees.length > 0 && (
-                    <div className="space-y-2">
-                      {attendees.map((attendee) => (
-                        <div key={attendee.id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                          <Avatar name={attendee.name} size={32} />
-                          <div className="flex-1">
-                            <Text weight="semibold">{attendee.name}</Text>
-                            <Text size={200} className="text-gray-600">{attendee.email}</Text>
-                          </div>
-                          <Badge
-                            appearance="filled"
-                            style={{ backgroundColor: getStatusColor(attendee.status) }}
-                          >
-                            {attendee.status}
-                          </Badge>
-                          <Button
-                            appearance="subtle"
-                            icon={<Dismiss24Regular />}
-                            onClick={() => removeAttendee(attendee.id)}
-                          />
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <Label className="text-sm font-semibold">Meeting Options</Label>
+                <div className="flex items-center gap-3 p-4 bg-blue-50 rounded-lg">
+                  <Video className="text-blue-600 h-5 w-5" />
+                  <div className="flex-1">
+                    <p className="font-semibold">Teams meeting</p>
+                    <p className="text-sm text-gray-600">Join this meeting online</p>
+                  </div>
+                  <Switch
+                    checked={isTeamsMeeting}
+                    onCheckedChange={setIsTeamsMeeting}
+                  />
+                </div>
+              </div>
+
+              {!isTeamsMeeting && (
+                <div className="space-y-2">
+                  <Label htmlFor="location" className="text-sm font-medium">
+                    Location
+                  </Label>
+                  <div className="flex items-center gap-2">
+                    <MapPin className="text-gray-600 h-4 w-4" />
+                    <Input
+                      id="location"
+                      value={location}
+                      onChange={(e) => setLocation(e.target.value)}
+                      placeholder="Add location"
+                      className="flex-1"
+                    />
+                  </div>
+                </div>
+              )}
+
+              <div className="space-y-4">
+                <Label className="text-sm font-semibold flex items-center gap-2">
+                  <Users className="h-4 w-4" />
+                  Attendees
+                </Label>
+                <div className="flex gap-2">
+                  <Input
+                    value={newAttendeeEmail}
+                    onChange={(e) => setNewAttendeeEmail(e.target.value)}
+                    placeholder="Enter email address"
+                    className="flex-1"
+                    onKeyDown={(e) => e.key === 'Enter' && addAttendee()}
+                  />
+                  <Button onClick={addAttendee} className="flex items-center gap-2">
+                    <Plus className="h-4 w-4" />
+                    Add
+                  </Button>
+                </div>
+                
+                {attendees.length > 0 && (
+                  <div className="space-y-2">
+                    {attendees.map((attendee) => (
+                      <div key={attendee.id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                        <Avatar className="h-8 w-8">
+                          <AvatarFallback>
+                            {attendee.name.charAt(0).toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1">
+                          <p className="font-semibold">{attendee.name}</p>
+                          <p className="text-sm text-gray-600">{attendee.email}</p>
                         </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                <Field label="Description">
-                  <Textarea
-                    value={description}
-                    onChange={(_, data) => setDescription(data.value)}
-                    placeholder="Add a description..."
-                    rows={4}
-                    className="w-full"
-                  />
-                </Field>
-
-                <Field label="Agenda">
-                  <Textarea
-                    value={agenda}
-                    onChange={(_, data) => setAgenda(data.value)}
-                    placeholder="Add agenda items..."
-                    rows={3}
-                    className="w-full"
-                  />
-                </Field>
-              </div>
-            )}
-
-            {selectedTab === 'scheduling' && (
-              <div className="space-y-6">
-                <Text size={500} weight="semibold">Free/Busy Times</Text>
-                <div className="grid gap-4">
-                  {mockAvailability.map((slot, index) => (
-                    <div key={index} className="flex items-center gap-4 p-3 bg-gray-50 rounded-lg">
-                      <Clock24Regular className="text-gray-600" />
-                      <Text className="w-20">{slot.time}</Text>
-                      <div className="flex-1 flex items-center gap-2">
-                        <div
-                          className="w-4 h-4 rounded-full"
-                          style={{ backgroundColor: getStatusColor(slot.status) }}
-                        />
-                        <Text className="capitalize">{slot.status}</Text>
+                        <Badge className={`${getStatusColor(attendee.status)} text-white`}>
+                          {attendee.status}
+                        </Badge>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => removeAttendee(attendee.id)}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
                       </div>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                )}
               </div>
-            )}
 
-            <Divider className="my-6" />
+              <div className="space-y-2">
+                <Label htmlFor="description" className="text-sm font-medium">
+                  Description
+                </Label>
+                <Textarea
+                  id="description"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  placeholder="Add a description..."
+                  rows={4}
+                  className="w-full"
+                />
+              </div>
 
-            <div className="flex justify-end gap-3">
-              <Button appearance="secondary">Cancel</Button>
-              <Button
-                appearance="primary"
-                icon={<Send24Regular />}
-              >
-                Send Invitation
-              </Button>
-            </div>
+              <div className="space-y-2">
+                <Label htmlFor="agenda" className="text-sm font-medium">
+                  Agenda
+                </Label>
+                <Textarea
+                  id="agenda"
+                  value={agenda}
+                  onChange={(e) => setAgenda(e.target.value)}
+                  placeholder="Add agenda items..."
+                  rows={3}
+                  className="w-full"
+                />
+              </div>
+            </TabsContent>
+
+            <TabsContent value="scheduling" className="space-y-6 mt-6">
+              <h3 className="text-lg font-semibold">Free/Busy Times</h3>
+              <div className="grid gap-4">
+                {mockAvailability.map((slot, index) => (
+                  <div key={index} className="flex items-center gap-4 p-3 bg-gray-50 rounded-lg">
+                    <Clock className="text-gray-600 h-4 w-4" />
+                    <span className="w-20">{slot.time}</span>
+                    <div className="flex-1 flex items-center gap-2">
+                      <div
+                        className={`w-4 h-4 rounded-full ${getStatusColor(slot.status).replace('bg-', 'bg-')}`}
+                      />
+                      <span className="capitalize">{slot.status}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </TabsContent>
+          </Tabs>
+
+          <Separator className="my-6" />
+
+          <div className="flex justify-end gap-3">
+            <Button variant="secondary">Cancel</Button>
+            <Button className="flex items-center gap-2">
+              <Send className="h-4 w-4" />
+              Send Invitation
+            </Button>
           </div>
-        </CardPreview>
+        </CardContent>
       </Card>
     </div>
   );
