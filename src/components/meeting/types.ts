@@ -7,6 +7,7 @@ export interface FormData {
   description: string;
   startTime: string;
   endTime: string;
+  location: string;
   isRecurring: boolean;
   isTeamsMeeting: boolean;
   allowAnonymous: boolean;

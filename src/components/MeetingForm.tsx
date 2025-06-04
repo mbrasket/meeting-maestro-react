@@ -45,6 +45,7 @@ const MeetingForm = () => {
     description: '',
     startTime: '',
     endTime: '',
+    location: '',
     isRecurring: false,
     isTeamsMeeting: true,
     allowAnonymous: false,

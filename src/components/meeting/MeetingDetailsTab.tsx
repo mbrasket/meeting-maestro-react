@@ -4,6 +4,12 @@ import {
   Switch,
   Field,
   Textarea,
+  MenuButton,
+  Menu,
+  MenuTrigger,
+  MenuPopover,
+  MenuList,
+  MenuItem,
   makeStyles,
   tokens,
 } from '@fluentui/react-components';
@@ -11,7 +17,9 @@ import {
   Clock20Regular, 
   People20Regular, 
   DocumentText20Regular,
-  PersonAdd20Regular
+  PersonAdd20Regular,
+  Location20Regular,
+  MoreHorizontal20Regular
 } from '@fluentui/react-icons';
 import { FormData } from './types';
 import TeamsSettingsSection from './TeamsSettingsSection';
@@ -22,6 +30,18 @@ const useStyles = makeStyles({
     alignItems: 'center',
     gap: tokens.spacingHorizontalM,
     marginBottom: tokens.spacingVerticalM,
+  },
+  fieldWithIconAndMenu: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: tokens.spacingHorizontalM,
+    marginBottom: tokens.spacingVerticalM,
+  },
+  fieldContainer: {
+    display: 'flex',
+    alignItems: 'center',
+    flex: 1,
+    gap: tokens.spacingHorizontalS,
   },
   timeFieldsContainer: {
     display: 'flex',
@@ -69,6 +89,10 @@ const useStyles = makeStyles({
   formField: {
     marginBottom: tokens.spacingVerticalM,
   },
+  menuButton: {
+    minWidth: 'auto',
+    padding: tokens.spacingHorizontalXS,
+  },
 });
 
 interface MeetingDetailsTabProps {
@@ -111,19 +135,37 @@ const MeetingDetailsTab = ({ formData, onInputChange }: MeetingDetailsTabProps) 
         </Field>
       </div>
 
-      {/* Participants */}
-      <div className={styles.fieldWithIcon}>
+      {/* Participants with style menu */}
+      <div className={styles.fieldWithIconAndMenu}>
         <div className={styles.iconContainer}>
           <People20Regular />
         </div>
-        <Field style={{ flex: 1 }}>
-          <Input
-            appearance="underline"
-            value={formData.participants}
-            onChange={(_, data) => onInputChange('participants', data.value)}
-            placeholder="Enter participant email addresses separated by commas"
-          />
-        </Field>
+        <div className={styles.fieldContainer}>
+          <Field style={{ flex: 1 }}>
+            <Input
+              appearance="underline"
+              value={formData.participants}
+              onChange={(_, data) => onInputChange('participants', data.value)}
+              placeholder="Enter participant email addresses separated by commas"
+            />
+          </Field>
+          <Menu>
+            <MenuTrigger disableButtonEnhancement>
+              <MenuButton
+                appearance="subtle"
+                icon={<MoreHorizontal20Regular />}
+                className={styles.menuButton}
+              />
+            </MenuTrigger>
+            <MenuPopover>
+              <MenuList>
+                <MenuItem>Format as list</MenuItem>
+                <MenuItem>Format as table</MenuItem>
+                <MenuItem>Import from contacts</MenuItem>
+              </MenuList>
+            </MenuPopover>
+          </Menu>
+        </div>
       </div>
 
       {/* Optional Participants */}
@@ -169,6 +211,39 @@ const MeetingDetailsTab = ({ formData, onInputChange }: MeetingDetailsTabProps) 
               onChange={(_, data) => onInputChange('endTime', data.value)}
             />
           </Field>
+        </div>
+      </div>
+
+      {/* Location with menu */}
+      <div className={styles.fieldWithIconAndMenu}>
+        <div className={styles.iconContainer}>
+          <Location20Regular />
+        </div>
+        <div className={styles.fieldContainer}>
+          <Field style={{ flex: 1 }} hint="Add meeting room, address, or online link">
+            <Input
+              appearance="underline"
+              value={formData.location || ''}
+              onChange={(_, data) => onInputChange('location', data.value)}
+              placeholder="Enter location or meeting room"
+            />
+          </Field>
+          <Menu>
+            <MenuTrigger disableButtonEnhancement>
+              <MenuButton
+                appearance="subtle"
+                icon={<MoreHorizontal20Regular />}
+                className={styles.menuButton}
+              />
+            </MenuTrigger>
+            <MenuPopover>
+              <MenuList>
+                <MenuItem>Browse meeting rooms</MenuItem>
+                <MenuItem>Add online meeting link</MenuItem>
+                <MenuItem>Get directions</MenuItem>
+              </MenuList>
+            </MenuPopover>
+          </Menu>
         </div>
       </div>
 
