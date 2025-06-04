@@ -10,8 +10,6 @@ export interface FormData {
   location: string;
   isRecurring: boolean;
   isTeamsMeeting: boolean;
-  allowAnonymous: boolean;
   enableChat: boolean;
   enableRecording: boolean;
-  lobbyBypass: string;
 }

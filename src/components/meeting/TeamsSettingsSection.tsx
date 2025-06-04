@@ -54,14 +54,6 @@ const TeamsSettingsSection = ({ formData, onInputChange }: TeamsSettingsSectionP
 
           <Field className={styles.formField}>
             <Switch
-              checked={formData.allowAnonymous}
-              onChange={(_, data) => onInputChange('allowAnonymous', data.checked)}
-              label="Allow anonymous participants"
-            />
-          </Field>
-
-          <Field className={styles.formField}>
-            <Switch
               checked={formData.enableChat}
               onChange={(_, data) => onInputChange('enableChat', data.checked)}
               label="Enable meeting chat"
