@@ -58,6 +58,11 @@ const useStyles = makeStyles({
     '& input': {
       paddingLeft: 0,
       height: '32px',
+      cursor: 'text',
+      transition: 'border-color 0.1s ease',
+      '&:hover': {
+        borderBottomColor: tokens.colorNeutralStroke1Hover,
+      },
     },
   },
 });

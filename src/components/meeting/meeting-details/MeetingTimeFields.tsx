@@ -20,6 +20,13 @@ const useStyles = makeStyles({
     gap: tokens.spacingHorizontalM,
     flex: 1,
     height: '32px',
+    padding: `${tokens.spacingVerticalXS} ${tokens.spacingHorizontalS}`,
+    borderRadius: tokens.borderRadiusSmall,
+    cursor: 'default',
+    transition: 'background-color 0.1s ease',
+    '&:hover': {
+      backgroundColor: tokens.colorSubtleBackgroundHover,
+    },
   },
   iconContainer: {
     display: 'flex',
@@ -34,6 +41,11 @@ const useStyles = makeStyles({
     height: '32px',
     '& input': {
       height: '32px',
+      cursor: 'text',
+      transition: 'border-color 0.1s ease',
+      '&:hover': {
+        borderBottomColor: tokens.colorNeutralStroke1Hover,
+      },
     },
   },
 });

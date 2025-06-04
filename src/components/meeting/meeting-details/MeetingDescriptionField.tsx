@@ -15,6 +15,13 @@ const useStyles = makeStyles({
     gap: tokens.spacingHorizontalM,
     marginTop: tokens.spacingVerticalL,
     marginBottom: '16px',
+    padding: `${tokens.spacingVerticalS} ${tokens.spacingHorizontalS}`,
+    borderRadius: tokens.borderRadiusSmall,
+    cursor: 'default',
+    transition: 'background-color 0.1s ease',
+    '&:hover': {
+      backgroundColor: tokens.colorSubtleBackgroundHover,
+    },
   },
   descriptionIcon: {
     marginTop: '8px',
@@ -26,6 +33,11 @@ const useStyles = makeStyles({
     border: `1px solid ${tokens.colorNeutralStroke1}`,
     borderRadius: tokens.borderRadiusMedium,
     padding: tokens.spacingVerticalS,
+    cursor: 'text',
+    transition: 'border-color 0.1s ease',
+    '&:hover': {
+      borderColor: tokens.colorNeutralStroke1Hover,
+    },
     '&:focus': {
       borderTopColor: tokens.colorBrandStroke1,
       borderRightColor: tokens.colorBrandStroke1,
