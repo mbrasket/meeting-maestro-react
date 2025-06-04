@@ -42,6 +42,7 @@ const useStyles = makeStyles({
     display: 'flex',
     flexDirection: 'column',
     gap: tokens.spacingVerticalS,
+    marginTop: tokens.spacingVerticalS,
   },
   participantItem: {
     display: 'flex',
@@ -56,6 +57,12 @@ const useStyles = makeStyles({
     gap: tokens.spacingHorizontalM,
     marginTop: tokens.spacingVerticalL,
   },
+  teamsSection: {
+    marginTop: tokens.spacingVerticalL,
+    padding: tokens.spacingVerticalM,
+    borderRadius: tokens.borderRadiusMedium,
+    backgroundColor: tokens.colorNeutralBackground2,
+  },
 });
 
 const MeetingForm = () => {
@@ -63,16 +70,21 @@ const MeetingForm = () => {
   const [selectedTab, setSelectedTab] = useState('details');
   const [formData, setFormData] = useState({
     title: '',
+    coOrganizers: '',
+    participants: '',
+    optionalParticipants: '',
     description: '',
     startTime: '',
     endTime: '',
     isRecurring: false,
+    isTeamsMeeting: true,
     allowAnonymous: false,
     enableChat: true,
     enableRecording: false,
+    lobbyBypass: 'everyone',
   });
 
-  const [participants] = useState([
+  const [participantsList] = useState([
     { id: 1, name: 'John Doe', email: 'john@company.com', role: 'Presenter' },
     { id: 2, name: 'Jane Smith', email: 'jane@company.com', role: 'Attendee' },
     { id: 3, name: 'Mike Johnson', email: 'mike@company.com', role: 'Attendee' },
@@ -107,17 +119,15 @@ const MeetingForm = () => {
           <Tab id="details" value="details" icon={<CalendarLtr20Regular />}>
             Meeting Details
           </Tab>
-          <Tab id="participants" value="participants" icon={<People20Regular />}>
-            Participants
-          </Tab>
           <Tab id="settings" value="settings" icon={<Settings20Regular />}>
-            Settings
+            Advanced Settings
           </Tab>
         </TabList>
 
         <div className={styles.tabContent}>
           {selectedTab === 'details' && (
             <div>
+              {/* Meeting Title */}
               <Field
                 label="Meeting Title"
                 required
@@ -130,18 +140,66 @@ const MeetingForm = () => {
                 />
               </Field>
 
+              {/* Co-organizers */}
               <Field
-                label="Description"
+                label="Co-organizers"
                 className={styles.formField}
               >
-                <Textarea
-                  value={formData.description}
-                  onChange={(_, data) => handleInputChange('description', data.value)}
-                  placeholder="Add meeting description (optional)"
-                  rows={3}
+                <Input
+                  value={formData.coOrganizers}
+                  onChange={(_, data) => handleInputChange('coOrganizers', data.value)}
+                  placeholder="Enter co-organizer email addresses separated by commas"
+                  contentBefore={<People20Regular />}
                 />
               </Field>
 
+              {/* Participants */}
+              <Field
+                label="Participants"
+                className={styles.formField}
+              >
+                <Input
+                  value={formData.participants}
+                  onChange={(_, data) => handleInputChange('participants', data.value)}
+                  placeholder="Enter participant email addresses separated by commas"
+                  contentBefore={<People20Regular />}
+                />
+                <div className={styles.participantsList}>
+                  {participantsList.map((participant) => (
+                    <div key={participant.id} className={styles.participantItem}>
+                      <Avatar
+                        name={participant.name}
+                        size={32}
+                      />
+                      <div style={{ flex: 1 }}>
+                        <Text weight="semibold">{participant.name}</Text>
+                        <br />
+                        <Text size={200} style={{ color: tokens.colorNeutralForeground2 }}>
+                          {participant.email}
+                        </Text>
+                      </div>
+                      <Badge appearance="outline">
+                        {participant.role}
+                      </Badge>
+                    </div>
+                  ))}
+                </div>
+              </Field>
+
+              {/* Optional Participants */}
+              <Field
+                label="Optional Participants"
+                className={styles.formField}
+              >
+                <Input
+                  value={formData.optionalParticipants}
+                  onChange={(_, data) => handleInputChange('optionalParticipants', data.value)}
+                  placeholder="Enter optional participant email addresses separated by commas"
+                  contentBefore={<People20Regular />}
+                />
+              </Field>
+
+              {/* Start Time + End Time */}
               <div style={{ display: 'flex', gap: tokens.spacingHorizontalM }}>
                 <Field
                   label="Start Time"
@@ -170,6 +228,69 @@ const MeetingForm = () => {
                 </Field>
               </div>
 
+              {/* Description */}
+              <Field
+                label="Description"
+                className={styles.formField}
+              >
+                <Textarea
+                  value={formData.description}
+                  onChange={(_, data) => handleInputChange('description', data.value)}
+                  placeholder="Add meeting description (optional)"
+                  rows={3}
+                />
+              </Field>
+
+              {/* Teams Meeting Options */}
+              <div className={styles.teamsSection}>
+                <Field className={styles.formField}>
+                  <Switch
+                    checked={formData.isTeamsMeeting}
+                    onChange={(_, data) => handleInputChange('isTeamsMeeting', data.checked)}
+                    label="Teams Meeting"
+                  />
+                </Field>
+
+                {formData.isTeamsMeeting && (
+                  <>
+                    <Field
+                      label="Meeting Link"
+                      className={styles.formField}
+                    >
+                      <Input
+                        value="https://teams.microsoft.com/l/meetup-join/..."
+                        readOnly
+                        contentBefore={<Video20Regular />}
+                      />
+                    </Field>
+
+                    <Field className={styles.formField}>
+                      <Switch
+                        checked={formData.allowAnonymous}
+                        onChange={(_, data) => handleInputChange('allowAnonymous', data.checked)}
+                        label="Allow anonymous participants"
+                      />
+                    </Field>
+
+                    <Field className={styles.formField}>
+                      <Switch
+                        checked={formData.enableChat}
+                        onChange={(_, data) => handleInputChange('enableChat', data.checked)}
+                        label="Enable meeting chat"
+                      />
+                    </Field>
+
+                    <Field className={styles.formField}>
+                      <Switch
+                        checked={formData.enableRecording}
+                        onChange={(_, data) => handleInputChange('enableRecording', data.checked)}
+                        label="Enable meeting recording"
+                      />
+                    </Field>
+                  </>
+                )}
+              </div>
+
               <Field className={styles.formField}>
                 <Switch
                   checked={formData.isRecurring}
@@ -180,79 +301,28 @@ const MeetingForm = () => {
             </div>
           )}
 
-          {selectedTab === 'participants' && (
+          {selectedTab === 'settings' && (
             <div>
+              <Body1 style={{ marginBottom: tokens.spacingVerticalM }}>
+                Advanced meeting settings and configurations
+              </Body1>
+              
               <Field
-                label="Add Participants"
+                label="Lobby Bypass"
                 className={styles.formField}
               >
                 <Input
-                  placeholder="Enter email addresses separated by commas"
-                  contentBefore={<People20Regular />}
+                  value={formData.lobbyBypass}
+                  onChange={(_, data) => handleInputChange('lobbyBypass', data.value)}
+                  placeholder="Who can bypass the lobby"
                 />
               </Field>
 
-              <Body1 style={{ marginBottom: tokens.spacingVerticalM }}>
-                Current Participants ({participants.length})
-              </Body1>
-
-              <div className={styles.participantsList}>
-                {participants.map((participant) => (
-                  <div key={participant.id} className={styles.participantItem}>
-                    <Avatar
-                      name={participant.name}
-                      size={32}
-                    />
-                    <div style={{ flex: 1 }}>
-                      <Text weight="semibold">{participant.name}</Text>
-                      <br />
-                      <Text size={200} style={{ color: tokens.colorNeutralForeground2 }}>
-                        {participant.email}
-                      </Text>
-                    </div>
-                    <Badge appearance="outline">
-                      {participant.role}
-                    </Badge>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {selectedTab === 'settings' && (
-            <div>
               <Field className={styles.formField}>
                 <Switch
                   checked={formData.allowAnonymous}
                   onChange={(_, data) => handleInputChange('allowAnonymous', data.checked)}
-                  label="Allow anonymous participants"
-                />
-              </Field>
-
-              <Field className={styles.formField}>
-                <Switch
-                  checked={formData.enableChat}
-                  onChange={(_, data) => handleInputChange('enableChat', data.checked)}
-                  label="Enable meeting chat"
-                />
-              </Field>
-
-              <Field className={styles.formField}>
-                <Switch
-                  checked={formData.enableRecording}
-                  onChange={(_, data) => handleInputChange('enableRecording', data.checked)}
-                  label="Enable meeting recording"
-                />
-              </Field>
-
-              <Field
-                label="Meeting Link"
-                className={styles.formField}
-              >
-                <Input
-                  value="https://teams.microsoft.com/l/meetup-join/..."
-                  readOnly
-                  contentBefore={<Video20Regular />}
+                  label="Advanced recording options"
                 />
               </Field>
             </div>
