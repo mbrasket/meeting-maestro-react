@@ -126,7 +126,7 @@ const PeoplePicker = ({
     setInputValue(newValue);
   };
 
-  const handleOptionSelect = (_, data) => {
+  const handleOptionSelect = (_, data: { optionValue?: string }) => {
     if (data.optionValue) {
       const selectedPerson = suggestions.find(p => p.id === data.optionValue);
       if (selectedPerson) {

@@ -237,7 +237,6 @@ const MeetingDetailsTab = ({ formData, onInputChange }: MeetingDetailsTabProps) 
             placeholder="Search for meeting room or location"
             suggestions={sampleLocations}
             onAddToHistory={addLocation}
-            hint="Select meeting room, add address, or online link"
           />
           <Menu>
             <MenuTrigger disableButtonEnhancement>

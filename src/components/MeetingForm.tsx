@@ -6,6 +6,7 @@ import {
   tokens,
 } from '@fluentui/react-components';
 import { FormData } from './meeting/types';
+import { Person } from '../data/sampleData';
 import MeetingToolbar from './meeting/MeetingToolbar';
 import MeetingDetailsTab from './meeting/MeetingDetailsTab';
 
