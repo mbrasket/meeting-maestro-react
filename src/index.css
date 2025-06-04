@@ -102,23 +102,3 @@
     @apply bg-background text-foreground;
   }
 }
-
-/* Specific fixes for Fluent UI underline inputs */
-@layer components {
-  .fui-Input[data-appearance="underline"] {
-    border-bottom: 1px solid var(--colorNeutralStroke1) !important;
-    transition: border-bottom-color 0.2s ease, border-bottom-width 0.2s ease, border-radius 0.2s ease, border 0.2s ease !important;
-  }
-  
-  .fui-Input[data-appearance="underline"]:hover {
-    border-bottom: 2px solid var(--colorNeutralStrokeAccessible) !important;
-  }
-  
-  .fui-Input[data-appearance="underline"]:focus {
-    border-bottom: none !important;
-    border: 1px solid var(--colorCompoundBrandStroke) !important;
-    border-radius: var(--borderRadiusMedium) !important;
-    outline: none !important;
-  }
-}
-
