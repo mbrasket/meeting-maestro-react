@@ -8,3 +8,7 @@ export const useToast = () => {
     },
   };
 };
+
+export const toast = (message: { title?: string; description?: string }) => {
+  console.log('Toast:', message);
+};
