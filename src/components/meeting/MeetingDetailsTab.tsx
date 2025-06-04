@@ -101,7 +101,7 @@ const useStyles = makeStyles({
 
 interface MeetingDetailsTabProps {
   formData: FormData;
-  onInputChange: (field: keyof FormData, value: string | boolean) => void;
+  onInputChange: (field: keyof FormData, value: string | boolean | Person[]) => void;
 }
 
 const MeetingDetailsTab = ({ formData, onInputChange }: MeetingDetailsTabProps) => {

@@ -139,7 +139,7 @@ const EnhancedLocationPicker = ({
           onBlur={handleBlur}
         >
           {filteredSuggestions.map((location) => (
-            <Option key={location.id} value={location.id}>
+            <Option key={location.id} value={location.id} text={location.name}>
               <div className={styles.optionContent}>
                 <div className={styles.iconContainer}>
                   {getLocationIcon(location.type)}

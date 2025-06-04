@@ -44,7 +44,7 @@ const MeetingForm = () => {
     enableRecording: false,
   });
 
-  const handleInputChange = (field: keyof FormData, value: string | boolean | any[]) => {
+  const handleInputChange = (field: keyof FormData, value: string | boolean | Person[]) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
@@ -55,9 +55,9 @@ const MeetingForm = () => {
     // Convert Person arrays to email strings for backend compatibility
     const meetingData = {
       ...formData,
-      coOrganizers: formData.coOrganizers.map(p => p.email).join(', '),
-      participants: formData.participants.map(p => p.email).join(', '),
-      optionalParticipants: formData.optionalParticipants.map(p => p.email).join(', '),
+      coOrganizers: Array.isArray(formData.coOrganizers) ? formData.coOrganizers.map(p => p.email).join(', ') : '',
+      participants: Array.isArray(formData.participants) ? formData.participants.map(p => p.email).join(', ') : '',
+      optionalParticipants: Array.isArray(formData.optionalParticipants) ? formData.optionalParticipants.map(p => p.email).join(', ') : '',
     };
     
     console.log('Creating meeting with data:', meetingData);
