@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import {
   Card,
@@ -30,7 +29,8 @@ import {
   Bell, 
   MoreHorizontal, 
   Send, 
-  Trash2 
+  Trash2,
+  ChevronDown
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -241,6 +241,7 @@ const MeetingForm = () => {
               <button className={styles.dropdownTrigger}>
                 <Tag size={16} />
                 <span>{selectedCategory}</span>
+                <ChevronDown size={14} />
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="z-50 bg-white border shadow-lg">
@@ -261,6 +262,7 @@ const MeetingForm = () => {
               <button className={styles.dropdownTrigger}>
                 <Bell size={16} />
                 <span>{selectedReminder}</span>
+                <ChevronDown size={14} />
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="z-50 bg-white border shadow-lg">
@@ -280,6 +282,7 @@ const MeetingForm = () => {
             <DropdownMenuTrigger asChild>
               <button className={styles.dropdownTrigger}>
                 <MoreHorizontal size={16} />
+                <ChevronDown size={14} />
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="z-50 bg-white border shadow-lg">
