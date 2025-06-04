@@ -1,10 +1,8 @@
 
-
 import {
   Input,
   Switch,
   Field,
-  Textarea,
   MenuButton,
   Menu,
   MenuTrigger,
@@ -15,7 +13,6 @@ import {
   tokens,
 } from '@fluentui/react-components';
 import { 
-  Clock20Regular, 
   People20Regular, 
   DocumentText20Regular,
   PersonAdd20Regular,
@@ -24,80 +21,16 @@ import {
 } from '@fluentui/react-icons';
 import { FormData } from './types';
 import TeamsSettingsSection from './TeamsSettingsSection';
-import EmailPicker from './EmailPicker';
 import PeoplePicker from './PeoplePicker';
-import EnhancedLocationPicker from './EnhancedLocationPicker';
 import LocationPicker from './LocationPicker';
 import { samplePeople, sampleLocations, Person } from '../../data/sampleData';
 import useAutocompleteHistory from '../../hooks/useAutocompleteHistory';
+import MeetingFieldWithIcon from './meeting-details/MeetingFieldWithIcon';
+import MeetingFieldWithIconAndMenu from './meeting-details/MeetingFieldWithIconAndMenu';
+import MeetingTimeFields from './meeting-details/MeetingTimeFields';
+import MeetingDescriptionField from './meeting-details/MeetingDescriptionField';
 
 const useStyles = makeStyles({
-  fieldWithIcon: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: tokens.spacingHorizontalM,
-    marginBottom: '16px',
-    height: '32px',
-  },
-  fieldWithIconAndMenu: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: tokens.spacingHorizontalM,
-    marginBottom: '16px',
-    height: '32px',
-  },
-  fieldContainer: {
-    display: 'flex',
-    alignItems: 'center',
-    flex: 1,
-    gap: tokens.spacingHorizontalS,
-    height: '32px',
-  },
-  timeFieldsContainer: {
-    display: 'flex',
-    gap: tokens.spacingHorizontalM,
-    marginBottom: '16px',
-  },
-  timeFieldWithIcon: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: tokens.spacingHorizontalM,
-    flex: 1,
-    height: '32px',
-  },
-  descriptionContainer: {
-    display: 'flex',
-    alignItems: 'flex-start',
-    gap: tokens.spacingHorizontalM,
-    marginTop: tokens.spacingVerticalL,
-    marginBottom: '16px',
-  },
-  descriptionIcon: {
-    marginTop: '8px',
-  },
-  descriptionField: {
-    flex: 1,
-  },
-  descriptionTextarea: {
-    border: `1px solid ${tokens.colorNeutralStroke1}`,
-    borderRadius: tokens.borderRadiusMedium,
-    padding: tokens.spacingVerticalS,
-    '&:focus': {
-      borderTopColor: tokens.colorBrandStroke1,
-      borderRightColor: tokens.colorBrandStroke1,
-      borderBottomColor: tokens.colorBrandStroke1,
-      borderLeftColor: tokens.colorBrandStroke1,
-      outline: 'none',
-    }
-  },
-  iconContainer: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: '20px',
-    height: '20px',
-    color: tokens.colorNeutralForeground2,
-  },
   formField: {
     marginBottom: '16px',
   },
@@ -150,10 +83,7 @@ const MeetingDetailsTab = ({ formData, onInputChange }: MeetingDetailsTabProps) 
   return (
     <div>
       {/* Meeting Title */}
-      <div className={styles.fieldWithIcon}>
-        <div className={styles.iconContainer}>
-          <DocumentText20Regular />
-        </div>
+      <MeetingFieldWithIcon icon={<DocumentText20Regular />}>
         <Field required className={styles.inputField}>
           <Input
             appearance="underline"
@@ -162,13 +92,10 @@ const MeetingDetailsTab = ({ formData, onInputChange }: MeetingDetailsTabProps) 
             placeholder="Enter meeting title"
           />
         </Field>
-      </div>
+      </MeetingFieldWithIcon>
 
       {/* Co-organizers with PeoplePicker */}
-      <div className={styles.fieldWithIcon}>
-        <div className={styles.iconContainer}>
-          <PersonAdd20Regular />
-        </div>
+      <MeetingFieldWithIcon icon={<PersonAdd20Regular />}>
         <PeoplePicker
           value={formData.coOrganizers}
           onChange={(people) => handlePersonChange('coOrganizers', people)}
@@ -176,22 +103,12 @@ const MeetingDetailsTab = ({ formData, onInputChange }: MeetingDetailsTabProps) 
           suggestions={samplePeople}
           onAddToHistory={handleAddPersonToHistory}
         />
-      </div>
+      </MeetingFieldWithIcon>
 
       {/* Participants with style menu and PeoplePicker */}
-      <div className={styles.fieldWithIconAndMenu}>
-        <div className={styles.iconContainer}>
-          <People20Regular />
-        </div>
-        <div className={styles.fieldContainer}>
-          <PeoplePicker
-            value={formData.participants}
-            onChange={(people) => handlePersonChange('participants', people)}
-            placeholder="Search for participants"
-            suggestions={samplePeople}
-            onAddToHistory={handleAddPersonToHistory}
-            required
-          />
+      <MeetingFieldWithIconAndMenu 
+        icon={<People20Regular />}
+        menu={
           <Menu>
             <MenuTrigger disableButtonEnhancement>
               <MenuButton
@@ -208,14 +125,20 @@ const MeetingDetailsTab = ({ formData, onInputChange }: MeetingDetailsTabProps) 
               </MenuList>
             </MenuPopover>
           </Menu>
-        </div>
-      </div>
+        }
+      >
+        <PeoplePicker
+          value={formData.participants}
+          onChange={(people) => handlePersonChange('participants', people)}
+          placeholder="Search for participants"
+          suggestions={samplePeople}
+          onAddToHistory={handleAddPersonToHistory}
+          required
+        />
+      </MeetingFieldWithIconAndMenu>
 
       {/* Optional Participants with PeoplePicker */}
-      <div className={styles.fieldWithIcon}>
-        <div className={styles.iconContainer}>
-          <People20Regular />
-        </div>
+      <MeetingFieldWithIcon icon={<People20Regular />}>
         <PeoplePicker
           value={formData.optionalParticipants}
           onChange={(people) => handlePersonChange('optionalParticipants', people)}
@@ -223,52 +146,15 @@ const MeetingDetailsTab = ({ formData, onInputChange }: MeetingDetailsTabProps) 
           suggestions={samplePeople}
           onAddToHistory={handleAddPersonToHistory}
         />
-      </div>
+      </MeetingFieldWithIcon>
 
       {/* Start Time + End Time */}
-      <div className={styles.timeFieldsContainer}>
-        <div className={styles.timeFieldWithIcon}>
-          <div className={styles.iconContainer}>
-            <Clock20Regular />
-          </div>
-          <Field required className={styles.inputField}>
-            <Input
-              appearance="underline"
-              type="datetime-local"
-              value={formData.startTime}
-              onChange={(_, data) => onInputChange('startTime', data.value)}
-            />
-          </Field>
-        </div>
-
-        <div className={styles.timeFieldWithIcon}>
-          <div className={styles.iconContainer}>
-            <Clock20Regular />
-          </div>
-          <Field required className={styles.inputField}>
-            <Input
-              appearance="underline"
-              type="datetime-local"
-              value={formData.endTime}
-              onChange={(_, data) => onInputChange('endTime', data.value)}
-            />
-          </Field>
-        </div>
-      </div>
+      <MeetingTimeFields formData={formData} onInputChange={onInputChange} />
 
       {/* Location with menu and LocationPicker */}
-      <div className={styles.fieldWithIconAndMenu}>
-        <div className={styles.iconContainer}>
-          <Location20Regular />
-        </div>
-        <div className={styles.fieldContainer}>
-          <LocationPicker
-            value={locationValue}
-            onChange={handleLocationChange}
-            placeholder="Search for meeting room or location"
-            suggestions={locationSuggestions}
-            onAddToHistory={handleAddLocationToHistory}
-          />
+      <MeetingFieldWithIconAndMenu 
+        icon={<Location20Regular />}
+        menu={
           <Menu>
             <MenuTrigger disableButtonEnhancement>
               <MenuButton
@@ -285,24 +171,19 @@ const MeetingDetailsTab = ({ formData, onInputChange }: MeetingDetailsTabProps) 
               </MenuList>
             </MenuPopover>
           </Menu>
-        </div>
-      </div>
+        }
+      >
+        <LocationPicker
+          value={locationValue}
+          onChange={handleLocationChange}
+          placeholder="Search for meeting room or location"
+          suggestions={locationSuggestions}
+          onAddToHistory={handleAddLocationToHistory}
+        />
+      </MeetingFieldWithIconAndMenu>
 
       {/* Description */}
-      <div className={styles.descriptionContainer}>
-        <div className={`${styles.iconContainer} ${styles.descriptionIcon}`}>
-          <DocumentText20Regular />
-        </div>
-        <Field className={styles.descriptionField}>
-          <Textarea
-            className={styles.descriptionTextarea}
-            value={formData.description}
-            onChange={(_, data) => onInputChange('description', data.value)}
-            placeholder="Add meeting description (optional)"
-            rows={3}
-          />
-        </Field>
-      </div>
+      <MeetingDescriptionField formData={formData} onInputChange={onInputChange} />
 
       {/* Teams Meeting Options */}
       <TeamsSettingsSection formData={formData} onInputChange={onInputChange} />
