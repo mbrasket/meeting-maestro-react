@@ -9,7 +9,7 @@ export interface FormData {
   description: string;
   startTime: string;
   endTime: string;
-  location: string;
+  location: string | string[];
   isRecurring: boolean;
   isTeamsMeeting: boolean;
   enableChat: boolean;

@@ -101,7 +101,7 @@ const useStyles = makeStyles({
 
 interface MeetingDetailsTabProps {
   formData: FormData;
-  onInputChange: (field: keyof FormData, value: string | boolean | Person[]) => void;
+  onInputChange: (field: keyof FormData, value: string | boolean | Person[] | string[]) => void;
 }
 
 const MeetingDetailsTab = ({ formData, onInputChange }: MeetingDetailsTabProps) => {
@@ -115,6 +115,22 @@ const MeetingDetailsTab = ({ formData, onInputChange }: MeetingDetailsTabProps) 
   const handleAddPersonToHistory = (person: Person) => {
     addEmail(person.email);
   };
+
+  const handleLocationChange = (locations: string[]) => {
+    onInputChange('location', locations);
+  };
+
+  const handleAddLocationToHistory = (location: string) => {
+    addLocation(location);
+  };
+
+  // Convert location string to array for the picker, handling both string and array values
+  const locationValue = Array.isArray(formData.location) 
+    ? formData.location 
+    : formData.location ? [formData.location] : [];
+
+  // Combine suggestions from sample data and history
+  const locationSuggestions = [...new Set([...locationHistory, ...sampleLocations.map(l => l.name)])];
 
   return (
     <div>
@@ -225,18 +241,18 @@ const MeetingDetailsTab = ({ formData, onInputChange }: MeetingDetailsTabProps) 
         </div>
       </div>
 
-      {/* Location with menu and EnhancedLocationPicker */}
+      {/* Location with menu and LocationPicker */}
       <div className={styles.fieldWithIconAndMenu}>
         <div className={styles.iconContainer}>
           <Location20Regular />
         </div>
         <div className={styles.fieldContainer}>
-          <EnhancedLocationPicker
-            value={formData.location || ''}
-            onChange={(value) => onInputChange('location', value)}
+          <LocationPicker
+            value={locationValue}
+            onChange={handleLocationChange}
             placeholder="Search for meeting room or location"
-            suggestions={sampleLocations}
-            onAddToHistory={addLocation}
+            suggestions={locationSuggestions}
+            onAddToHistory={handleAddLocationToHistory}
           />
           <Menu>
             <MenuTrigger disableButtonEnhancement>
