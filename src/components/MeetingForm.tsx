@@ -149,12 +149,28 @@ const useStyles = makeStyles({
   },
 });
 
+interface FormData {
+  title: string;
+  coOrganizers: string;
+  participants: string;
+  optionalParticipants: string;
+  description: string;
+  startTime: string;
+  endTime: string;
+  isRecurring: boolean;
+  isTeamsMeeting: boolean;
+  allowAnonymous: boolean;
+  enableChat: boolean;
+  enableRecording: boolean;
+  lobbyBypass: string;
+}
+
 const MeetingForm = () => {
   const styles = useStyles();
   const [selectedTab, setSelectedTab] = useState('details');
   const [selectedCategory, setSelectedCategory] = useState('General');
   const [selectedReminder, setSelectedReminder] = useState('15 mins');
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     title: '',
     coOrganizers: '',
     participants: '',
@@ -170,7 +186,7 @@ const MeetingForm = () => {
     lobbyBypass: 'everyone',
   });
 
-  const handleInputChange = (field: string, value: string | boolean) => {
+  const handleInputChange = (field: keyof FormData, value: string | boolean) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
