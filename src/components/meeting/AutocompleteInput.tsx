@@ -1,4 +1,3 @@
-
 import { useState, useRef, useEffect } from 'react';
 import {
   Input,
@@ -64,15 +63,18 @@ const AutocompleteInput = ({
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const containerRef = useRef<HTMLDivElement>(null);
   
-  // Filter suggestions based on current input
-  const filteredSuggestions = suggestions.filter(suggestion =>
-    suggestion.toLowerCase().includes(value.toLowerCase()) && suggestion !== value
-  );
+  // Filter suggestions based on current input - show all if empty, filter if not
+  const filteredSuggestions = value.trim().length === 0 
+    ? suggestions 
+    : suggestions.filter(suggestion =>
+        suggestion.toLowerCase().includes(value.toLowerCase()) && suggestion !== value
+      );
 
   const handleInputChange = (newValue: string) => {
     onChange(newValue);
-    setIsOpen(newValue.length > 0 && filteredSuggestions.length > 0);
     setSelectedIndex(-1);
+    // Show dropdown if we have suggestions
+    setIsOpen(filteredSuggestions.length > 0 || suggestions.length > 0);
   };
 
   const handleSuggestionClick = (suggestion: string) => {
@@ -112,7 +114,8 @@ const AutocompleteInput = ({
   };
 
   const handleInputFocus = () => {
-    if (value.length > 0 && filteredSuggestions.length > 0) {
+    // Always show dropdown on focus if we have suggestions
+    if (suggestions.length > 0) {
       setIsOpen(true);
     }
   };
@@ -139,6 +142,20 @@ const AutocompleteInput = ({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // Update filtered suggestions when value or suggestions change
+  useEffect(() => {
+    const newFilteredSuggestions = value.trim().length === 0 
+      ? suggestions 
+      : suggestions.filter(suggestion =>
+          suggestion.toLowerCase().includes(value.toLowerCase()) && suggestion !== value
+        );
+    
+    if (isOpen && newFilteredSuggestions.length === 0 && suggestions.length > 0) {
+      // Keep dropdown open but show "No matches" or all suggestions
+      setIsOpen(true);
+    }
+  }, [value, suggestions, isOpen]);
+
   return (
     <div className={styles.container} ref={containerRef}>
       <Field style={{ flex: 1 }} hint={hint}>
@@ -153,19 +170,29 @@ const AutocompleteInput = ({
         />
       </Field>
       
-      {isOpen && filteredSuggestions.length > 0 && (
+      {isOpen && (
         <div className={styles.dropdown}>
-          {filteredSuggestions.map((suggestion, index) => (
-            <div
-              key={suggestion}
-              className={`${styles.dropdownItem} ${
-                index === selectedIndex ? styles.selectedItem : ''
-              }`}
-              onClick={() => handleSuggestionClick(suggestion)}
-            >
-              {suggestion}
+          {filteredSuggestions.length > 0 ? (
+            filteredSuggestions.map((suggestion, index) => (
+              <div
+                key={suggestion}
+                className={`${styles.dropdownItem} ${
+                  index === selectedIndex ? styles.selectedItem : ''
+                }`}
+                onClick={() => handleSuggestionClick(suggestion)}
+              >
+                {suggestion}
+              </div>
+            ))
+          ) : suggestions.length > 0 ? (
+            <div className={styles.dropdownItem} style={{ color: tokens.colorNeutralForeground3 }}>
+              No matches found
             </div>
-          ))}
+          ) : (
+            <div className={styles.dropdownItem} style={{ color: tokens.colorNeutralForeground3 }}>
+              Start typing to see suggestions
+            </div>
+          )}
         </div>
       )}
     </div>
