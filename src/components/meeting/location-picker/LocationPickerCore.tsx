@@ -54,20 +54,17 @@ const useStyles = makeStyles({
   underlineInput: {
     width: '100%',
     height: '32px',
-    '& .fui-Input__input': {
-      paddingLeft: '0 !important',
-      height: '32px !important',
+    '& input': {
+      paddingLeft: 0,
+      height: '32px',
       cursor: 'default',
-      borderBottomWidth: '1px !important',
-      borderBottomColor: `${tokens.colorNeutralStroke1} !important`,
-      transition: 'border-bottom-width 0.1s ease, border-bottom-color 0.1s ease',
+      borderBottom: `1px solid ${tokens.colorNeutralStroke1}`,
+      transition: 'border-bottom 0.1s ease',
       '&:hover': {
-        borderBottomWidth: '2px !important',
-        borderBottomColor: `${tokens.colorBrandStroke1} !important`,
+        borderBottom: `2px solid ${tokens.colorBrandStroke1}`,
       },
       '&:focus': {
-        borderBottomWidth: '2px !important',
-        borderBottomColor: `${tokens.colorBrandStroke1} !important`,
+        borderBottom: `2px solid ${tokens.colorBrandStroke1}`,
       },
     },
   },
