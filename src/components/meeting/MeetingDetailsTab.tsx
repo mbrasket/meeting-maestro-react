@@ -23,7 +23,9 @@ import {
 import { FormData } from './types';
 import TeamsSettingsSection from './TeamsSettingsSection';
 import EmailPicker from './EmailPicker';
-import LocationPicker from './LocationPicker';
+import PeoplePicker from './PeoplePicker';
+import EnhancedLocationPicker from './EnhancedLocationPicker';
+import { samplePeople, sampleLocations, Person } from '../../data/sampleData';
 import useAutocompleteHistory from '../../hooks/useAutocompleteHistory';
 
 const useStyles = makeStyles({
@@ -106,6 +108,14 @@ const MeetingDetailsTab = ({ formData, onInputChange }: MeetingDetailsTabProps) 
   const styles = useStyles();
   const { emailHistory, locationHistory, addEmail, addLocation } = useAutocompleteHistory();
 
+  const handlePersonChange = (field: 'coOrganizers' | 'participants' | 'optionalParticipants', people: Person[]) => {
+    onInputChange(field, people);
+  };
+
+  const handleAddPersonToHistory = (person: Person) => {
+    addEmail(person.email);
+  };
+
   return (
     <div>
       {/* Meeting Title */}
@@ -123,32 +133,32 @@ const MeetingDetailsTab = ({ formData, onInputChange }: MeetingDetailsTabProps) 
         </Field>
       </div>
 
-      {/* Co-organizers with EmailPicker */}
+      {/* Co-organizers with PeoplePicker */}
       <div className={styles.fieldWithIcon}>
         <div className={styles.iconContainer}>
           <PersonAdd20Regular />
         </div>
-        <EmailPicker
+        <PeoplePicker
           value={formData.coOrganizers}
-          onChange={(value) => onInputChange('coOrganizers', value)}
-          placeholder="Enter co-organizer email addresses"
-          suggestions={emailHistory}
-          onAddToHistory={addEmail}
+          onChange={(people) => handlePersonChange('coOrganizers', people)}
+          placeholder="Search for co-organizers"
+          suggestions={samplePeople}
+          onAddToHistory={handleAddPersonToHistory}
         />
       </div>
 
-      {/* Participants with style menu and EmailPicker */}
+      {/* Participants with style menu and PeoplePicker */}
       <div className={styles.fieldWithIconAndMenu}>
         <div className={styles.iconContainer}>
           <People20Regular />
         </div>
         <div className={styles.fieldContainer}>
-          <EmailPicker
+          <PeoplePicker
             value={formData.participants}
-            onChange={(value) => onInputChange('participants', value)}
-            placeholder="Enter participant email addresses"
-            suggestions={emailHistory}
-            onAddToHistory={addEmail}
+            onChange={(people) => handlePersonChange('participants', people)}
+            placeholder="Search for participants"
+            suggestions={samplePeople}
+            onAddToHistory={handleAddPersonToHistory}
             required
           />
           <Menu>
@@ -170,17 +180,17 @@ const MeetingDetailsTab = ({ formData, onInputChange }: MeetingDetailsTabProps) 
         </div>
       </div>
 
-      {/* Optional Participants with EmailPicker */}
+      {/* Optional Participants with PeoplePicker */}
       <div className={styles.fieldWithIcon}>
         <div className={styles.iconContainer}>
           <People20Regular />
         </div>
-        <EmailPicker
+        <PeoplePicker
           value={formData.optionalParticipants}
-          onChange={(value) => onInputChange('optionalParticipants', value)}
-          placeholder="Enter optional participant email addresses"
-          suggestions={emailHistory}
-          onAddToHistory={addEmail}
+          onChange={(people) => handlePersonChange('optionalParticipants', people)}
+          placeholder="Search for optional participants"
+          suggestions={samplePeople}
+          onAddToHistory={handleAddPersonToHistory}
         />
       </div>
 
@@ -215,19 +225,19 @@ const MeetingDetailsTab = ({ formData, onInputChange }: MeetingDetailsTabProps) 
         </div>
       </div>
 
-      {/* Location with menu and LocationPicker */}
+      {/* Location with menu and EnhancedLocationPicker */}
       <div className={styles.fieldWithIconAndMenu}>
         <div className={styles.iconContainer}>
           <Location20Regular />
         </div>
         <div className={styles.fieldContainer}>
-          <LocationPicker
+          <EnhancedLocationPicker
             value={formData.location || ''}
             onChange={(value) => onInputChange('location', value)}
-            placeholder="Enter location or meeting room"
-            suggestions={locationHistory}
+            placeholder="Search for meeting room or location"
+            suggestions={sampleLocations}
             onAddToHistory={addLocation}
-            hint="Add meeting room, address, or online link"
+            hint="Select meeting room, add address, or online link"
           />
           <Menu>
             <MenuTrigger disableButtonEnhancement>

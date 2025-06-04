@@ -31,9 +31,9 @@ const MeetingForm = () => {
   const [selectedReminder, setSelectedReminder] = useState('15 mins');
   const [formData, setFormData] = useState<FormData>({
     title: '',
-    coOrganizers: '',
-    participants: '',
-    optionalParticipants: '',
+    coOrganizers: [],
+    participants: [],
+    optionalParticipants: [],
     description: '',
     startTime: '',
     endTime: '',
@@ -44,7 +44,7 @@ const MeetingForm = () => {
     enableRecording: false,
   });
 
-  const handleInputChange = (field: keyof FormData, value: string | boolean) => {
+  const handleInputChange = (field: keyof FormData, value: string | boolean | any[]) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
@@ -52,7 +52,15 @@ const MeetingForm = () => {
   };
 
   const handleCreateMeeting = () => {
-    console.log('Creating meeting with data:', formData);
+    // Convert Person arrays to email strings for backend compatibility
+    const meetingData = {
+      ...formData,
+      coOrganizers: formData.coOrganizers.map(p => p.email).join(', '),
+      participants: formData.participants.map(p => p.email).join(', '),
+      optionalParticipants: formData.optionalParticipants.map(p => p.email).join(', '),
+    };
+    
+    console.log('Creating meeting with data:', meetingData);
     // Meeting creation logic would go here
   };
 

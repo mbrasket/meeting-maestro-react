@@ -1,9 +1,11 @@
 
+import { Person } from '../../data/sampleData';
+
 export interface FormData {
   title: string;
-  coOrganizers: string;
-  participants: string;
-  optionalParticipants: string;
+  coOrganizers: Person[];
+  participants: Person[];
+  optionalParticipants: Person[];
   description: string;
   startTime: string;
   endTime: string;
