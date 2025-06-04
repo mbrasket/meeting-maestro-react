@@ -49,6 +49,8 @@ const useStyles = makeStyles({
     flexShrink: 0,
     cursor: 'pointer',
     whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
     '&:focus': {
       outline: `2px solid ${tokens.colorBrandStroke1}`,
       outlineOffset: '1px',
@@ -69,6 +71,7 @@ const useStyles = makeStyles({
     borderRadius: tokens.borderRadiusSmall,
     display: 'flex',
     alignItems: 'center',
+    flexShrink: 0,
     '&:hover': {
       backgroundColor: tokens.colorNeutralBackground3,
     },
@@ -400,7 +403,7 @@ const LocationPicker = ({
                         onFocus={() => setSelectedChipIndex(index)}
                         data-chip
                       >
-                        <Text size={200} truncate title={location}>
+                        <Text size={200} truncate title={location} style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                           {location}
                         </Text>
                         <button
