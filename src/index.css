@@ -106,15 +106,34 @@
 @layer components {
   .fui-Input[data-appearance="underline"] {
     border-bottom: 1px solid var(--colorNeutralStroke1) !important;
-    transition: border-bottom-color 0.2s ease, border-bottom-width 0.2s ease !important;
+    transition: border-bottom-color 0.2s ease, border-bottom-width 0.2s ease, border-radius 0.2s ease, border 0.2s ease !important;
+    cursor: default !important;
   }
   
   .fui-Input[data-appearance="underline"]:hover {
     border-bottom: 2px solid var(--colorNeutralStrokeAccessible) !important;
+    cursor: default !important;
   }
   
   .fui-Input[data-appearance="underline"]:focus {
-    border-bottom: 2px solid var(--colorCompoundBrandStroke) !important;
+    border-bottom: none !important;
+    border: 1px solid var(--colorCompoundBrandStroke) !important;
+    border-radius: var(--borderRadiusMedium) !important;
     outline: none !important;
+  }
+
+  /* Apply default cursor to all input elements and textareas */
+  .fui-Input,
+  .fui-Textarea,
+  input,
+  textarea {
+    cursor: default !important;
+  }
+
+  .fui-Input:hover,
+  .fui-Textarea:hover,
+  input:hover,
+  textarea:hover {
+    cursor: default !important;
   }
 }
