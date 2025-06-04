@@ -1,3 +1,4 @@
+
 import {
   Input,
   Switch,
@@ -25,6 +26,7 @@ import TeamsSettingsSection from './TeamsSettingsSection';
 import EmailPicker from './EmailPicker';
 import PeoplePicker from './PeoplePicker';
 import EnhancedLocationPicker from './EnhancedLocationPicker';
+import LocationPicker from './LocationPicker';
 import { samplePeople, sampleLocations, Person } from '../../data/sampleData';
 import useAutocompleteHistory from '../../hooks/useAutocompleteHistory';
 

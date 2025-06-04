@@ -8,8 +8,8 @@ import {
   makeStyles,
   tokens,
   Text,
-  Dismiss12Regular,
 } from '@fluentui/react-components';
+import { Dismiss12Regular } from '@fluentui/react-icons';
 
 const useStyles = makeStyles({
   container: {
