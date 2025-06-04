@@ -8,11 +8,8 @@ import {
   Switch,
   Tab,
   TabList,
-  Avatar,
-  Badge,
   Textarea,
   Field,
-  Text,
   Title1,
   Subtitle1,
   Body1,
@@ -37,20 +34,6 @@ const useStyles = makeStyles({
   },
   tabContent: {
     paddingTop: tokens.spacingVerticalM,
-  },
-  participantsList: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: tokens.spacingVerticalS,
-    marginTop: tokens.spacingVerticalS,
-  },
-  participantItem: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: tokens.spacingHorizontalM,
-    padding: tokens.spacingVerticalS,
-    borderRadius: tokens.borderRadiusMedium,
-    backgroundColor: tokens.colorNeutralBackground2,
   },
   buttonGroup: {
     display: 'flex',
@@ -83,12 +66,6 @@ const MeetingForm = () => {
     enableRecording: false,
     lobbyBypass: 'everyone',
   });
-
-  const [participantsList] = useState([
-    { id: 1, name: 'John Doe', email: 'john@company.com', role: 'Presenter' },
-    { id: 2, name: 'Jane Smith', email: 'jane@company.com', role: 'Attendee' },
-    { id: 3, name: 'Mike Johnson', email: 'mike@company.com', role: 'Attendee' },
-  ]);
 
   const handleInputChange = (field: string, value: string | boolean) => {
     setFormData(prev => ({
@@ -164,26 +141,6 @@ const MeetingForm = () => {
                   placeholder="Enter participant email addresses separated by commas"
                   contentBefore={<People20Regular />}
                 />
-                <div className={styles.participantsList}>
-                  {participantsList.map((participant) => (
-                    <div key={participant.id} className={styles.participantItem}>
-                      <Avatar
-                        name={participant.name}
-                        size={32}
-                      />
-                      <div style={{ flex: 1 }}>
-                        <Text weight="semibold">{participant.name}</Text>
-                        <br />
-                        <Text size={200} style={{ color: tokens.colorNeutralForeground2 }}>
-                          {participant.email}
-                        </Text>
-                      </div>
-                      <Badge appearance="outline">
-                        {participant.role}
-                      </Badge>
-                    </div>
-                  ))}
-                </div>
               </Field>
 
               {/* Optional Participants */}
