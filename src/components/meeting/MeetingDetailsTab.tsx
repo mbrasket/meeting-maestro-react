@@ -22,7 +22,8 @@ import {
 } from '@fluentui/react-icons';
 import { FormData } from './types';
 import TeamsSettingsSection from './TeamsSettingsSection';
-import AutocompleteInput from './AutocompleteInput';
+import EmailPicker from './EmailPicker';
+import LocationPicker from './LocationPicker';
 import useAutocompleteHistory from '../../hooks/useAutocompleteHistory';
 
 const useStyles = makeStyles({
@@ -105,21 +106,6 @@ const MeetingDetailsTab = ({ formData, onInputChange }: MeetingDetailsTabProps) 
   const styles = useStyles();
   const { emailHistory, locationHistory, addEmail, addLocation } = useAutocompleteHistory();
 
-  const handleEmailChange = (field: keyof FormData, value: string) => {
-    onInputChange(field, value);
-    // Add to history when user finishes typing (on blur or enter)
-    if (value.includes('@') && value.includes('.')) {
-      addEmail(value);
-    }
-  };
-
-  const handleLocationChange = (value: string) => {
-    onInputChange('location', value);
-    if (value.trim()) {
-      addLocation(value);
-    }
-  };
-
   return (
     <div>
       {/* Meeting Title */}
@@ -137,32 +123,33 @@ const MeetingDetailsTab = ({ formData, onInputChange }: MeetingDetailsTabProps) 
         </Field>
       </div>
 
-      {/* Co-organizers with autocomplete */}
+      {/* Co-organizers with EmailPicker */}
       <div className={styles.fieldWithIcon}>
         <div className={styles.iconContainer}>
           <PersonAdd20Regular />
         </div>
-        <AutocompleteInput
+        <EmailPicker
           value={formData.coOrganizers}
-          onChange={(value) => handleEmailChange('coOrganizers', value)}
-          placeholder="Enter co-organizer email addresses separated by commas"
+          onChange={(value) => onInputChange('coOrganizers', value)}
+          placeholder="Enter co-organizer email addresses"
           suggestions={emailHistory}
           onAddToHistory={addEmail}
         />
       </div>
 
-      {/* Participants with style menu and autocomplete */}
+      {/* Participants with style menu and EmailPicker */}
       <div className={styles.fieldWithIconAndMenu}>
         <div className={styles.iconContainer}>
           <People20Regular />
         </div>
         <div className={styles.fieldContainer}>
-          <AutocompleteInput
+          <EmailPicker
             value={formData.participants}
-            onChange={(value) => handleEmailChange('participants', value)}
-            placeholder="Enter participant email addresses separated by commas"
+            onChange={(value) => onInputChange('participants', value)}
+            placeholder="Enter participant email addresses"
             suggestions={emailHistory}
             onAddToHistory={addEmail}
+            required
           />
           <Menu>
             <MenuTrigger disableButtonEnhancement>
@@ -183,15 +170,15 @@ const MeetingDetailsTab = ({ formData, onInputChange }: MeetingDetailsTabProps) 
         </div>
       </div>
 
-      {/* Optional Participants with autocomplete */}
+      {/* Optional Participants with EmailPicker */}
       <div className={styles.fieldWithIcon}>
         <div className={styles.iconContainer}>
           <People20Regular />
         </div>
-        <AutocompleteInput
+        <EmailPicker
           value={formData.optionalParticipants}
-          onChange={(value) => handleEmailChange('optionalParticipants', value)}
-          placeholder="Enter optional participant email addresses separated by commas"
+          onChange={(value) => onInputChange('optionalParticipants', value)}
+          placeholder="Enter optional participant email addresses"
           suggestions={emailHistory}
           onAddToHistory={addEmail}
         />
@@ -228,15 +215,15 @@ const MeetingDetailsTab = ({ formData, onInputChange }: MeetingDetailsTabProps) 
         </div>
       </div>
 
-      {/* Location with menu and autocomplete */}
+      {/* Location with menu and LocationPicker */}
       <div className={styles.fieldWithIconAndMenu}>
         <div className={styles.iconContainer}>
           <Location20Regular />
         </div>
         <div className={styles.fieldContainer}>
-          <AutocompleteInput
+          <LocationPicker
             value={formData.location || ''}
-            onChange={handleLocationChange}
+            onChange={(value) => onInputChange('location', value)}
             placeholder="Enter location or meeting room"
             suggestions={locationHistory}
             onAddToHistory={addLocation}
