@@ -1,4 +1,3 @@
-
 import {
   Field,
   Textarea,
@@ -30,10 +29,21 @@ const useStyles = makeStyles({
     },
   },
   descriptionTextarea: {
-    border: `1px solid ${tokens.colorNeutralStroke1}`,
+    borderTopColor: tokens.colorNeutralStroke1,
+    borderRightColor: tokens.colorNeutralStroke1,
+    borderBottomColor: tokens.colorNeutralStroke1,
+    borderLeftColor: tokens.colorNeutralStroke1,
+    borderTopWidth: '1px',
+    borderRightWidth: '1px',
+    borderBottomWidth: '1px',
+    borderLeftWidth: '1px',
+    borderTopStyle: 'solid',
+    borderRightStyle: 'solid',
+    borderBottomStyle: 'solid',
+    borderLeftStyle: 'solid',
     borderRadius: tokens.borderRadiusMedium,
     padding: tokens.spacingVerticalS,
-    cursor: 'text',
+    cursor: 'default',
     transition: 'border-color 0.1s ease',
     '&:hover': {
       borderTopColor: tokens.colorNeutralStroke1Hover,

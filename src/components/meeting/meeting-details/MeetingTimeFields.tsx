@@ -1,4 +1,3 @@
-
 import {
   Input,
   Field,
@@ -41,7 +40,7 @@ const useStyles = makeStyles({
     },
     '& input': {
       height: '32px',
-      cursor: 'text',
+      cursor: 'default',
       transition: 'border-color 0.1s ease',
       '&:hover': {
         borderBottomColor: tokens.colorNeutralStroke1Hover,
