@@ -1,4 +1,3 @@
-
 import { useState, useCallback, useRef, KeyboardEvent } from 'react';
 import {
   Input,
@@ -179,6 +178,35 @@ const PeoplePicker = ({
     setTimeout(() => inputRef.current?.focus(), 0);
   }, [value, onChange, onAddToHistory]);
 
+  const addTextAsPerson = useCallback((text: string) => {
+    const trimmedText = text.trim();
+    if (trimmedText && !value.find(p => p.name === trimmedText || p.email === trimmedText)) {
+      // Create a temporary person object from the text
+      const tempPerson: Person = {
+        id: `temp-${Date.now()}`, // Temporary ID
+        name: trimmedText,
+        email: trimmedText.includes('@') ? trimmedText : `${trimmedText}@company.com`,
+        avatar: '', // No avatar for text-based entries
+        role: 'External',
+        department: 'External',
+        status: 'Available'
+      };
+      
+      const newPeople = [...value, tempPerson];
+      onChange(newPeople);
+      
+      if (onAddToHistory) {
+        onAddToHistory(tempPerson);
+      }
+    }
+    setInputValue('');
+    setIsPopoverOpen(false);
+    setSelectedIndex(-1);
+    setSelectedChipIndex(-1);
+    // Keep focus on input after adding person
+    setTimeout(() => inputRef.current?.focus(), 0);
+  }, [value, onChange, onAddToHistory]);
+
   const removePerson = useCallback((personToRemove: Person) => {
     const newPeople = value.filter(person => person.id !== personToRemove.id);
     onChange(newPeople);
@@ -240,6 +268,15 @@ const PeoplePicker = ({
 
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     const cursorPosition = inputRef.current?.selectionStart || 0;
+    
+    // Handle semicolon - convert current input to chip
+    if (e.key === ';') {
+      e.preventDefault();
+      if (inputValue.trim()) {
+        addTextAsPerson(inputValue);
+      }
+      return;
+    }
     
     // Handle navigation between chips and input
     if (e.key === 'ArrowLeft') {
