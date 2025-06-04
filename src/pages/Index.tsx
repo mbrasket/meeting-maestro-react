@@ -1,8 +1,14 @@
 
 import MeetingForm from "@/components/MeetingForm";
+import FluentUITest from "@/components/FluentUITest";
 
 const Index = () => {
-  return <MeetingForm />;
+  return (
+    <div>
+      <FluentUITest />
+      <MeetingForm />
+    </div>
+  );
 };
 
 export default Index;
