@@ -1,3 +1,4 @@
+
 import { useState, useCallback, useRef, KeyboardEvent } from 'react';
 import {
   Input,
@@ -159,6 +160,7 @@ const PeoplePicker = ({
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const [selectedChipIndex, setSelectedChipIndex] = useState(-1);
   const inputRef = useRef<HTMLInputElement>(null);
+  const chipRefs = useRef<(HTMLDivElement | null)[]>([]);
   
   const addPerson = useCallback((person: Person) => {
     if (!value.find(p => p.id === person.id)) {
@@ -187,9 +189,25 @@ const PeoplePicker = ({
     if (index >= 0 && index < value.length) {
       const newPeople = value.filter((_, i) => i !== index);
       onChange(newPeople);
-      setSelectedChipIndex(-1);
+      
+      // Adjust selected chip index after removal
+      if (selectedChipIndex === index) {
+        // If we removed the selected chip, move selection appropriately
+        if (index > 0) {
+          setSelectedChipIndex(index - 1);
+          setTimeout(() => chipRefs.current[index - 1]?.focus(), 0);
+        } else if (newPeople.length > 0) {
+          setSelectedChipIndex(0);
+          setTimeout(() => chipRefs.current[0]?.focus(), 0);
+        } else {
+          setSelectedChipIndex(-1);
+          setTimeout(() => inputRef.current?.focus(), 0);
+        }
+      } else if (selectedChipIndex > index) {
+        setSelectedChipIndex(selectedChipIndex - 1);
+      }
     }
-  }, [value, onChange]);
+  }, [value, onChange, selectedChipIndex]);
 
   const handleInputChange = (newValue: string) => {
     setInputValue(newValue);
@@ -224,11 +242,31 @@ const PeoplePicker = ({
     const cursorPosition = inputRef.current?.selectionStart || 0;
     
     // Handle navigation between chips and input
-    if (e.key === 'ArrowLeft' && cursorPosition === 0 && value.length > 0) {
-      e.preventDefault();
-      setSelectedChipIndex(value.length - 1);
-      setIsPopoverOpen(false);
-      return;
+    if (e.key === 'ArrowLeft') {
+      if (isPopoverOpen) {
+        // Dismiss flyout and don't navigate to chips yet
+        e.preventDefault();
+        setIsPopoverOpen(false);
+        setSelectedIndex(-1);
+        return;
+      }
+      
+      if (cursorPosition === 0 && value.length > 0) {
+        e.preventDefault();
+        setSelectedChipIndex(value.length - 1);
+        setTimeout(() => chipRefs.current[value.length - 1]?.focus(), 0);
+        return;
+      }
+    }
+
+    if (e.key === 'ArrowRight') {
+      if (isPopoverOpen) {
+        // Dismiss flyout
+        e.preventDefault();
+        setIsPopoverOpen(false);
+        setSelectedIndex(-1);
+        return;
+      }
     }
 
     // Handle backspace when input is empty - remove last person
@@ -274,12 +312,14 @@ const PeoplePicker = ({
         e.preventDefault();
         if (index > 0) {
           setSelectedChipIndex(index - 1);
+          chipRefs.current[index - 1]?.focus();
         }
         break;
       case 'ArrowRight':
         e.preventDefault();
         if (index < value.length - 1) {
           setSelectedChipIndex(index + 1);
+          chipRefs.current[index + 1]?.focus();
         } else {
           // Move to input
           setSelectedChipIndex(-1);
@@ -289,24 +329,10 @@ const PeoplePicker = ({
       case 'Backspace':
         e.preventDefault();
         removePersonAtIndex(index);
-        // Focus previous chip or input
-        if (index > 0) {
-          setTimeout(() => setSelectedChipIndex(index - 1), 0);
-        } else {
-          setSelectedChipIndex(-1);
-          setTimeout(() => inputRef.current?.focus(), 0);
-        }
         break;
       case 'Delete':
         e.preventDefault();
         removePersonAtIndex(index);
-        // Focus next chip or input
-        if (index < value.length - 1) {
-          setTimeout(() => setSelectedChipIndex(index), 0);
-        } else {
-          setSelectedChipIndex(-1);
-          setTimeout(() => inputRef.current?.focus(), 0);
-        }
         break;
       case 'Enter':
       case ' ':
@@ -366,6 +392,7 @@ const PeoplePicker = ({
                     {value.map((person, index) => (
                       <div 
                         key={person.id} 
+                        ref={el => chipRefs.current[index] = el}
                         className={`${styles.personaChip} ${selectedChipIndex === index ? styles.selectedChip : ''}`}
                         tabIndex={0}
                         onKeyDown={(e) => handleChipKeyDown(e, index)}
