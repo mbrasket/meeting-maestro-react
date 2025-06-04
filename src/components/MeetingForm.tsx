@@ -87,7 +87,7 @@ const useStyles = makeStyles({
   formField: {
     marginBottom: tokens.spacingVerticalM,
   },
-  fieldContainer: {
+  fieldWithIcon: {
     display: 'flex',
     alignItems: 'center',
     gap: tokens.spacingHorizontalM,
@@ -97,7 +97,7 @@ const useStyles = makeStyles({
     display: 'flex',
     gap: tokens.spacingHorizontalM,
   },
-  timeFieldWrapper: {
+  timeFieldWithIcon: {
     display: 'flex',
     alignItems: 'center',
     gap: tokens.spacingHorizontalM,
@@ -111,7 +111,7 @@ const useStyles = makeStyles({
     marginBottom: tokens.spacingVerticalM,
   },
   descriptionIcon: {
-    marginTop: '8px', // Align with middle of first line of text
+    marginTop: '8px',
   },
   descriptionField: {
     flex: 1,
@@ -121,7 +121,10 @@ const useStyles = makeStyles({
     borderRadius: tokens.borderRadiusMedium,
     padding: tokens.spacingVerticalS,
     '&:focus': {
-      borderColor: tokens.colorBrandStroke1,
+      borderTopColor: tokens.colorBrandStroke1,
+      borderRightColor: tokens.colorBrandStroke1,
+      borderBottomColor: tokens.colorBrandStroke1,
+      borderLeftColor: tokens.colorBrandStroke1,
       outline: 'none',
     }
   },
@@ -306,7 +309,7 @@ const MeetingForm = () => {
           {selectedTab === 'details' && (
             <div>
               {/* Meeting Title */}
-              <div className={styles.fieldContainer}>
+              <div className={styles.fieldWithIcon}>
                 <div className={styles.iconContainer}>
                   <DocumentText20Regular />
                 </div>
@@ -321,7 +324,7 @@ const MeetingForm = () => {
               </div>
 
               {/* Co-organizers */}
-              <div className={styles.fieldContainer}>
+              <div className={styles.fieldWithIcon}>
                 <div className={styles.iconContainer}>
                   <PersonAdd20Regular />
                 </div>
@@ -336,7 +339,7 @@ const MeetingForm = () => {
               </div>
 
               {/* Participants */}
-              <div className={styles.fieldContainer}>
+              <div className={styles.fieldWithIcon}>
                 <div className={styles.iconContainer}>
                   <People20Regular />
                 </div>
@@ -351,7 +354,7 @@ const MeetingForm = () => {
               </div>
 
               {/* Optional Participants */}
-              <div className={styles.fieldContainer}>
+              <div className={styles.fieldWithIcon}>
                 <div className={styles.iconContainer}>
                   <People20Regular />
                 </div>
@@ -367,7 +370,7 @@ const MeetingForm = () => {
 
               {/* Start Time + End Time */}
               <div className={styles.timeFieldsContainer}>
-                <div className={styles.timeFieldWrapper}>
+                <div className={styles.timeFieldWithIcon}>
                   <div className={styles.iconContainer}>
                     <Clock20Regular />
                   </div>
@@ -381,7 +384,7 @@ const MeetingForm = () => {
                   </Field>
                 </div>
 
-                <div className={styles.timeFieldWrapper}>
+                <div className={styles.timeFieldWithIcon}>
                   <div className={styles.iconContainer}>
                     <Clock20Regular />
                   </div>
