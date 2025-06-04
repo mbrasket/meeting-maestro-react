@@ -338,6 +338,8 @@ const PeoplePicker = ({
         e.preventDefault();
         setIsPopoverOpen(false);
         setSelectedIndex(-1);
+        // Ensure focus stays on the input field
+        setTimeout(() => inputRef.current?.focus(), 0);
         break;
     }
   };
