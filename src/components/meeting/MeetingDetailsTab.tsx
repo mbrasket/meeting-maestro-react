@@ -44,8 +44,9 @@ const useStyles = makeStyles({
     '& input': {
       height: '32px',
       cursor: 'default',
-      transition: 'border-color 0.1s ease',
+      transition: 'border-bottom-width 0.1s ease, border-bottom-color 0.1s ease',
       '&:hover': {
+        borderBottomWidth: '2px',
         borderBottomColor: tokens.colorBrandStroke1,
       },
     },

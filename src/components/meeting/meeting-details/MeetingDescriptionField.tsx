@@ -40,8 +40,12 @@ const useStyles = makeStyles({
     borderRadius: tokens.borderRadiusMedium,
     padding: tokens.spacingVerticalS,
     cursor: 'default',
-    transition: 'border-color 0.1s ease',
+    transition: 'border-width 0.1s ease, border-color 0.1s ease',
     '&:hover': {
+      borderTopWidth: '2px',
+      borderRightWidth: '2px',
+      borderBottomWidth: '2px',
+      borderLeftWidth: '2px',
       borderTopColor: tokens.colorBrandStroke1,
       borderRightColor: tokens.colorBrandStroke1,
       borderBottomColor: tokens.colorBrandStroke1,
