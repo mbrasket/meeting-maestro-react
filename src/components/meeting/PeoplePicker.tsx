@@ -1,9 +1,11 @@
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import {
-  Combobox,
-  Option,
+  Input,
   Field,
+  Popover,
+  PopoverTrigger,
+  PopoverSurface,
   makeStyles,
   tokens,
   Avatar,
@@ -15,22 +17,21 @@ import { Person } from '../../data/sampleData';
 const useStyles = makeStyles({
   container: {
     flex: 1,
+    position: 'relative',
   },
-  inputContainer: {
+  inputWrapper: {
+    position: 'relative',
     display: 'flex',
     alignItems: 'center',
-    flexWrap: 'wrap',
-    gap: tokens.spacingHorizontalXS,
     minHeight: '32px',
-    padding: `${tokens.spacingVerticalXXS} ${tokens.spacingHorizontalXS}`,
-    border: `1px solid ${tokens.colorNeutralStroke1}`,
-    borderRadius: tokens.borderRadiusMedium,
-    backgroundColor: tokens.colorNeutralBackground1,
-    '&:focus-within': {
-      borderColor: tokens.colorBrandStroke1,
-      outline: `2px solid ${tokens.colorBrandStroke1}`,
-      outlineOffset: '-1px',
-    },
+  },
+  chipsContainer: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: tokens.spacingHorizontalXXS,
+    flexWrap: 'nowrap',
+    overflow: 'hidden',
+    paddingRight: tokens.spacingHorizontalXS,
   },
   personaChip: {
     display: 'flex',
@@ -40,8 +41,9 @@ const useStyles = makeStyles({
     backgroundColor: tokens.colorNeutralBackground2,
     borderRadius: tokens.borderRadiusSmall,
     border: `1px solid ${tokens.colorNeutralStroke1}`,
-    maxWidth: '150px',
+    maxWidth: '120px',
     fontSize: tokens.fontSizeBase200,
+    flexShrink: 0,
   },
   dismissButton: {
     border: 'none',
@@ -55,24 +57,28 @@ const useStyles = makeStyles({
       backgroundColor: tokens.colorNeutralBackground3,
     },
   },
-  comboboxContainer: {
+  input: {
     flex: 1,
     minWidth: '100px',
-  },
-  combobox: {
     border: 'none',
     outline: 'none',
-    backgroundColor: 'transparent',
-    '& > div': {
-      border: 'none',
-      backgroundColor: 'transparent',
-    },
+    background: 'transparent',
   },
-  optionContent: {
+  popoverSurface: {
+    maxHeight: '200px',
+    overflowY: 'auto',
+    padding: 0,
+    minWidth: '300px',
+  },
+  optionItem: {
     display: 'flex',
     alignItems: 'center',
     gap: tokens.spacingHorizontalS,
-    width: '100%',
+    padding: tokens.spacingVerticalS,
+    cursor: 'pointer',
+    '&:hover': {
+      backgroundColor: tokens.colorNeutralBackground2,
+    },
   },
   optionDetails: {
     display: 'flex',
@@ -82,6 +88,12 @@ const useStyles = makeStyles({
   optionSecondaryText: {
     color: tokens.colorNeutralForeground2,
     fontSize: tokens.fontSizeBase200,
+  },
+  underlineInput: {
+    width: '100%',
+    '& input': {
+      paddingLeft: 0,
+    },
   },
 });
 
@@ -104,6 +116,8 @@ const PeoplePicker = ({
 }: PeoplePickerProps) => {
   const styles = useStyles();
   const [inputValue, setInputValue] = useState('');
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
   
   const addPerson = useCallback((person: Person) => {
     if (!value.find(p => p.id === person.id)) {
@@ -115,6 +129,7 @@ const PeoplePicker = ({
       }
     }
     setInputValue('');
+    setIsPopoverOpen(false);
   }, [value, onChange, onAddToHistory]);
 
   const removePerson = useCallback((personToRemove: Person) => {
@@ -124,15 +139,22 @@ const PeoplePicker = ({
 
   const handleInputChange = (newValue: string) => {
     setInputValue(newValue);
+    setIsPopoverOpen(newValue.length > 0);
   };
 
-  const handleOptionSelect = (_, data: { optionValue?: string }) => {
-    if (data.optionValue) {
-      const selectedPerson = suggestions.find(p => p.id === data.optionValue);
-      if (selectedPerson) {
-        addPerson(selectedPerson);
-      }
+  const handleInputFocus = () => {
+    if (inputValue.length > 0) {
+      setIsPopoverOpen(true);
     }
+  };
+
+  const handleInputBlur = () => {
+    // Delay closing to allow for option selection
+    setTimeout(() => setIsPopoverOpen(false), 150);
+  };
+
+  const handleOptionClick = (person: Person) => {
+    addPerson(person);
   };
 
   const filteredSuggestions = suggestions.filter(person =>
@@ -143,62 +165,89 @@ const PeoplePicker = ({
     !value.find(p => p.id === person.id)
   );
 
+  const getPlaceholder = () => {
+    if (value.length === 0) {
+      return placeholder;
+    }
+    return '';
+  };
+
   return (
     <div className={styles.container}>
       <Field required={required}>
-        <div className={styles.inputContainer}>
-          {value.map((person) => (
-            <div key={person.id} className={styles.personaChip}>
-              <Avatar
-                image={{ src: person.avatar }}
-                name={person.name}
-                size={16}
-              />
-              <Text size={200} truncate title={person.name}>
-                {person.name}
-              </Text>
-              <button
-                className={styles.dismissButton}
-                onClick={() => removePerson(person)}
-                aria-label={`Remove ${person.name}`}
-              >
-                <Dismiss12Regular />
-              </button>
-            </div>
-          ))}
-          
-          <div className={styles.comboboxContainer}>
-            <Combobox
-              className={styles.combobox}
-              appearance="outline"
-              placeholder={value.length === 0 ? placeholder : ''}
-              value={inputValue}
-              onInput={(e) => handleInputChange((e.target as HTMLInputElement).value)}
-              onOptionSelect={handleOptionSelect}
-            >
-              {filteredSuggestions.map((person) => (
-                <Option key={person.id} value={person.id} text={person.name}>
-                  <div className={styles.optionContent}>
-                    <Avatar
-                      image={{ src: person.avatar }}
-                      name={person.name}
-                      size={32}
-                    />
-                    <div className={styles.optionDetails}>
-                      <Text weight="semibold">{person.name}</Text>
-                      <Text className={styles.optionSecondaryText}>
-                        {person.role} • {person.department}
-                      </Text>
-                      <Text className={styles.optionSecondaryText} size={100}>
-                        {person.email}
-                      </Text>
+        <Popover
+          open={isPopoverOpen && filteredSuggestions.length > 0}
+          onOpenChange={(_, data) => setIsPopoverOpen(data.open)}
+        >
+          <PopoverTrigger disableButtonEnhancement>
+            <div className={styles.inputWrapper}>
+              <Input
+                ref={inputRef}
+                appearance="underline"
+                className={styles.underlineInput}
+                value={inputValue}
+                onChange={(_, data) => handleInputChange(data.value)}
+                onFocus={handleInputFocus}
+                onBlur={handleInputBlur}
+                placeholder={getPlaceholder()}
+                contentBefore={
+                  value.length > 0 && (
+                    <div className={styles.chipsContainer}>
+                      {value.map((person) => (
+                        <div key={person.id} className={styles.personaChip}>
+                          <Avatar
+                            image={{ src: person.avatar }}
+                            name={person.name}
+                            size={16}
+                          />
+                          <Text size={200} truncate title={person.name}>
+                            {person.name}
+                          </Text>
+                          <button
+                            className={styles.dismissButton}
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              removePerson(person);
+                            }}
+                            aria-label={`Remove ${person.name}`}
+                          >
+                            <Dismiss12Regular />
+                          </button>
+                        </div>
+                      ))}
                     </div>
-                  </div>
-                </Option>
-              ))}
-            </Combobox>
-          </div>
-        </div>
+                  )
+                }
+              />
+            </div>
+          </PopoverTrigger>
+          
+          <PopoverSurface className={styles.popoverSurface}>
+            {filteredSuggestions.map((person) => (
+              <div
+                key={person.id}
+                className={styles.optionItem}
+                onClick={() => handleOptionClick(person)}
+              >
+                <Avatar
+                  image={{ src: person.avatar }}
+                  name={person.name}
+                  size={32}
+                />
+                <div className={styles.optionDetails}>
+                  <Text weight="semibold">{person.name}</Text>
+                  <Text className={styles.optionSecondaryText}>
+                    {person.role} • {person.department}
+                  </Text>
+                  <Text className={styles.optionSecondaryText} size={100}>
+                    {person.email}
+                  </Text>
+                </div>
+              </div>
+            ))}
+          </PopoverSurface>
+        </Popover>
       </Field>
     </div>
   );
