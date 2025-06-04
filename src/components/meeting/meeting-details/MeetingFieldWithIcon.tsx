@@ -15,10 +15,6 @@ const useStyles = makeStyles({
     padding: `${tokens.spacingVerticalXS} ${tokens.spacingHorizontalS}`,
     borderRadius: tokens.borderRadiusSmall,
     cursor: 'default',
-    transition: 'background-color 0.1s ease',
-    '&:hover': {
-      backgroundColor: tokens.colorSubtleBackgroundHover,
-    },
   },
   iconContainer: {
     display: 'flex',
@@ -27,6 +23,13 @@ const useStyles = makeStyles({
     width: '20px',
     height: '20px',
     color: tokens.colorNeutralForeground2,
+  },
+  fieldContainer: {
+    flex: 1,
+    transition: 'background-color 0.1s ease',
+    '&:hover': {
+      backgroundColor: tokens.colorSubtleBackgroundHover,
+    },
   },
 });
 
@@ -43,7 +46,9 @@ const MeetingFieldWithIcon = ({ icon, children }: MeetingFieldWithIconProps) => 
       <div className={styles.iconContainer}>
         {icon}
       </div>
-      {children}
+      <div className={styles.fieldContainer}>
+        {children}
+      </div>
     </div>
   );
 };

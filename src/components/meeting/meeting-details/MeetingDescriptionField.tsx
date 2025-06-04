@@ -18,16 +18,16 @@ const useStyles = makeStyles({
     padding: `${tokens.spacingVerticalS} ${tokens.spacingHorizontalS}`,
     borderRadius: tokens.borderRadiusSmall,
     cursor: 'default',
-    transition: 'background-color 0.1s ease',
-    '&:hover': {
-      backgroundColor: tokens.colorSubtleBackgroundHover,
-    },
   },
   descriptionIcon: {
     marginTop: '8px',
   },
   descriptionField: {
     flex: 1,
+    transition: 'background-color 0.1s ease',
+    '&:hover': {
+      backgroundColor: tokens.colorSubtleBackgroundHover,
+    },
   },
   descriptionTextarea: {
     border: `1px solid ${tokens.colorNeutralStroke1}`,
@@ -39,10 +39,7 @@ const useStyles = makeStyles({
       borderColor: tokens.colorNeutralStroke1Hover,
     },
     '&:focus': {
-      borderTopColor: tokens.colorBrandStroke1,
-      borderRightColor: tokens.colorBrandStroke1,
-      borderBottomColor: tokens.colorBrandStroke1,
-      borderLeftColor: tokens.colorBrandStroke1,
+      borderColor: tokens.colorBrandStroke1,
       outline: 'none',
     }
   },

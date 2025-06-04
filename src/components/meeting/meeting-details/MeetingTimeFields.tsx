@@ -23,10 +23,6 @@ const useStyles = makeStyles({
     padding: `${tokens.spacingVerticalXS} ${tokens.spacingHorizontalS}`,
     borderRadius: tokens.borderRadiusSmall,
     cursor: 'default',
-    transition: 'background-color 0.1s ease',
-    '&:hover': {
-      backgroundColor: tokens.colorSubtleBackgroundHover,
-    },
   },
   iconContainer: {
     display: 'flex',
@@ -39,6 +35,10 @@ const useStyles = makeStyles({
   inputField: {
     flex: 1,
     height: '32px',
+    transition: 'background-color 0.1s ease',
+    '&:hover': {
+      backgroundColor: tokens.colorSubtleBackgroundHover,
+    },
     '& input': {
       height: '32px',
       cursor: 'text',

@@ -16,6 +16,10 @@ const useStyles = makeStyles({
   container: {
     flex: 1,
     position: 'relative',
+    transition: 'background-color 0.1s ease',
+    '&:hover': {
+      backgroundColor: tokens.colorSubtleBackgroundHover,
+    },
   },
   chipsContainer: {
     display: 'flex',
