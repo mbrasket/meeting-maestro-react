@@ -37,10 +37,16 @@ const useStyles = makeStyles({
     '& input': {
       height: '32px',
       cursor: 'default',
+      borderBottomWidth: '1px',
+      borderBottomColor: tokens.colorNeutralStroke1,
       transition: 'border-bottom-width 0.1s ease, border-bottom-color 0.1s ease',
       '&:hover': {
-        borderBottomWidth: '2px',
-        borderBottomColor: tokens.colorBrandStroke1,
+        borderBottomWidth: '2px !important',
+        borderBottomColor: `${tokens.colorBrandStroke1} !important`,
+      },
+      '&:focus': {
+        borderBottomWidth: '2px !important',
+        borderBottomColor: `${tokens.colorBrandStroke1} !important`,
       },
     },
   },
