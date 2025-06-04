@@ -1,3 +1,4 @@
+
 import { useState, useCallback, useRef, KeyboardEvent } from 'react';
 import {
   Input,
@@ -44,7 +45,7 @@ const useStyles = makeStyles({
     borderRightStyle: 'solid',
     borderBottomStyle: 'solid',
     borderLeftStyle: 'solid',
-    maxWidth: '120px',
+    maxWidth: '300px',
     fontSize: tokens.fontSizeBase200,
     flexShrink: 0,
     cursor: 'pointer',
