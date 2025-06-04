@@ -29,14 +29,6 @@ const useStyles = makeStyles({
     borderRadius: tokens.borderRadiusMedium,
     padding: tokens.spacingVerticalS,
     cursor: 'default',
-    transition: 'border 0.1s ease',
-    '&:hover': {
-      border: `2px solid ${tokens.colorBrandStroke1}`,
-    },
-    '&:focus': {
-      border: `2px solid ${tokens.colorBrandStroke1}`,
-      outline: 'none',
-    }
   },
   iconContainer: {
     display: 'flex',
