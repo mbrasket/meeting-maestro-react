@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import {
   Card,
@@ -24,6 +25,19 @@ import {
   DocumentText20Regular,
   PersonAdd20Regular
 } from '@fluentui/react-icons';
+import { 
+  Tag, 
+  Bell, 
+  MoreHorizontal, 
+  Send, 
+  Trash2 
+} from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const useStyles = makeStyles({
   container: {
@@ -32,6 +46,40 @@ const useStyles = makeStyles({
     padding: tokens.spacingVerticalL,
     backgroundColor: tokens.colorNeutralBackground1,
     minHeight: '100vh',
+  },
+  toolbar: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    width: '100vw',
+    marginLeft: 'calc(-50vw + 50%)',
+    padding: `${tokens.spacingVerticalM} ${tokens.spacingHorizontalXL}`,
+    backgroundColor: tokens.colorNeutralBackground2,
+    borderBottom: `1px solid ${tokens.colorNeutralStroke2}`,
+    marginBottom: tokens.spacingVerticalL,
+  },
+  toolbarLeft: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: tokens.spacingHorizontalM,
+  },
+  toolbarRight: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: tokens.spacingHorizontalS,
+  },
+  dropdownTrigger: {
+    border: 'none',
+    background: 'transparent',
+    padding: tokens.spacingVerticalS,
+    display: 'flex',
+    alignItems: 'center',
+    gap: tokens.spacingHorizontalXS,
+    cursor: 'pointer',
+    borderRadius: tokens.borderRadiusSmall,
+    '&:hover': {
+      backgroundColor: tokens.colorNeutralBackground1Hover,
+    }
   },
   card: {
     marginBottom: tokens.spacingVerticalM,
@@ -58,6 +106,8 @@ const useStyles = makeStyles({
 const MeetingForm = () => {
   const styles = useStyles();
   const [selectedTab, setSelectedTab] = useState('details');
+  const [selectedCategory, setSelectedCategory] = useState('General');
+  const [selectedReminder, setSelectedReminder] = useState('15 mins');
   const [formData, setFormData] = useState({
     title: '',
     coOrganizers: '',
@@ -86,14 +136,96 @@ const MeetingForm = () => {
     // Meeting creation logic would go here
   };
 
+  const handleSend = () => {
+    console.log('Sending meeting...');
+    handleCreateMeeting();
+  };
+
+  const handleDelete = () => {
+    console.log('Deleting meeting...');
+  };
+
+  const categories = ['General', 'Team Meeting', 'Client Call', 'Review', 'Training'];
+  const reminders = ['15 mins', '30 mins', '1 hour', '2 hours', '1 day'];
+
   return (
     <div className={styles.container}>
-      <Card className={styles.card}>
-        <CardHeader
-          header={<Title1>Create New Meeting</Title1>}
-          description={<Subtitle1>Set up your Microsoft Teams meeting</Subtitle1>}
-        />
-      </Card>
+      {/* Full-width Toolbar */}
+      <div className={styles.toolbar}>
+        <div className={styles.toolbarLeft}>
+          <Button
+            appearance="primary"
+            icon={<Send size={16} />}
+            onClick={handleSend}
+          >
+            Send
+          </Button>
+          <Button
+            appearance="subtle"
+            icon={<Trash2 size={16} />}
+            onClick={handleDelete}
+          >
+            Delete
+          </Button>
+        </div>
+
+        <div className={styles.toolbarRight}>
+          {/* Meeting Categories Dropdown */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className={styles.dropdownTrigger}>
+                <Tag size={16} />
+                <span>{selectedCategory}</span>
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="z-50 bg-white border shadow-lg">
+              {categories.map((category) => (
+                <DropdownMenuItem
+                  key={category}
+                  onClick={() => setSelectedCategory(category)}
+                >
+                  {category}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          {/* Meeting Reminders Dropdown */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className={styles.dropdownTrigger}>
+                <Bell size={16} />
+                <span>{selectedReminder}</span>
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="z-50 bg-white border shadow-lg">
+              {reminders.map((reminder) => (
+                <DropdownMenuItem
+                  key={reminder}
+                  onClick={() => setSelectedReminder(reminder)}
+                >
+                  {reminder}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          {/* More Options Menu */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className={styles.dropdownTrigger}>
+                <MoreHorizontal size={16} />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="z-50 bg-white border shadow-lg">
+              <DropdownMenuItem>Save as Template</DropdownMenuItem>
+              <DropdownMenuItem>Copy Meeting Link</DropdownMenuItem>
+              <DropdownMenuItem>Export to Calendar</DropdownMenuItem>
+              <DropdownMenuItem>Meeting Settings</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </div>
 
       <Card className={styles.card}>
         <TabList
@@ -117,6 +249,7 @@ const MeetingForm = () => {
                 className={styles.formField}
               >
                 <Input
+                  appearance="underline"
                   value={formData.title}
                   onChange={(_, data) => handleInputChange('title', data.value)}
                   placeholder="Enter meeting title"
@@ -129,6 +262,7 @@ const MeetingForm = () => {
                 className={styles.formField}
               >
                 <Input
+                  appearance="underline"
                   value={formData.coOrganizers}
                   onChange={(_, data) => handleInputChange('coOrganizers', data.value)}
                   placeholder="Enter co-organizer email addresses separated by commas"
@@ -141,6 +275,7 @@ const MeetingForm = () => {
                 className={styles.formField}
               >
                 <Input
+                  appearance="underline"
                   value={formData.participants}
                   onChange={(_, data) => handleInputChange('participants', data.value)}
                   placeholder="Enter participant email addresses separated by commas"
@@ -153,6 +288,7 @@ const MeetingForm = () => {
                 className={styles.formField}
               >
                 <Input
+                  appearance="underline"
                   value={formData.optionalParticipants}
                   onChange={(_, data) => handleInputChange('optionalParticipants', data.value)}
                   placeholder="Enter optional participant email addresses separated by commas"
@@ -167,6 +303,7 @@ const MeetingForm = () => {
                   style={{ flex: 1 }}
                 >
                   <Input
+                    appearance="underline"
                     type="datetime-local"
                     value={formData.startTime}
                     onChange={(_, data) => handleInputChange('startTime', data.value)}
@@ -179,6 +316,7 @@ const MeetingForm = () => {
                   style={{ flex: 1 }}
                 >
                   <Input
+                    appearance="underline"
                     type="datetime-local"
                     value={formData.endTime}
                     onChange={(_, data) => handleInputChange('endTime', data.value)}
@@ -192,6 +330,7 @@ const MeetingForm = () => {
                 className={styles.formField}
               >
                 <Textarea
+                  appearance="underline"
                   value={formData.description}
                   onChange={(_, data) => handleInputChange('description', data.value)}
                   placeholder="Add meeting description (optional)"
@@ -287,23 +426,6 @@ const MeetingForm = () => {
           )}
         </div>
       </Card>
-
-      <div className={styles.buttonGroup}>
-        <Button
-          appearance="primary"
-          icon={<Video20Regular />}
-          onClick={handleCreateMeeting}
-          size="large"
-        >
-          Create Meeting
-        </Button>
-        <Button
-          appearance="secondary"
-          size="large"
-        >
-          Save as Template
-        </Button>
-      </div>
     </div>
   );
 };
