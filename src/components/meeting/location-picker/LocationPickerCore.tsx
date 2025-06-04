@@ -1,4 +1,5 @@
-import { useState, useCallback, useRef, KeyboardEvent } from 'react';
+
+import { useState, useCallback, useRef, KeyboardEvent, useEffect } from 'react';
 import {
   Input,
   Field,
@@ -80,6 +81,37 @@ const LocationPickerCore = ({
   const [selectedChipIndex, setSelectedChipIndex] = useState(-1);
   const inputRef = useRef<HTMLInputElement>(null);
   const chipRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Add global keydown listener to capture typing when focus is elsewhere
+  useEffect(() => {
+    const handleGlobalKeyDown = (e: KeyboardEvent<Element>) => {
+      // Check if the event target is within this component
+      if (!containerRef.current?.contains(e.target as Node)) {
+        return;
+      }
+
+      // Check if it's a letter, number, or other printable character
+      if (e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) {
+        // Focus the input and clear any selection
+        setSelectedChipIndex(-1);
+        setSelectedIndex(-1);
+        inputRef.current?.focus();
+        
+        // Let the input handle the keystroke naturally
+        if (inputValue === '') {
+          setInputValue(e.key);
+          setIsPopoverOpen(true);
+        }
+      }
+    };
+
+    const container = containerRef.current;
+    if (container) {
+      container.addEventListener('keydown', handleGlobalKeyDown as any);
+      return () => container.removeEventListener('keydown', handleGlobalKeyDown as any);
+    }
+  }, [inputValue]);
 
   const addLocation = useCallback((location: string) => {
     const trimmedLocation = location.trim();
@@ -291,7 +323,7 @@ const LocationPickerCore = ({
   };
 
   return (
-    <div className={styles.container}>
+    <div ref={containerRef} className={styles.container} tabIndex={-1}>
       <Field hint={hint}>
         <Popover
           open={isPopoverOpen && filteredSuggestions.length > 0}
