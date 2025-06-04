@@ -36,10 +36,16 @@ const useStyles = makeStyles({
     cursor: 'text',
     transition: 'border-color 0.1s ease',
     '&:hover': {
-      borderColor: tokens.colorNeutralStroke1Hover,
+      borderTopColor: tokens.colorNeutralStroke1Hover,
+      borderRightColor: tokens.colorNeutralStroke1Hover,
+      borderBottomColor: tokens.colorNeutralStroke1Hover,
+      borderLeftColor: tokens.colorNeutralStroke1Hover,
     },
     '&:focus': {
-      borderColor: tokens.colorBrandStroke1,
+      borderTopColor: tokens.colorBrandStroke1,
+      borderRightColor: tokens.colorBrandStroke1,
+      borderBottomColor: tokens.colorBrandStroke1,
+      borderLeftColor: tokens.colorBrandStroke1,
       outline: 'none',
     }
   },
