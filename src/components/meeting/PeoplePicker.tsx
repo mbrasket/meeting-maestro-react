@@ -1,4 +1,3 @@
-
 import { useState, useCallback, useRef, KeyboardEvent } from 'react';
 import {
   Input,
@@ -174,6 +173,8 @@ const PeoplePicker = ({
     setIsPopoverOpen(false);
     setSelectedIndex(-1);
     setSelectedChipIndex(-1);
+    // Keep focus on input after adding person
+    setTimeout(() => inputRef.current?.focus(), 0);
   }, [value, onChange, onAddToHistory]);
 
   const removePerson = useCallback((personToRemove: Person) => {
@@ -211,11 +212,12 @@ const PeoplePicker = ({
       return;
     }
     
+    // Delay closing to allow clicks to register
     setTimeout(() => {
       setIsPopoverOpen(false);
       setSelectedIndex(-1);
       setSelectedChipIndex(-1);
-    }, 150);
+    }, 200);
   };
 
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
@@ -236,7 +238,7 @@ const PeoplePicker = ({
       return;
     }
 
-    // Handle suggestion navigation
+    // Handle suggestion navigation only when popover is open
     if (!isPopoverOpen || filteredSuggestions.length === 0) return;
 
     switch (e.key) {
@@ -339,7 +341,13 @@ const PeoplePicker = ({
         <Popover
           open={isPopoverOpen && filteredSuggestions.length > 0}
           positioning="below-start"
-          onOpenChange={(_, data) => setIsPopoverOpen(data.open)}
+          onOpenChange={(_, data) => {
+            // Only close if explicitly requested, don't interfere with typing
+            if (!data.open) {
+              setIsPopoverOpen(false);
+              setSelectedIndex(-1);
+            }
+          }}
         >
           <PopoverTrigger disableButtonEnhancement>
             <Input
@@ -400,11 +408,11 @@ const PeoplePicker = ({
           
           <PopoverSurface className={styles.popoverSurface}>
             {filteredSuggestions.map((person, index) => (
-              <button
+              <div
                 key={person.id}
                 className={styles.optionItem}
                 onClick={() => handleOptionClick(person)}
-                onFocus={() => setSelectedIndex(index)}
+                onMouseEnter={() => setSelectedIndex(index)}
                 data-suggestion-option
                 style={{
                   backgroundColor: selectedIndex === index ? tokens.colorNeutralBackground2 : 'transparent'
@@ -424,7 +432,7 @@ const PeoplePicker = ({
                     {person.email}
                   </Text>
                 </div>
-              </button>
+              </div>
             ))}
           </PopoverSurface>
         </Popover>
