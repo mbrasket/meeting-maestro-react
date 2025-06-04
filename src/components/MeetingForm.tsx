@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import {
   Card,
@@ -16,7 +15,15 @@ import {
   makeStyles,
   tokens,
 } from '@fluentui/react-components';
-import { CalendarLtr20Regular, Clock20Regular, Video20Regular, People20Regular, Settings20Regular } from '@fluentui/react-icons';
+import { 
+  CalendarLtr20Regular, 
+  Clock20Regular, 
+  Video20Regular, 
+  People20Regular, 
+  Settings20Regular,
+  DocumentText20Regular,
+  PersonAdd20Regular
+} from '@fluentui/react-icons';
 
 const useStyles = makeStyles({
   container: {
@@ -106,7 +113,6 @@ const MeetingForm = () => {
             <div>
               {/* Meeting Title */}
               <Field
-                label="Meeting Title"
                 required
                 className={styles.formField}
               >
@@ -114,25 +120,24 @@ const MeetingForm = () => {
                   value={formData.title}
                   onChange={(_, data) => handleInputChange('title', data.value)}
                   placeholder="Enter meeting title"
+                  contentBefore={<DocumentText20Regular />}
                 />
               </Field>
 
               {/* Co-organizers */}
               <Field
-                label="Co-organizers"
                 className={styles.formField}
               >
                 <Input
                   value={formData.coOrganizers}
                   onChange={(_, data) => handleInputChange('coOrganizers', data.value)}
                   placeholder="Enter co-organizer email addresses separated by commas"
-                  contentBefore={<People20Regular />}
+                  contentBefore={<PersonAdd20Regular />}
                 />
               </Field>
 
               {/* Participants */}
               <Field
-                label="Participants"
                 className={styles.formField}
               >
                 <Input
@@ -145,7 +150,6 @@ const MeetingForm = () => {
 
               {/* Optional Participants */}
               <Field
-                label="Optional Participants"
                 className={styles.formField}
               >
                 <Input
@@ -159,7 +163,6 @@ const MeetingForm = () => {
               {/* Start Time + End Time */}
               <div style={{ display: 'flex', gap: tokens.spacingHorizontalM }}>
                 <Field
-                  label="Start Time"
                   required
                   style={{ flex: 1 }}
                 >
@@ -172,7 +175,6 @@ const MeetingForm = () => {
                 </Field>
 
                 <Field
-                  label="End Time"
                   required
                   style={{ flex: 1 }}
                 >
@@ -187,7 +189,6 @@ const MeetingForm = () => {
 
               {/* Description */}
               <Field
-                label="Description"
                 className={styles.formField}
               >
                 <Textarea
