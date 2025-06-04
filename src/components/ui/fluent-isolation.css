@@ -1,0 +1,36 @@
+
+/* Isolation for Fluent UI components to prevent Tailwind interference */
+.fluent-isolation {
+  /* Reset any global styles that might interfere with Fluent UI */
+  all: unset;
+  
+  /* Ensure Fluent UI hover states work properly */
+  * {
+    cursor: revert;
+  }
+  
+  /* Allow Fluent UI to manage its own transitions and animations */
+  input[data-fluent-input] {
+    transition: revert;
+    border: revert;
+    outline: revert;
+  }
+  
+  /* Ensure underline inputs can show their hover states */
+  .fui-Input[data-appearance="underline"] {
+    border-bottom-width: revert;
+    border-bottom-style: revert;
+    border-bottom-color: revert;
+  }
+  
+  .fui-Input[data-appearance="underline"]:hover {
+    border-bottom-width: revert;
+    border-bottom-color: revert;
+  }
+  
+  .fui-Input[data-appearance="underline"]:focus {
+    border-bottom-width: revert;
+    border-bottom-color: revert;
+    outline: revert;
+  }
+}

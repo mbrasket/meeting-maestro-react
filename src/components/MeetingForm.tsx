@@ -87,7 +87,7 @@ const MeetingForm = () => {
       />
 
       <Card className={styles.card}>
-        <div className={styles.content}>
+        <div className={`${styles.content} fluent-isolation`}>
           <MeetingDetailsTab formData={formData} onInputChange={handleInputChange} />
         </div>
       </Card>
