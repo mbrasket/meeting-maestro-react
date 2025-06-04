@@ -110,7 +110,7 @@
   }
   
   .fui-Input[data-appearance="underline"]:hover {
-    border-bottom: 2px solid var(--colorBrandStroke1) !important;
+    border-bottom: 2px solid var(--colorNeutralStrokeAccessible) !important;
   }
   
   .fui-Input[data-appearance="underline"]:focus {
