@@ -35,7 +35,18 @@ const useStyles = makeStyles({
     padding: `2px ${tokens.spacingHorizontalXXS}`,
     backgroundColor: tokens.colorNeutralBackground2,
     borderRadius: tokens.borderRadiusSmall,
-    border: `1px solid ${tokens.colorNeutralStroke1}`,
+    borderTopColor: tokens.colorNeutralStroke1,
+    borderRightColor: tokens.colorNeutralStroke1,
+    borderBottomColor: tokens.colorNeutralStroke1,
+    borderLeftColor: tokens.colorNeutralStroke1,
+    borderTopWidth: '1px',
+    borderRightWidth: '1px',
+    borderBottomWidth: '1px',
+    borderLeftWidth: '1px',
+    borderTopStyle: 'solid',
+    borderRightStyle: 'solid',
+    borderBottomStyle: 'solid',
+    borderLeftStyle: 'solid',
     maxWidth: '120px',
     fontSize: tokens.fontSizeBase200,
     flexShrink: 0,
@@ -47,7 +58,10 @@ const useStyles = makeStyles({
   },
   selectedChip: {
     backgroundColor: tokens.colorBrandBackground2,
-    borderColor: tokens.colorBrandStroke1,
+    borderTopColor: tokens.colorBrandStroke1,
+    borderRightColor: tokens.colorBrandStroke1,
+    borderBottomColor: tokens.colorBrandStroke1,
+    borderLeftColor: tokens.colorBrandStroke1,
   },
   dismissButton: {
     border: 'none',
@@ -71,7 +85,18 @@ const useStyles = makeStyles({
     padding: 0,
     minWidth: '300px',
     backgroundColor: tokens.colorNeutralBackground1,
-    border: `1px solid ${tokens.colorNeutralStroke1}`,
+    borderTopColor: tokens.colorNeutralStroke1,
+    borderRightColor: tokens.colorNeutralStroke1,
+    borderBottomColor: tokens.colorNeutralStroke1,
+    borderLeftColor: tokens.colorNeutralStroke1,
+    borderTopWidth: '1px',
+    borderRightWidth: '1px',
+    borderBottomWidth: '1px',
+    borderLeftWidth: '1px',
+    borderTopStyle: 'solid',
+    borderRightStyle: 'solid',
+    borderBottomStyle: 'solid',
+    borderLeftStyle: 'solid',
     borderRadius: tokens.borderRadiusMedium,
     boxShadow: tokens.shadow16,
     zIndex: 1000,
@@ -194,8 +219,10 @@ const PeoplePicker = ({
   };
 
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    const cursorPosition = inputRef.current?.selectionStart || 0;
+    
     // Handle navigation between chips and input
-    if (e.key === 'ArrowLeft' && inputRef.current?.selectionStart === 0 && value.length > 0) {
+    if (e.key === 'ArrowLeft' && cursorPosition === 0 && value.length > 0) {
       e.preventDefault();
       setSelectedChipIndex(value.length - 1);
       setIsPopoverOpen(false);
@@ -203,7 +230,7 @@ const PeoplePicker = ({
     }
 
     // Handle backspace when input is empty - remove last person
-    if (e.key === 'Backspace' && inputValue === '' && value.length > 0) {
+    if (e.key === 'Backspace' && inputValue === '' && cursorPosition === 0 && value.length > 0) {
       e.preventDefault();
       removePersonAtIndex(value.length - 1);
       return;
@@ -262,10 +289,10 @@ const PeoplePicker = ({
         removePersonAtIndex(index);
         // Focus previous chip or input
         if (index > 0) {
-          setSelectedChipIndex(index - 1);
+          setTimeout(() => setSelectedChipIndex(index - 1), 0);
         } else {
           setSelectedChipIndex(-1);
-          inputRef.current?.focus();
+          setTimeout(() => inputRef.current?.focus(), 0);
         }
         break;
       case 'Delete':
@@ -273,10 +300,10 @@ const PeoplePicker = ({
         removePersonAtIndex(index);
         // Focus next chip or input
         if (index < value.length - 1) {
-          setSelectedChipIndex(index);
+          setTimeout(() => setSelectedChipIndex(index), 0);
         } else {
           setSelectedChipIndex(-1);
-          inputRef.current?.focus();
+          setTimeout(() => inputRef.current?.focus(), 0);
         }
         break;
       case 'Enter':
