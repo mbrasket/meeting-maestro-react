@@ -101,3 +101,20 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Specific fixes for Fluent UI underline inputs */
+@layer components {
+  .fui-Input[data-appearance="underline"] {
+    border-bottom: 1px solid var(--colorNeutralStroke1) !important;
+    transition: border-bottom-color 0.2s ease, border-bottom-width 0.2s ease !important;
+  }
+  
+  .fui-Input[data-appearance="underline"]:hover {
+    border-bottom: 2px solid var(--colorBrandStroke1) !important;
+  }
+  
+  .fui-Input[data-appearance="underline"]:focus {
+    border-bottom: 2px solid var(--colorCompoundBrandStroke) !important;
+    outline: none !important;
+  }
+}

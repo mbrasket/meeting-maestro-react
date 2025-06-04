@@ -1,31 +1,36 @@
 
-/* Targeted isolation for Fluent UI components to prevent Tailwind interference */
+/* Isolation for Fluent UI components to prevent Tailwind interference */
 .fluent-isolation {
-  /* Only reset properties that commonly conflict, not everything */
-  box-sizing: border-box;
+  /* Reset any global styles that might interfere with Fluent UI */
+  all: unset;
   
-  /* Prevent Tailwind's global input resets from affecting Fluent UI */
-  input {
-    all: revert;
-    box-sizing: border-box;
+  /* Ensure Fluent UI hover states work properly */
+  * {
+    cursor: revert;
   }
   
-  /* Allow Fluent UI to manage its own focus and hover states */
-  .fui-Input {
-    all: revert;
-    box-sizing: border-box;
+  /* Allow Fluent UI to manage its own transitions and animations */
+  input[data-fluent-input] {
+    transition: revert;
+    border: revert;
+    outline: revert;
   }
   
-  /* Ensure Tailwind doesn't override Fluent UI's button styles */
-  button {
-    all: revert;
-    box-sizing: border-box;
+  /* Ensure underline inputs can show their hover states */
+  .fui-Input[data-appearance="underline"] {
+    border-bottom-width: revert;
+    border-bottom-style: revert;
+    border-bottom-color: revert;
   }
   
-  /* Let Fluent UI manage popover and surface styles */
-  .fui-PopoverSurface,
-  .fui-Popover {
-    all: revert;
-    box-sizing: border-box;
+  .fui-Input[data-appearance="underline"]:hover {
+    border-bottom-width: revert;
+    border-bottom-color: revert;
+  }
+  
+  .fui-Input[data-appearance="underline"]:focus {
+    border-bottom-width: revert;
+    border-bottom-color: revert;
+    outline: revert;
   }
 }

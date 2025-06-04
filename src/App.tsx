@@ -1,24 +1,17 @@
 
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { FluentProvider, webLightTheme } from '@fluentui/react-components';
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import Index from "@/pages/Index";
-import NotFound from "@/pages/NotFound";
-
-const queryClient = new QueryClient();
+import { FluentProvider, teamsLightTheme } from '@fluentui/react-components';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import Index from './pages/Index';
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <FluentProvider theme={webLightTheme}>
-        <Router>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </Router>
-      </FluentProvider>
-    </QueryClientProvider>
+    <FluentProvider theme={teamsLightTheme}>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Index />} />
+        </Routes>
+      </BrowserRouter>
+    </FluentProvider>
   );
 }
 
