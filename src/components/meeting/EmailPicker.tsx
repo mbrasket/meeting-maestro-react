@@ -125,7 +125,7 @@ const EmailPicker = ({
           appearance="underline"
           placeholder={placeholder}
           value={inputValue}
-          onInput={(e) => handleInputChange(e.target.value)}
+          onInput={(e) => handleInputChange((e.target as HTMLInputElement).value)}
           onOptionSelect={handleOptionSelect}
           onKeyDown={handleKeyDown}
         >
