@@ -39,11 +39,6 @@ const useStyles = makeStyles({
   },
   inputField: {
     flex: 1,
-    height: '32px',
-    '& input': {
-      height: '32px',
-      cursor: 'default',
-    },
   },
 });
 

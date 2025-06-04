@@ -16,7 +16,6 @@ const useStyles = makeStyles({
     marginBottom: '16px',
     padding: `${tokens.spacingVerticalS} ${tokens.spacingHorizontalS}`,
     borderRadius: tokens.borderRadiusSmall,
-    cursor: 'default',
   },
   descriptionIcon: {
     marginTop: '8px',
@@ -28,7 +27,6 @@ const useStyles = makeStyles({
     border: `1px solid ${tokens.colorNeutralStroke1}`,
     borderRadius: tokens.borderRadiusMedium,
     padding: tokens.spacingVerticalS,
-    cursor: 'default',
   },
   iconContainer: {
     display: 'flex',

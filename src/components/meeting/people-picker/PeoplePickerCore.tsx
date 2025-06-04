@@ -54,12 +54,6 @@ const useStyles = makeStyles({
   },
   underlineInput: {
     width: '100%',
-    height: '32px',
-    '& input': {
-      paddingLeft: 0,
-      height: '32px',
-      cursor: 'default',
-    },
   },
 });
 

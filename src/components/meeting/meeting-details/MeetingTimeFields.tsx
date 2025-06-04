@@ -21,7 +21,6 @@ const useStyles = makeStyles({
     height: '32px',
     padding: `${tokens.spacingVerticalXS} ${tokens.spacingHorizontalS}`,
     borderRadius: tokens.borderRadiusSmall,
-    cursor: 'default',
   },
   iconContainer: {
     display: 'flex',
@@ -33,11 +32,6 @@ const useStyles = makeStyles({
   },
   inputField: {
     flex: 1,
-    height: '32px',
-    '& input': {
-      height: '32px',
-      cursor: 'default',
-    },
   },
 });
 
