@@ -188,8 +188,7 @@ const PeoplePicker = ({
         email: trimmedText.includes('@') ? trimmedText : `${trimmedText}@company.com`,
         avatar: '', // No avatar for text-based entries
         role: 'External',
-        department: 'External',
-        status: 'Available'
+        department: 'External'
       };
       
       const newPeople = [...value, tempPerson];
