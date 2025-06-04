@@ -1,5 +1,5 @@
 
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, KeyboardEvent } from 'react';
 import {
   Input,
   Field,
@@ -18,12 +18,6 @@ const useStyles = makeStyles({
   container: {
     flex: 1,
     position: 'relative',
-  },
-  inputWrapper: {
-    position: 'relative',
-    display: 'flex',
-    alignItems: 'center',
-    minHeight: '32px',
   },
   chipsContainer: {
     display: 'flex',
@@ -60,15 +54,17 @@ const useStyles = makeStyles({
   input: {
     flex: 1,
     minWidth: '100px',
-    border: 'none',
-    outline: 'none',
-    background: 'transparent',
   },
   popoverSurface: {
     maxHeight: '200px',
     overflowY: 'auto',
     padding: 0,
     minWidth: '300px',
+    backgroundColor: tokens.colorNeutralBackground1,
+    border: `1px solid ${tokens.colorNeutralStroke1}`,
+    borderRadius: tokens.borderRadiusMedium,
+    boxShadow: tokens.shadow16,
+    zIndex: 1000,
   },
   optionItem: {
     display: 'flex',
@@ -76,8 +72,17 @@ const useStyles = makeStyles({
     gap: tokens.spacingHorizontalS,
     padding: tokens.spacingVerticalS,
     cursor: 'pointer',
+    border: 'none',
+    background: 'transparent',
+    width: '100%',
+    textAlign: 'left',
     '&:hover': {
       backgroundColor: tokens.colorNeutralBackground2,
+    },
+    '&:focus': {
+      backgroundColor: tokens.colorNeutralBackground2,
+      outline: `2px solid ${tokens.colorBrandStroke1}`,
+      outlineOffset: '-2px',
     },
   },
   optionDetails: {
@@ -117,6 +122,7 @@ const PeoplePicker = ({
   const styles = useStyles();
   const [inputValue, setInputValue] = useState('');
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const [selectedIndex, setSelectedIndex] = useState(-1);
   const inputRef = useRef<HTMLInputElement>(null);
   
   const addPerson = useCallback((person: Person) => {
@@ -130,6 +136,7 @@ const PeoplePicker = ({
     }
     setInputValue('');
     setIsPopoverOpen(false);
+    setSelectedIndex(-1);
   }, [value, onChange, onAddToHistory]);
 
   const removePerson = useCallback((personToRemove: Person) => {
@@ -140,6 +147,7 @@ const PeoplePicker = ({
   const handleInputChange = (newValue: string) => {
     setInputValue(newValue);
     setIsPopoverOpen(newValue.length > 0);
+    setSelectedIndex(-1);
   };
 
   const handleInputFocus = () => {
@@ -148,9 +156,47 @@ const PeoplePicker = ({
     }
   };
 
-  const handleInputBlur = () => {
-    // Delay closing to allow for option selection
-    setTimeout(() => setIsPopoverOpen(false), 150);
+  const handleInputBlur = (e: React.FocusEvent) => {
+    // Don't close if focus is moving to a suggestion option
+    const relatedTarget = e.relatedTarget as HTMLElement;
+    if (relatedTarget && relatedTarget.closest('[data-suggestion-option]')) {
+      return;
+    }
+    
+    setTimeout(() => {
+      setIsPopoverOpen(false);
+      setSelectedIndex(-1);
+    }, 150);
+  };
+
+  const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (!isPopoverOpen || filteredSuggestions.length === 0) return;
+
+    switch (e.key) {
+      case 'ArrowDown':
+        e.preventDefault();
+        setSelectedIndex(prev => 
+          prev < filteredSuggestions.length - 1 ? prev + 1 : 0
+        );
+        break;
+      case 'ArrowUp':
+        e.preventDefault();
+        setSelectedIndex(prev => 
+          prev > 0 ? prev - 1 : filteredSuggestions.length - 1
+        );
+        break;
+      case 'Enter':
+        e.preventDefault();
+        if (selectedIndex >= 0 && selectedIndex < filteredSuggestions.length) {
+          addPerson(filteredSuggestions[selectedIndex]);
+        }
+        break;
+      case 'Escape':
+        e.preventDefault();
+        setIsPopoverOpen(false);
+        setSelectedIndex(-1);
+        break;
+    }
   };
 
   const handleOptionClick = (person: Person) => {
@@ -177,58 +223,63 @@ const PeoplePicker = ({
       <Field required={required}>
         <Popover
           open={isPopoverOpen && filteredSuggestions.length > 0}
+          positioning="below-start"
           onOpenChange={(_, data) => setIsPopoverOpen(data.open)}
         >
           <PopoverTrigger disableButtonEnhancement>
-            <div className={styles.inputWrapper}>
-              <Input
-                ref={inputRef}
-                appearance="underline"
-                className={styles.underlineInput}
-                value={inputValue}
-                onChange={(_, data) => handleInputChange(data.value)}
-                onFocus={handleInputFocus}
-                onBlur={handleInputBlur}
-                placeholder={getPlaceholder()}
-                contentBefore={
-                  value.length > 0 && (
-                    <div className={styles.chipsContainer}>
-                      {value.map((person) => (
-                        <div key={person.id} className={styles.personaChip}>
-                          <Avatar
-                            image={{ src: person.avatar }}
-                            name={person.name}
-                            size={16}
-                          />
-                          <Text size={200} truncate title={person.name}>
-                            {person.name}
-                          </Text>
-                          <button
-                            className={styles.dismissButton}
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              removePerson(person);
-                            }}
-                            aria-label={`Remove ${person.name}`}
-                          >
-                            <Dismiss12Regular />
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  )
-                }
-              />
-            </div>
+            <Input
+              ref={inputRef}
+              appearance="underline"
+              className={styles.underlineInput}
+              value={inputValue}
+              onChange={(_, data) => handleInputChange(data.value)}
+              onFocus={handleInputFocus}
+              onBlur={handleInputBlur}
+              onKeyDown={handleKeyDown}
+              placeholder={getPlaceholder()}
+              contentBefore={
+                value.length > 0 && (
+                  <div className={styles.chipsContainer}>
+                    {value.map((person) => (
+                      <div key={person.id} className={styles.personaChip}>
+                        <Avatar
+                          image={{ src: person.avatar }}
+                          name={person.name}
+                          size={16}
+                        />
+                        <Text size={200} truncate title={person.name}>
+                          {person.name}
+                        </Text>
+                        <button
+                          className={styles.dismissButton}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            removePerson(person);
+                          }}
+                          aria-label={`Remove ${person.name}`}
+                        >
+                          <Dismiss12Regular />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )
+              }
+            />
           </PopoverTrigger>
           
           <PopoverSurface className={styles.popoverSurface}>
-            {filteredSuggestions.map((person) => (
-              <div
+            {filteredSuggestions.map((person, index) => (
+              <button
                 key={person.id}
                 className={styles.optionItem}
                 onClick={() => handleOptionClick(person)}
+                onFocus={() => setSelectedIndex(index)}
+                data-suggestion-option
+                style={{
+                  backgroundColor: selectedIndex === index ? tokens.colorNeutralBackground2 : 'transparent'
+                }}
               >
                 <Avatar
                   image={{ src: person.avatar }}
@@ -244,7 +295,7 @@ const PeoplePicker = ({
                     {person.email}
                   </Text>
                 </div>
-              </div>
+              </button>
             ))}
           </PopoverSurface>
         </Popover>
