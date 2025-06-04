@@ -1,3 +1,4 @@
+
 import {
   Input,
   Switch,
@@ -40,11 +41,11 @@ const useStyles = makeStyles({
   inputField: {
     flex: 1,
     height: '32px',
-    '& input': {
-      height: '32px',
+    '& .fui-Input__input': {
+      height: '32px !important',
       cursor: 'default',
-      borderBottomWidth: '1px',
-      borderBottomColor: tokens.colorNeutralStroke1,
+      borderBottomWidth: '1px !important',
+      borderBottomColor: `${tokens.colorNeutralStroke1} !important`,
       transition: 'border-bottom-width 0.1s ease, border-bottom-color 0.1s ease',
       '&:hover': {
         borderBottomWidth: '2px !important',

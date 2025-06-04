@@ -54,12 +54,12 @@ const useStyles = makeStyles({
   underlineInput: {
     width: '100%',
     height: '32px',
-    '& input': {
-      paddingLeft: 0,
-      height: '32px',
+    '& .fui-Input__input': {
+      paddingLeft: '0 !important',
+      height: '32px !important',
       cursor: 'default',
-      borderBottomWidth: '1px',
-      borderBottomColor: tokens.colorNeutralStroke1,
+      borderBottomWidth: '1px !important',
+      borderBottomColor: `${tokens.colorNeutralStroke1} !important`,
       transition: 'border-bottom-width 0.1s ease, border-bottom-color 0.1s ease',
       '&:hover': {
         borderBottomWidth: '2px !important',
