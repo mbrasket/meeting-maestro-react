@@ -3,7 +3,6 @@ import { useState } from 'react';
 import {
   Card,
   CardHeader,
-  CardPreview,
   Input,
   Button,
   Switch,
@@ -20,7 +19,7 @@ import {
   makeStyles,
   tokens,
 } from '@fluentui/react-components';
-import { Calendar, Clock, Video, Users, Settings } from '@fluentui/react-icons';
+import { CalendarLtr20Regular, Clock20Regular, Video20Regular, People20Regular, Settings20Regular } from '@fluentui/react-icons';
 
 const useStyles = makeStyles({
   container: {
@@ -105,13 +104,13 @@ const MeetingForm = () => {
           selectedValue={selectedTab}
           onTabSelect={(_, data) => setSelectedTab(data.value as string)}
         >
-          <Tab id="details" value="details" icon={<Calendar />}>
+          <Tab id="details" value="details" icon={<CalendarLtr20Regular />}>
             Meeting Details
           </Tab>
-          <Tab id="participants" value="participants" icon={<Users />}>
+          <Tab id="participants" value="participants" icon={<People20Regular />}>
             Participants
           </Tab>
-          <Tab id="settings" value="settings" icon={<Settings />}>
+          <Tab id="settings" value="settings" icon={<Settings20Regular />}>
             Settings
           </Tab>
         </TabList>
@@ -153,7 +152,7 @@ const MeetingForm = () => {
                     type="datetime-local"
                     value={formData.startTime}
                     onChange={(_, data) => handleInputChange('startTime', data.value)}
-                    contentBefore={<Clock />}
+                    contentBefore={<Clock20Regular />}
                   />
                 </Field>
 
@@ -166,7 +165,7 @@ const MeetingForm = () => {
                     type="datetime-local"
                     value={formData.endTime}
                     onChange={(_, data) => handleInputChange('endTime', data.value)}
-                    contentBefore={<Clock />}
+                    contentBefore={<Clock20Regular />}
                   />
                 </Field>
               </div>
@@ -189,7 +188,7 @@ const MeetingForm = () => {
               >
                 <Input
                   placeholder="Enter email addresses separated by commas"
-                  contentBefore={<Users />}
+                  contentBefore={<People20Regular />}
                 />
               </Field>
 
@@ -253,7 +252,7 @@ const MeetingForm = () => {
                 <Input
                   value="https://teams.microsoft.com/l/meetup-join/..."
                   readOnly
-                  contentBefore={<Video />}
+                  contentBefore={<Video20Regular />}
                 />
               </Field>
             </div>
@@ -264,7 +263,7 @@ const MeetingForm = () => {
       <div className={styles.buttonGroup}>
         <Button
           appearance="primary"
-          icon={<Video />}
+          icon={<Video20Regular />}
           onClick={handleCreateMeeting}
           size="large"
         >
