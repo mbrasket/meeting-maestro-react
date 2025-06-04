@@ -26,6 +26,7 @@ const useStyles = makeStyles({
     flexWrap: 'nowrap',
     overflow: 'hidden',
     paddingRight: tokens.spacingHorizontalXS,
+    maxWidth: '100%',
   },
   personaChip: {
     display: 'flex',
@@ -38,6 +39,15 @@ const useStyles = makeStyles({
     maxWidth: '120px',
     fontSize: tokens.fontSizeBase200,
     flexShrink: 0,
+    cursor: 'pointer',
+    '&:focus': {
+      outline: `2px solid ${tokens.colorBrandStroke1}`,
+      outlineOffset: '1px',
+    },
+  },
+  selectedChip: {
+    backgroundColor: tokens.colorBrandBackground2,
+    borderColor: tokens.colorBrandStroke1,
   },
   dismissButton: {
     border: 'none',
@@ -123,6 +133,7 @@ const PeoplePicker = ({
   const [inputValue, setInputValue] = useState('');
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(-1);
+  const [selectedChipIndex, setSelectedChipIndex] = useState(-1);
   const inputRef = useRef<HTMLInputElement>(null);
   
   const addPerson = useCallback((person: Person) => {
@@ -137,39 +148,68 @@ const PeoplePicker = ({
     setInputValue('');
     setIsPopoverOpen(false);
     setSelectedIndex(-1);
+    setSelectedChipIndex(-1);
   }, [value, onChange, onAddToHistory]);
 
   const removePerson = useCallback((personToRemove: Person) => {
     const newPeople = value.filter(person => person.id !== personToRemove.id);
     onChange(newPeople);
+    setSelectedChipIndex(-1);
+  }, [value, onChange]);
+
+  const removePersonAtIndex = useCallback((index: number) => {
+    if (index >= 0 && index < value.length) {
+      const newPeople = value.filter((_, i) => i !== index);
+      onChange(newPeople);
+      setSelectedChipIndex(-1);
+    }
   }, [value, onChange]);
 
   const handleInputChange = (newValue: string) => {
     setInputValue(newValue);
     setIsPopoverOpen(newValue.length > 0);
     setSelectedIndex(-1);
+    setSelectedChipIndex(-1);
   };
 
   const handleInputFocus = () => {
     if (inputValue.length > 0) {
       setIsPopoverOpen(true);
     }
+    setSelectedChipIndex(-1);
   };
 
   const handleInputBlur = (e: React.FocusEvent) => {
-    // Don't close if focus is moving to a suggestion option
+    // Don't close if focus is moving to a suggestion option or chip
     const relatedTarget = e.relatedTarget as HTMLElement;
-    if (relatedTarget && relatedTarget.closest('[data-suggestion-option]')) {
+    if (relatedTarget && (relatedTarget.closest('[data-suggestion-option]') || relatedTarget.closest('[data-chip]'))) {
       return;
     }
     
     setTimeout(() => {
       setIsPopoverOpen(false);
       setSelectedIndex(-1);
+      setSelectedChipIndex(-1);
     }, 150);
   };
 
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    // Handle navigation between chips and input
+    if (e.key === 'ArrowLeft' && inputRef.current?.selectionStart === 0 && value.length > 0) {
+      e.preventDefault();
+      setSelectedChipIndex(value.length - 1);
+      setIsPopoverOpen(false);
+      return;
+    }
+
+    // Handle backspace when input is empty - remove last person
+    if (e.key === 'Backspace' && inputValue === '' && value.length > 0) {
+      e.preventDefault();
+      removePersonAtIndex(value.length - 1);
+      return;
+    }
+
+    // Handle suggestion navigation
     if (!isPopoverOpen || filteredSuggestions.length === 0) return;
 
     switch (e.key) {
@@ -195,6 +235,54 @@ const PeoplePicker = ({
         e.preventDefault();
         setIsPopoverOpen(false);
         setSelectedIndex(-1);
+        break;
+    }
+  };
+
+  const handleChipKeyDown = (e: KeyboardEvent<HTMLDivElement>, index: number) => {
+    switch (e.key) {
+      case 'ArrowLeft':
+        e.preventDefault();
+        if (index > 0) {
+          setSelectedChipIndex(index - 1);
+        }
+        break;
+      case 'ArrowRight':
+        e.preventDefault();
+        if (index < value.length - 1) {
+          setSelectedChipIndex(index + 1);
+        } else {
+          // Move to input
+          setSelectedChipIndex(-1);
+          inputRef.current?.focus();
+        }
+        break;
+      case 'Backspace':
+        e.preventDefault();
+        removePersonAtIndex(index);
+        // Focus previous chip or input
+        if (index > 0) {
+          setSelectedChipIndex(index - 1);
+        } else {
+          setSelectedChipIndex(-1);
+          inputRef.current?.focus();
+        }
+        break;
+      case 'Delete':
+        e.preventDefault();
+        removePersonAtIndex(index);
+        // Focus next chip or input
+        if (index < value.length - 1) {
+          setSelectedChipIndex(index);
+        } else {
+          setSelectedChipIndex(-1);
+          inputRef.current?.focus();
+        }
+        break;
+      case 'Enter':
+      case ' ':
+        e.preventDefault();
+        removePerson(value[index]);
         break;
     }
   };
@@ -240,8 +328,15 @@ const PeoplePicker = ({
               contentBefore={
                 value.length > 0 && (
                   <div className={styles.chipsContainer}>
-                    {value.map((person) => (
-                      <div key={person.id} className={styles.personaChip}>
+                    {value.map((person, index) => (
+                      <div 
+                        key={person.id} 
+                        className={`${styles.personaChip} ${selectedChipIndex === index ? styles.selectedChip : ''}`}
+                        tabIndex={0}
+                        onKeyDown={(e) => handleChipKeyDown(e, index)}
+                        onFocus={() => setSelectedChipIndex(index)}
+                        data-chip
+                      >
                         <Avatar
                           image={{ src: person.avatar }}
                           name={person.name}
@@ -256,6 +351,13 @@ const PeoplePicker = ({
                             e.preventDefault();
                             e.stopPropagation();
                             removePerson(person);
+                          }}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              removePerson(person);
+                            }
                           }}
                           aria-label={`Remove ${person.name}`}
                         >
