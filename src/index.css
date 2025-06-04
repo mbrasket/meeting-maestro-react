@@ -1,4 +1,5 @@
 
+
 @import './components/ui/fluent-isolation.css';
 @tailwind base;
 @tailwind components;
@@ -107,12 +108,10 @@
   .fui-Input[data-appearance="underline"] {
     border-bottom: 1px solid var(--colorNeutralStroke1) !important;
     transition: border-bottom-color 0.2s ease, border-bottom-width 0.2s ease, border-radius 0.2s ease, border 0.2s ease !important;
-    cursor: pointer !important;
   }
   
   .fui-Input[data-appearance="underline"]:hover {
     border-bottom: 2px solid var(--colorNeutralStrokeAccessible) !important;
-    cursor: pointer !important;
   }
   
   .fui-Input[data-appearance="underline"]:focus {
@@ -120,28 +119,6 @@
     border: 1px solid var(--colorCompoundBrandStroke) !important;
     border-radius: var(--borderRadiusMedium) !important;
     outline: none !important;
-    cursor: text !important;
-  }
-
-  /* Apply pointer cursor to inactive inputs and text cursor when focused */
-  .fui-Input,
-  .fui-Textarea,
-  input,
-  textarea {
-    cursor: pointer !important;
-  }
-
-  .fui-Input:focus,
-  .fui-Textarea:focus,
-  input:focus,
-  textarea:focus {
-    cursor: text !important;
-  }
-
-  .fui-Input:hover,
-  .fui-Textarea:hover,
-  input:hover,
-  textarea:hover {
-    cursor: pointer !important;
   }
 }
+
