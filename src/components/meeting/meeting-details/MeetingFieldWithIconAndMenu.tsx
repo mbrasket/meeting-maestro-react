@@ -1,4 +1,3 @@
-
 import { ReactNode } from 'react';
 import {
   makeStyles,
@@ -25,10 +24,6 @@ const useStyles = makeStyles({
   },
   inputContainer: {
     flex: 1,
-    transition: 'background-color 0.1s ease',
-    '&:hover': {
-      backgroundColor: tokens.colorSubtleBackgroundHover,
-    },
   },
   iconContainer: {
     display: 'flex',

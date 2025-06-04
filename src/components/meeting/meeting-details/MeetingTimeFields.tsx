@@ -34,16 +34,12 @@ const useStyles = makeStyles({
   inputField: {
     flex: 1,
     height: '32px',
-    transition: 'background-color 0.1s ease',
-    '&:hover': {
-      backgroundColor: tokens.colorSubtleBackgroundHover,
-    },
     '& input': {
       height: '32px',
       cursor: 'default',
       transition: 'border-color 0.1s ease',
       '&:hover': {
-        borderBottomColor: tokens.colorNeutralStroke1Hover,
+        borderBottomColor: tokens.colorBrandStroke1,
       },
     },
   },

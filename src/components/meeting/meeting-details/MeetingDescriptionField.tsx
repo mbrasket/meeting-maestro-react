@@ -23,10 +23,6 @@ const useStyles = makeStyles({
   },
   descriptionField: {
     flex: 1,
-    transition: 'background-color 0.1s ease',
-    '&:hover': {
-      backgroundColor: tokens.colorSubtleBackgroundHover,
-    },
   },
   descriptionTextarea: {
     borderTopColor: tokens.colorNeutralStroke1,
@@ -46,10 +42,10 @@ const useStyles = makeStyles({
     cursor: 'default',
     transition: 'border-color 0.1s ease',
     '&:hover': {
-      borderTopColor: tokens.colorNeutralStroke1Hover,
-      borderRightColor: tokens.colorNeutralStroke1Hover,
-      borderBottomColor: tokens.colorNeutralStroke1Hover,
-      borderLeftColor: tokens.colorNeutralStroke1Hover,
+      borderTopColor: tokens.colorBrandStroke1,
+      borderRightColor: tokens.colorBrandStroke1,
+      borderBottomColor: tokens.colorBrandStroke1,
+      borderLeftColor: tokens.colorBrandStroke1,
     },
     '&:focus': {
       borderTopColor: tokens.colorBrandStroke1,

@@ -15,10 +15,6 @@ const useStyles = makeStyles({
   container: {
     flex: 1,
     position: 'relative',
-    transition: 'background-color 0.1s ease',
-    '&:hover': {
-      backgroundColor: tokens.colorSubtleBackgroundHover,
-    },
   },
   chipsContainer: {
     display: 'flex',
@@ -64,7 +60,7 @@ const useStyles = makeStyles({
       cursor: 'default',
       transition: 'border-color 0.1s ease',
       '&:hover': {
-        borderBottomColor: tokens.colorNeutralStroke1Hover,
+        borderBottomColor: tokens.colorBrandStroke1,
       },
     },
   },

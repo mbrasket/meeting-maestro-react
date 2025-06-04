@@ -46,7 +46,7 @@ const useStyles = makeStyles({
       cursor: 'default',
       transition: 'border-color 0.1s ease',
       '&:hover': {
-        borderBottomColor: tokens.colorNeutralStroke1Hover,
+        borderBottomColor: tokens.colorBrandStroke1,
       },
     },
   },
