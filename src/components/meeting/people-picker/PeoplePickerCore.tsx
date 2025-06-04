@@ -81,6 +81,8 @@ const PeoplePickerCore = ({
   const [selectedChipIndex, setSelectedChipIndex] = useState(-1);
   const inputRef = useRef<HTMLInputElement>(null);
   const chipRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const popoverRef = useRef<HTMLDivElement>(null);
+  const suggestionRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   const filteredSuggestions = suggestions.filter(person =>
     (person.name.toLowerCase().includes(inputValue.toLowerCase()) ||
@@ -98,6 +100,27 @@ const PeoplePickerCore = ({
       setSelectedIndex(-1);
     }
   }, [isPopoverOpen, filteredSuggestions.length]);
+  
+  // Scroll selected item into view
+  useEffect(() => {
+    if (selectedIndex >= 0 && popoverRef.current && suggestionRefs.current[selectedIndex]) {
+      const popover = popoverRef.current;
+      const selectedItem = suggestionRefs.current[selectedIndex];
+      
+      if (selectedItem) {
+        const popoverRect = popover.getBoundingClientRect();
+        const itemRect = selectedItem.getBoundingClientRect();
+        
+        if (itemRect.bottom > popoverRect.bottom) {
+          // Item is below visible area, scroll down
+          popover.scrollTop += itemRect.bottom - popoverRect.bottom;
+        } else if (itemRect.top < popoverRect.top) {
+          // Item is above visible area, scroll up
+          popover.scrollTop -= popoverRect.top - itemRect.top;
+        }
+      }
+    }
+  }, [selectedIndex]);
   
   const addPerson = useCallback((person: Person) => {
     if (!value.find(p => p.id === person.id)) {
@@ -373,15 +396,16 @@ const PeoplePickerCore = ({
             />
           </PopoverTrigger>
           
-          <PopoverSurface className={styles.popoverSurface}>
+          <PopoverSurface ref={popoverRef} className={styles.popoverSurface}>
             {filteredSuggestions.map((person, index) => (
-              <PersonSuggestion
-                key={person.id}
-                person={person}
-                isSelected={selectedIndex === index}
-                onClick={handleOptionClick}
-                onMouseEnter={() => setSelectedIndex(index)}
-              />
+              <div key={person.id} ref={el => suggestionRefs.current[index] = el}>
+                <PersonSuggestion
+                  person={person}
+                  isSelected={selectedIndex === index}
+                  onClick={handleOptionClick}
+                  onMouseEnter={() => setSelectedIndex(index)}
+                />
+              </div>
             ))}
           </PopoverSurface>
         </Popover>

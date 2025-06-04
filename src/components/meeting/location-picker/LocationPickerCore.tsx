@@ -10,6 +10,7 @@ import {
 } from '@fluentui/react-components';
 import LocationChip from './LocationChip';
 import LocationSuggestion from './LocationSuggestion';
+import { useEffect } from 'react';
 
 const useStyles = makeStyles({
   container: {
@@ -80,6 +81,35 @@ const LocationPickerCore = ({
   const [selectedChipIndex, setSelectedChipIndex] = useState(-1);
   const inputRef = useRef<HTMLInputElement>(null);
   const chipRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const popoverRef = useRef<HTMLDivElement>(null);
+  const suggestionRefs = useRef<(HTMLDivElement | null)[]>([]);
+
+  const filteredSuggestions = suggestions.filter(suggestion =>
+    suggestion.toLowerCase().includes(inputValue.toLowerCase()) && 
+    suggestion !== inputValue &&
+    !value.includes(suggestion)
+  );
+
+  // Scroll selected item into view
+  useEffect(() => {
+    if (selectedIndex >= 0 && popoverRef.current && suggestionRefs.current[selectedIndex]) {
+      const popover = popoverRef.current;
+      const selectedItem = suggestionRefs.current[selectedIndex];
+      
+      if (selectedItem) {
+        const popoverRect = popover.getBoundingClientRect();
+        const itemRect = selectedItem.getBoundingClientRect();
+        
+        if (itemRect.bottom > popoverRect.bottom) {
+          // Item is below visible area, scroll down
+          popover.scrollTop += itemRect.bottom - popoverRect.bottom;
+        } else if (itemRect.top < popoverRect.top) {
+          // Item is above visible area, scroll up
+          popover.scrollTop -= popoverRect.top - itemRect.top;
+        }
+      }
+    }
+  }, [selectedIndex]);
 
   const addLocation = useCallback((location: string) => {
     const trimmedLocation = location.trim();
@@ -277,12 +307,6 @@ const LocationPickerCore = ({
     addLocation(location);
   };
 
-  const filteredSuggestions = suggestions.filter(suggestion =>
-    suggestion.toLowerCase().includes(inputValue.toLowerCase()) && 
-    suggestion !== inputValue &&
-    !value.includes(suggestion)
-  );
-
   const getPlaceholder = () => {
     if (value.length === 0) {
       return placeholder;
@@ -335,15 +359,16 @@ const LocationPickerCore = ({
             />
           </PopoverTrigger>
           
-          <PopoverSurface className={styles.popoverSurface}>
+          <PopoverSurface ref={popoverRef} className={styles.popoverSurface}>
             {filteredSuggestions.map((location, index) => (
-              <LocationSuggestion
-                key={location}
-                location={location}
-                isSelected={selectedIndex === index}
-                onClick={handleOptionClick}
-                onMouseEnter={() => setSelectedIndex(index)}
-              />
+              <div key={location} ref={el => suggestionRefs.current[index] = el}>
+                <LocationSuggestion
+                  location={location}
+                  isSelected={selectedIndex === index}
+                  onClick={handleOptionClick}
+                  onMouseEnter={() => setSelectedIndex(index)}
+                />
+              </div>
             ))}
           </PopoverSurface>
         </Popover>
