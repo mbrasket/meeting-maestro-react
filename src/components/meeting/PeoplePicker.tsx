@@ -1,4 +1,5 @@
-import { useState, useCallback, useRef, KeyboardEvent } from 'react';
+
+import { useState, useCallback, useRef, KeyboardEvent, useEffect } from 'react';
 import {
   Input,
   Field,
@@ -130,8 +131,10 @@ const useStyles = makeStyles({
   },
   underlineInput: {
     width: '100%',
+    height: '32px',
     '& input': {
       paddingLeft: 0,
+      height: '32px',
     },
   },
 });
@@ -160,6 +163,23 @@ const PeoplePicker = ({
   const [selectedChipIndex, setSelectedChipIndex] = useState(-1);
   const inputRef = useRef<HTMLInputElement>(null);
   const chipRefs = useRef<(HTMLDivElement | null)[]>([]);
+
+  const filteredSuggestions = suggestions.filter(person =>
+    (person.name.toLowerCase().includes(inputValue.toLowerCase()) ||
+     person.email.toLowerCase().includes(inputValue.toLowerCase()) ||
+     person.role?.toLowerCase().includes(inputValue.toLowerCase()) ||
+     person.department?.toLowerCase().includes(inputValue.toLowerCase())) &&
+    !value.find(p => p.id === person.id)
+  );
+
+  // Auto-select first suggestion when flyout opens
+  useEffect(() => {
+    if (isPopoverOpen && filteredSuggestions.length > 0) {
+      setSelectedIndex(0);
+    } else {
+      setSelectedIndex(-1);
+    }
+  }, [isPopoverOpen, filteredSuggestions.length]);
   
   const addPerson = useCallback((person: Person) => {
     if (!value.find(p => p.id === person.id)) {
@@ -239,7 +259,6 @@ const PeoplePicker = ({
   const handleInputChange = (newValue: string) => {
     setInputValue(newValue);
     setIsPopoverOpen(newValue.length > 0);
-    setSelectedIndex(-1);
     setSelectedChipIndex(-1);
   };
 
@@ -383,14 +402,6 @@ const PeoplePicker = ({
   const handleOptionClick = (person: Person) => {
     addPerson(person);
   };
-
-  const filteredSuggestions = suggestions.filter(person =>
-    (person.name.toLowerCase().includes(inputValue.toLowerCase()) ||
-     person.email.toLowerCase().includes(inputValue.toLowerCase()) ||
-     person.role?.toLowerCase().includes(inputValue.toLowerCase()) ||
-     person.department?.toLowerCase().includes(inputValue.toLowerCase())) &&
-    !value.find(p => p.id === person.id)
-  );
 
   const getPlaceholder = () => {
     if (value.length === 0) {

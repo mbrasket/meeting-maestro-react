@@ -48,6 +48,7 @@ const useStyles = makeStyles({
     fontSize: tokens.fontSizeBase200,
     flexShrink: 0,
     cursor: 'pointer',
+    whiteSpace: 'nowrap',
     '&:focus': {
       outline: `2px solid ${tokens.colorBrandStroke1}`,
       outlineOffset: '1px',
@@ -119,8 +120,10 @@ const useStyles = makeStyles({
   },
   underlineInput: {
     width: '100%',
+    height: '32px',
     '& input': {
       paddingLeft: 0,
+      height: '32px',
     },
   },
 });

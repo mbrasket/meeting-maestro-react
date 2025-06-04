@@ -1,4 +1,5 @@
 
+
 import {
   Input,
   Switch,
@@ -35,36 +36,41 @@ const useStyles = makeStyles({
     display: 'flex',
     alignItems: 'center',
     gap: tokens.spacingHorizontalM,
-    marginBottom: tokens.spacingVerticalM,
+    marginBottom: '16px',
+    height: '32px',
   },
   fieldWithIconAndMenu: {
     display: 'flex',
     alignItems: 'center',
     gap: tokens.spacingHorizontalM,
-    marginBottom: tokens.spacingVerticalM,
+    marginBottom: '16px',
+    height: '32px',
   },
   fieldContainer: {
     display: 'flex',
     alignItems: 'center',
     flex: 1,
     gap: tokens.spacingHorizontalS,
+    height: '32px',
   },
   timeFieldsContainer: {
     display: 'flex',
     gap: tokens.spacingHorizontalM,
+    marginBottom: '16px',
   },
   timeFieldWithIcon: {
     display: 'flex',
     alignItems: 'center',
     gap: tokens.spacingHorizontalM,
     flex: 1,
+    height: '32px',
   },
   descriptionContainer: {
     display: 'flex',
     alignItems: 'flex-start',
     gap: tokens.spacingHorizontalM,
     marginTop: tokens.spacingVerticalL,
-    marginBottom: tokens.spacingVerticalM,
+    marginBottom: '16px',
   },
   descriptionIcon: {
     marginTop: '8px',
@@ -93,11 +99,18 @@ const useStyles = makeStyles({
     color: tokens.colorNeutralForeground2,
   },
   formField: {
-    marginBottom: tokens.spacingVerticalM,
+    marginBottom: '16px',
   },
   menuButton: {
     minWidth: 'auto',
     padding: tokens.spacingHorizontalXS,
+  },
+  inputField: {
+    flex: 1,
+    height: '32px',
+    '& input': {
+      height: '32px',
+    },
   },
 });
 
@@ -141,7 +154,7 @@ const MeetingDetailsTab = ({ formData, onInputChange }: MeetingDetailsTabProps) 
         <div className={styles.iconContainer}>
           <DocumentText20Regular />
         </div>
-        <Field required style={{ flex: 1 }}>
+        <Field required className={styles.inputField}>
           <Input
             appearance="underline"
             value={formData.title}
@@ -218,7 +231,7 @@ const MeetingDetailsTab = ({ formData, onInputChange }: MeetingDetailsTabProps) 
           <div className={styles.iconContainer}>
             <Clock20Regular />
           </div>
-          <Field required style={{ flex: 1 }}>
+          <Field required className={styles.inputField}>
             <Input
               appearance="underline"
               type="datetime-local"
@@ -232,7 +245,7 @@ const MeetingDetailsTab = ({ formData, onInputChange }: MeetingDetailsTabProps) 
           <div className={styles.iconContainer}>
             <Clock20Regular />
           </div>
-          <Field required style={{ flex: 1 }}>
+          <Field required className={styles.inputField}>
             <Input
               appearance="underline"
               type="datetime-local"
