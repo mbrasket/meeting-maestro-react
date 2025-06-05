@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import {
   Card,
@@ -13,7 +14,7 @@ const useStyles = makeStyles({
   container: {
     maxWidth: '800px',
     margin: '0 auto',
-    padding: tokens.spacingVerticalL,
+    padding: tokens.spacingVerticalM,
     backgroundColor: tokens.colorNeutralBackground1,
     minHeight: '100vh',
   },
