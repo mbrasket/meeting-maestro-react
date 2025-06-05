@@ -59,7 +59,6 @@ const InstanceItem = ({ instance, onUpdate, onDelete }: InstanceItemProps) => {
           placeholder="Select date and time"
           value={selectedDate}
           onSelectDate={handleDateTimeChange}
-          showTime={true}
           formatDate={(date) => date ? date.toLocaleString() : ''}
         />
       </Field>
