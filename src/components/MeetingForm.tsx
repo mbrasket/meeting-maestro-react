@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import {
   Card,
@@ -41,9 +40,6 @@ const MeetingForm = () => {
     endTime: '',
     location: [],
     isRecurring: false,
-    isTeamsMeeting: true,
-    enableChat: true,
-    enableRecording: false,
   });
 
   const handleInputChange = (field: keyof FormData, value: string | boolean | Person[] | string[]) => {

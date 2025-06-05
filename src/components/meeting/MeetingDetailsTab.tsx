@@ -1,3 +1,4 @@
+
 import {
   Input,
   Switch,
@@ -19,7 +20,6 @@ import {
   MoreHorizontal20Regular
 } from '@fluentui/react-icons';
 import { FormData } from './types';
-import TeamsSettingsSection from './TeamsSettingsSection';
 import PeoplePicker from './PeoplePicker';
 import LocationPicker from './LocationPicker';
 import { samplePeople, sampleLocations, Person } from '../../data/sampleData';
@@ -179,9 +179,6 @@ const MeetingDetailsTab = ({ formData, onInputChange }: MeetingDetailsTabProps) 
 
       {/* Description */}
       <MeetingDescriptionField formData={formData} onInputChange={onInputChange} />
-
-      {/* Teams Meeting Options */}
-      <TeamsSettingsSection formData={formData} onInputChange={onInputChange} />
 
       <Field className={styles.formField}>
         <Switch

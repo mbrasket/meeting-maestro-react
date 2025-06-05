@@ -11,7 +11,4 @@ export interface FormData {
   endTime: string;
   location: string | string[];
   isRecurring: boolean;
-  isTeamsMeeting: boolean;
-  enableChat: boolean;
-  enableRecording: boolean;
 }
