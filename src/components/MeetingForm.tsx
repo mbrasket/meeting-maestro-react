@@ -9,6 +9,7 @@ import { FormData, RecurringPattern, OneOffInstance } from './meeting/types';
 import { Person } from '../data/sampleData';
 import MeetingToolbar from './meeting/MeetingToolbar';
 import MeetingDetailsTab from './meeting/MeetingDetailsTab';
+import MeetingSeriesPanel from './meeting/MeetingSeriesPanel';
 
 const useStyles = makeStyles({
   container: {
@@ -139,6 +140,14 @@ const MeetingForm = () => {
           <MeetingDetailsTab formData={formData} onInputChange={handleInputChange} />
         </div>
       </Card>
+
+      {formData.isRecurring && (
+        <Card className={styles.card}>
+          <div className={styles.content}>
+            <MeetingSeriesPanel formData={formData} onInputChange={handleInputChange} />
+          </div>
+        </Card>
+      )}
     </div>
   );
 };
