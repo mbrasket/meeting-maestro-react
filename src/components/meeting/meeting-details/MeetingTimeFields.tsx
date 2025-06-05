@@ -71,6 +71,11 @@ const MeetingTimeFields = ({ formData, onInputChange }: MeetingTimeFieldsProps) 
               value={startDate}
               onSelectDate={(date) => handleDateChange('startTime', date)}
               formatDate={(date) => date ? date.toLocaleDateString() : ''}
+              showMonthPickerAsOverlay={true}
+              // Remove the internal calendar icon
+              calendarProps={{
+                showGoToToday: false,
+              }}
             />
           </Field>
         </div>
