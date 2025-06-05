@@ -1,26 +1,56 @@
+
 import React, { useState, useRef, useEffect, KeyboardEvent, ChangeEvent } from 'react';
 import { Input, Field, makeStyles, tokens } from '@fluentui/react-components';
+import { ArrowRight16Regular } from '@fluentui/react-icons';
 
 const useStyles = makeStyles({
   timeInput: {
     fontFamily: 'monospace',
     letterSpacing: '0.5px',
   },
+  dualTimeContainer: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: tokens.spacingHorizontalXS,
+    width: '100%',
+  },
+  timeInputWrapper: {
+    flex: 1,
+  },
+  arrowIcon: {
+    color: tokens.colorNeutralForeground2,
+    flexShrink: 0,
+  },
 });
 
 interface TimeInputProps {
   value?: string;
+  endValue?: string;
   onChange?: (value: string) => void;
+  onEndChange?: (value: string) => void;
   placeholder?: string;
+  endPlaceholder?: string;
   label?: string;
   required?: boolean;
+  dualMode?: boolean;
 }
 
-const TimeInput = ({ value = '', onChange, placeholder = 'HH:MM AM/PM', label, required }: TimeInputProps) => {
+const TimeInput = ({ 
+  value = '', 
+  endValue = '',
+  onChange, 
+  onEndChange,
+  placeholder = 'HH:MM AM/PM',
+  endPlaceholder = 'HH:MM AM/PM',
+  label, 
+  required,
+  dualMode = false
+}: TimeInputProps) => {
   const styles = useStyles();
-  const inputRef = useRef<HTMLInputElement>(null);
-  const [displayValue, setDisplayValue] = useState(value || '');
-  const [cursorPosition, setCursorPosition] = useState(0);
+  const startInputRef = useRef<HTMLInputElement>(null);
+  const endInputRef = useRef<HTMLInputElement>(null);
+  const [startDisplayValue, setStartDisplayValue] = useState(value || '');
+  const [endDisplayValue, setEndDisplayValue] = useState(endValue || '');
 
   // Valid minute increments
   const minuteIncrements = [0, 5, 15, 30, 45, 55];
@@ -67,11 +97,12 @@ const TimeInput = ({ value = '', onChange, placeholder = 'HH:MM AM/PM', label, r
     }
   };
 
-  const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
-    const input = inputRef.current;
+  const createKeyDownHandler = (isEndTime: boolean) => (e: KeyboardEvent<HTMLInputElement>) => {
+    const input = isEndTime ? endInputRef.current : startInputRef.current;
     if (!input) return;
 
     const position = input.selectionStart || 0;
+    const displayValue = isEndTime ? endDisplayValue : startDisplayValue;
     const section = getCurrentSection(position, displayValue);
     const parsed = parseTime(displayValue);
 
@@ -81,8 +112,13 @@ const TimeInput = ({ value = '', onChange, placeholder = 'HH:MM AM/PM', label, r
       if (!parsed) {
         // Set default time if no valid time
         const defaultTime = '12:00 AM';
-        setDisplayValue(defaultTime);
-        onChange?.(defaultTime);
+        if (isEndTime) {
+          setEndDisplayValue(defaultTime);
+          onEndChange?.(defaultTime);
+        } else {
+          setStartDisplayValue(defaultTime);
+          onChange?.(defaultTime);
+        }
         return;
       }
 
@@ -105,8 +141,13 @@ const TimeInput = ({ value = '', onChange, placeholder = 'HH:MM AM/PM', label, r
       }
 
       const newTime = formatTime(newHours, newMinutes, newPeriod);
-      setDisplayValue(newTime);
-      onChange?.(newTime);
+      if (isEndTime) {
+        setEndDisplayValue(newTime);
+        onEndChange?.(newTime);
+      } else {
+        setStartDisplayValue(newTime);
+        onChange?.(newTime);
+      }
 
       // Restore cursor position after state update
       setTimeout(() => {
@@ -117,7 +158,7 @@ const TimeInput = ({ value = '', onChange, placeholder = 'HH:MM AM/PM', label, r
     }
   };
 
-  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+  const createChangeHandler = (isEndTime: boolean) => (e: ChangeEvent<HTMLInputElement>) => {
     let inputValue = e.target.value;
     const position = e.target.selectionStart || 0;
 
@@ -132,55 +173,103 @@ const TimeInput = ({ value = '', onChange, placeholder = 'HH:MM AM/PM', label, r
     // Convert to uppercase for AM/PM
     inputValue = inputValue.toUpperCase();
 
-    setDisplayValue(inputValue);
-    setCursorPosition(position);
+    if (isEndTime) {
+      setEndDisplayValue(inputValue);
+    } else {
+      setStartDisplayValue(inputValue);
+    }
 
     // Validate and call onChange only if it's a complete time
     const parsed = parseTime(inputValue);
     if (parsed && parsed.hours >= 1 && parsed.hours <= 12 && 
         parsed.minutes >= 0 && parsed.minutes <= 59) {
-      onChange?.(inputValue);
+      if (isEndTime) {
+        onEndChange?.(inputValue);
+      } else {
+        onChange?.(inputValue);
+      }
     }
   };
 
-  const handleBlur = () => {
-    // Try to auto-complete partial input on blur
+  const createBlurHandler = (isEndTime: boolean) => () => {
+    const displayValue = isEndTime ? endDisplayValue : startDisplayValue;
     const parsed = parseTime(displayValue);
     if (parsed) {
       const formattedTime = formatTime(parsed.hours, parsed.minutes, parsed.period);
       if (formattedTime !== displayValue) {
-        setDisplayValue(formattedTime);
-        onChange?.(formattedTime);
+        if (isEndTime) {
+          setEndDisplayValue(formattedTime);
+          onEndChange?.(formattedTime);
+        } else {
+          setStartDisplayValue(formattedTime);
+          onChange?.(formattedTime);
+        }
       }
     }
   };
 
   useEffect(() => {
-    setDisplayValue(value || '');
+    setStartDisplayValue(value || '');
   }, [value]);
 
-  const inputComponent = (
+  useEffect(() => {
+    setEndDisplayValue(endValue || '');
+  }, [endValue]);
+
+  const renderTimeInput = (
+    inputValue: string,
+    inputRef: React.RefObject<HTMLInputElement>,
+    placeholder: string,
+    isEndTime: boolean
+  ) => (
     <Input
       ref={inputRef}
-      value={displayValue}
-      onChange={handleChange}
-      onKeyDown={handleKeyDown}
-      onBlur={handleBlur}
+      value={inputValue}
+      onChange={createChangeHandler(isEndTime)}
+      onKeyDown={createKeyDownHandler(isEndTime)}
+      onBlur={createBlurHandler(isEndTime)}
       placeholder={placeholder}
       className={styles.timeInput}
       maxLength={8}
     />
   );
 
+  if (dualMode) {
+    const content = (
+      <div className={styles.dualTimeContainer}>
+        <div className={styles.timeInputWrapper}>
+          {renderTimeInput(startDisplayValue, startInputRef, placeholder, false)}
+        </div>
+        <ArrowRight16Regular className={styles.arrowIcon} />
+        <div className={styles.timeInputWrapper}>
+          {renderTimeInput(endDisplayValue, endInputRef, endPlaceholder, true)}
+        </div>
+      </div>
+    );
+
+    if (label) {
+      return (
+        <Field label={label} required={required}>
+          {content}
+        </Field>
+      );
+    }
+
+    return content;
+  }
+
+  // Single mode (existing behavior)
+  const singleInput = renderTimeInput(startDisplayValue, startInputRef, placeholder, false);
+
   if (label) {
     return (
       <Field label={label} required={required}>
-        {inputComponent}
+        {singleInput}
       </Field>
     );
   }
 
-  return inputComponent;
+  return singleInput;
 };
 
 export default TimeInput;
