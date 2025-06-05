@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect, KeyboardEvent, ChangeEvent } from 'react';
 import { Input, Field, makeStyles } from '@fluentui/react-components';
 
@@ -110,37 +111,32 @@ const TimeInput = ({ value = '', onChange, placeholder = 'HH:MM AM/PM', label, r
 
     // Handle Tab key for section navigation
     if (e.key === 'Tab') {
+      e.preventDefault();
       if (e.shiftKey) {
-        // Shift+Tab - move to previous section or let it bubble up to previous field
-        if (section === 'hours') {
-          // Let the tab bubble up to go to previous field
-          return;
-        } else {
-          e.preventDefault();
-          switch (section) {
-            case 'minutes':
-              moveToSection('hours');
-              break;
-            case 'period':
-              moveToSection('minutes');
-              break;
-          }
+        // Shift+Tab - move to previous section
+        switch (section) {
+          case 'minutes':
+            moveToSection('hours');
+            break;
+          case 'period':
+            moveToSection('minutes');
+            break;
+          case 'hours':
+            moveToSection('period');
+            break;
         }
       } else {
-        // Tab - move to next section or let it bubble up to next field
-        if (section === 'period') {
-          // Let the tab bubble up to go to next field
-          return;
-        } else {
-          e.preventDefault();
-          switch (section) {
-            case 'hours':
-              moveToSection('minutes');
-              break;
-            case 'minutes':
-              moveToSection('period');
-              break;
-          }
+        // Tab - move to next section
+        switch (section) {
+          case 'hours':
+            moveToSection('minutes');
+            break;
+          case 'minutes':
+            moveToSection('period');
+            break;
+          case 'period':
+            moveToSection('hours');
+            break;
         }
       }
       return;
