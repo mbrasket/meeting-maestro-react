@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect, KeyboardEvent, ChangeEvent } from 'react';
 import { Input, Field, makeStyles, tokens } from '@fluentui/react-components';
 import { ArrowRight16Regular } from '@fluentui/react-icons';
@@ -43,7 +42,7 @@ const useStyles = makeStyles({
     border: 'none',
     backgroundColor: 'transparent',
     padding: '4px 0',
-    width: '70px',
+    width: '90px',
     textAlign: 'center',
     '&:focus': {
       outline: 'none',
@@ -53,7 +52,8 @@ const useStyles = makeStyles({
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: '0 8px',
+    paddingLeft: '8px',
+    paddingRight: '8px',
     color: tokens.colorNeutralForeground2,
     flexShrink: 0,
   },
@@ -241,22 +241,14 @@ const TimeInput = ({
     inputValue = inputValue.toUpperCase();
 
     if (isDual) {
-      const parsed = parseTime(inputValue);
-      if (parsed && parsed.hours >= 1 && parsed.hours <= 12 && 
-          parsed.minutes >= 0 && parsed.minutes <= 59) {
-        if (isEndTime) {
-          onEndChange?.(inputValue);
-        } else {
-          onChange?.(inputValue);
-        }
+      if (isEndTime) {
+        onEndChange?.(inputValue);
+      } else {
+        onChange?.(inputValue);
       }
     } else {
       setDisplayValue(inputValue);
-      const parsed = parseTime(inputValue);
-      if (parsed && parsed.hours >= 1 && parsed.hours <= 12 && 
-          parsed.minutes >= 0 && parsed.minutes <= 59) {
-        onChange?.(inputValue);
-      }
+      onChange?.(inputValue);
     }
   };
 
