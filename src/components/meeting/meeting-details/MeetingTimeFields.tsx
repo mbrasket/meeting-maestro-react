@@ -5,7 +5,7 @@ import {
   tokens,
 } from '@fluentui/react-components';
 import { DatePicker } from '@fluentui/react-datepicker-compat';
-import { Calendar20Regular, ChevronRight20Regular } from '@fluentui/react-icons';
+import { Calendar20Regular, ArrowRight20Regular } from '@fluentui/react-icons';
 import { FormData } from '../types';
 import TimeInput from './TimeInput';
 
@@ -33,9 +33,7 @@ const useStyles = makeStyles({
     display: 'flex',
     alignItems: 'center',
     gap: tokens.spacingHorizontalS,
-    height: '32px',
-    padding: `${tokens.spacingVerticalXS} ${tokens.spacingHorizontalS}`,
-    borderRadius: tokens.borderRadiusSmall,
+    width: '100%',
   },
   iconContainer: {
     display: 'flex',
@@ -97,21 +95,25 @@ const MeetingTimeFields = ({ formData, onInputChange }: MeetingTimeFieldsProps) 
 
       <div className={styles.timeFieldGroup}>
         <div className={styles.timeFieldsRow}>
-          <TimeInput
-            value={formData.startTime}
-            onChange={(value) => onInputChange('startTime', value)}
-            placeholder="HH:MM AM/PM"
-            required
-          />
-          <div className={styles.arrowContainer}>
-            <ChevronRight20Regular />
+          <div className={styles.timeField}>
+            <TimeInput
+              value={formData.startTime}
+              onChange={(value) => onInputChange('startTime', value)}
+              placeholder="HH:MM AM/PM"
+              required
+            />
           </div>
-          <TimeInput
-            value={formData.endTime}
-            onChange={(value) => onInputChange('endTime', value)}
-            placeholder="HH:MM AM/PM"
-            required
-          />
+          <div className={styles.arrowContainer}>
+            <ArrowRight20Regular />
+          </div>
+          <div className={styles.timeField}>
+            <TimeInput
+              value={formData.endTime}
+              onChange={(value) => onInputChange('endTime', value)}
+              placeholder="HH:MM AM/PM"
+              required
+            />
+          </div>
         </div>
       </div>
     </div>
