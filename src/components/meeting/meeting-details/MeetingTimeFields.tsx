@@ -64,7 +64,6 @@ const MeetingTimeFields = ({ formData, onInputChange }: MeetingTimeFieldsProps) 
 
   const handleDateChange = (date: Date | null | undefined) => {
     if (date) {
-      // Only update the date part, preserve time if it exists
       const dateStr = date.toISOString().slice(0, 10); // YYYY-MM-DD format
       onInputChange('startDate', dateStr);
     }
@@ -78,10 +77,10 @@ const MeetingTimeFields = ({ formData, onInputChange }: MeetingTimeFieldsProps) 
     onInputChange('endTime', timeValue);
   };
 
-  // Parse the date from startTime if it exists, otherwise use current date
+  // Parse the date from startDate if it exists
   const getDateValue = () => {
-    if (formData.startTime) {
-      const date = new Date(formData.startTime);
+    if (formData.startDate) {
+      const date = new Date(formData.startDate);
       return isNaN(date.getTime()) ? undefined : date;
     }
     return undefined;
@@ -99,6 +98,28 @@ const MeetingTimeFields = ({ formData, onInputChange }: MeetingTimeFieldsProps) 
             formatDate={(date) => date ? date.toLocaleDateString() : ''}
             showMonthPickerAsOverlay={true}
             className={styles.dateInput}
+            showGoToToday={false}
+            allowTextInput={false}
+            calendarProps={{
+              showGoToToday: false,
+            }}
+            textField={{
+              iconProps: { iconName: undefined },
+              styles: {
+                fieldGroup: {
+                  border: 'none',
+                },
+                field: {
+                  border: 'none',
+                  borderBottom: '1px solid',
+                  borderRadius: 0,
+                  padding: '0',
+                },
+                icon: {
+                  display: 'none',
+                },
+              },
+            }}
           />
         </Field>
       </div>
