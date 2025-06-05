@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect, KeyboardEvent, ChangeEvent } from 'react';
 import { Input, Field, makeStyles } from '@fluentui/react-components';
 
@@ -109,33 +108,36 @@ const TimeInput = ({ value = '', onChange, placeholder = 'HH:MM AM/PM', label, r
     const section = getCurrentSection(position);
     const parsed = parseTime(displayValue);
 
-    // Handle Tab key for section navigation
+    // Handle Tab key for section navigation with boundary checking
     if (e.key === 'Tab') {
-      e.preventDefault();
       if (e.shiftKey) {
-        // Shift+Tab - move to previous section
+        // Shift+Tab - move to previous section or allow default behavior at boundary
+        if (section === 'hours') {
+          // At first section, allow tabbing out to previous field
+          return;
+        }
+        e.preventDefault();
         switch (section) {
           case 'minutes':
             moveToSection('hours');
             break;
           case 'period':
             moveToSection('minutes');
-            break;
-          case 'hours':
-            moveToSection('period');
             break;
         }
       } else {
-        // Tab - move to next section
+        // Tab - move to next section or allow default behavior at boundary
+        if (section === 'period') {
+          // At last section, allow tabbing out to next field
+          return;
+        }
+        e.preventDefault();
         switch (section) {
           case 'hours':
             moveToSection('minutes');
             break;
           case 'minutes':
             moveToSection('period');
-            break;
-          case 'period':
-            moveToSection('hours');
             break;
         }
       }
