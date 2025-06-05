@@ -6,15 +6,15 @@ import {
   Input,
 } from '@fluentui/react-components';
 import { DatePicker } from '@fluentui/react-datepicker-compat';
-import { ArrowRight20Regular } from '@fluentui/react-icons';
+import { ArrowRight20Regular, Calendar20Regular } from '@fluentui/react-icons';
 import { FormData } from '../types';
 import TimeInput from './TimeInput';
+import MeetingFieldWithIcon from './MeetingFieldWithIcon';
 
 const useStyles = makeStyles({
   timeFieldsContainer: {
     display: 'flex',
     gap: tokens.spacingHorizontalM,
-    marginBottom: '16px',
     alignItems: 'center',
   },
   fieldGroup: {
@@ -102,45 +102,47 @@ const MeetingTimeFields = ({ formData, onInputChange }: MeetingTimeFieldsProps) 
   };
 
   return (
-    <div className={styles.timeFieldsContainer}>
-      <div className={styles.fieldGroup}>
-        <Field required className={styles.dateField}>
-          <DatePicker
-            appearance="underline"
-            placeholder="Select date"
-            value={getDateValue()}
-            onSelectDate={handleDateChange}
-            formatDate={(date) => date ? date.toLocaleDateString() : ''}
-            showMonthPickerAsOverlay={true}
-            className={styles.dateInput}
-            showGoToToday={false}
-            allowTextInput={false}
-          />
-        </Field>
-      </div>
+    <MeetingFieldWithIcon icon={<Calendar20Regular />}>
+      <div className={styles.timeFieldsContainer}>
+        <div className={styles.fieldGroup}>
+          <Field required className={styles.dateField}>
+            <DatePicker
+              appearance="underline"
+              placeholder="Select date"
+              value={getDateValue()}
+              onSelectDate={handleDateChange}
+              formatDate={(date) => date ? date.toLocaleDateString() : ''}
+              showMonthPickerAsOverlay={true}
+              className={styles.dateInput}
+              showGoToToday={false}
+              allowTextInput={false}
+            />
+          </Field>
+        </div>
 
-      <div className={styles.timeFieldsRow}>
-        <div className={styles.timeField}>
-          <TimeInput
-            value={formData.startTime}
-            onChange={handleStartTimeChange}
-            placeholder="Start time"
-            required
-          />
-        </div>
-        <div className={styles.arrowContainer}>
-          <ArrowRight20Regular />
-        </div>
-        <div className={styles.timeField}>
-          <TimeInput
-            value={formData.endTime}
-            onChange={handleEndTimeChange}
-            placeholder="End time"
-            required
-          />
+        <div className={styles.timeFieldsRow}>
+          <div className={styles.timeField}>
+            <TimeInput
+              value={formData.startTime}
+              onChange={handleStartTimeChange}
+              placeholder="Start time"
+              required
+            />
+          </div>
+          <div className={styles.arrowContainer}>
+            <ArrowRight20Regular />
+          </div>
+          <div className={styles.timeField}>
+            <TimeInput
+              value={formData.endTime}
+              onChange={handleEndTimeChange}
+              placeholder="End time"
+              required
+            />
+          </div>
         </div>
       </div>
-    </div>
+    </MeetingFieldWithIcon>
   );
 };
 
