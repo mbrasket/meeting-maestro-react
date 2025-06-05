@@ -2,9 +2,11 @@
 import {
   Avatar,
   Text,
+  Button,
   makeStyles,
   tokens,
 } from '@fluentui/react-components';
+import { Dismiss20Regular } from '@fluentui/react-icons';
 import { Person } from '../../../data/sampleData';
 
 const useStyles = makeStyles({
@@ -14,8 +16,12 @@ const useStyles = makeStyles({
     gap: tokens.spacingHorizontalS,
     padding: tokens.spacingVerticalXS,
     borderRadius: tokens.borderRadiusSmall,
+    position: 'relative',
     '&:hover': {
       backgroundColor: tokens.colorNeutralBackground2,
+    },
+    '&:hover .delete-button': {
+      opacity: 1,
     },
   },
   details: {
@@ -41,14 +47,31 @@ const useStyles = makeStyles({
     textOverflow: 'ellipsis',
     whiteSpace: 'nowrap',
   },
+  deleteButton: {
+    position: 'absolute',
+    top: tokens.spacingVerticalXS,
+    right: tokens.spacingHorizontalXS,
+    opacity: 0,
+    transition: 'opacity 0.2s ease',
+    minWidth: '24px',
+    width: '24px',
+    height: '24px',
+  },
 });
 
 interface ParticipantItemProps {
   participant: Person;
+  onRemove?: (participant: Person) => void;
 }
 
-const ParticipantItem = ({ participant }: ParticipantItemProps) => {
+const ParticipantItem = ({ participant, onRemove }: ParticipantItemProps) => {
   const styles = useStyles();
+
+  const handleRemove = () => {
+    if (onRemove) {
+      onRemove(participant);
+    }
+  };
 
   return (
     <div className={styles.item}>
@@ -70,6 +93,16 @@ const ParticipantItem = ({ participant }: ParticipantItemProps) => {
           </Text>
         )}
       </div>
+      {onRemove && (
+        <Button
+          appearance="subtle"
+          size="small"
+          icon={<Dismiss20Regular />}
+          className={`${styles.deleteButton} delete-button`}
+          onClick={handleRemove}
+          title="Remove participant"
+        />
+      )}
     </div>
   );
 };

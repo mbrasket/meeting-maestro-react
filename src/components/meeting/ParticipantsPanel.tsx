@@ -41,9 +41,19 @@ interface ParticipantsPanelProps {
   coOrganizers: Person[];
   participants: Person[];
   optionalParticipants: Person[];
+  onRemoveCoOrganizer?: (participant: Person) => void;
+  onRemoveParticipant?: (participant: Person) => void;
+  onRemoveOptionalParticipant?: (participant: Person) => void;
 }
 
-const ParticipantsPanel = ({ coOrganizers, participants, optionalParticipants }: ParticipantsPanelProps) => {
+const ParticipantsPanel = ({ 
+  coOrganizers, 
+  participants, 
+  optionalParticipants,
+  onRemoveCoOrganizer,
+  onRemoveParticipant,
+  onRemoveOptionalParticipant
+}: ParticipantsPanelProps) => {
   const styles = useStyles();
 
   const totalCount = coOrganizers.length + participants.length + optionalParticipants.length;
@@ -62,6 +72,7 @@ const ParticipantsPanel = ({ coOrganizers, participants, optionalParticipants }:
             title="Co-organizers"
             participants={coOrganizers}
             count={coOrganizers.length}
+            onRemoveParticipant={onRemoveCoOrganizer}
           />
         )}
         
@@ -70,6 +81,7 @@ const ParticipantsPanel = ({ coOrganizers, participants, optionalParticipants }:
             title="Participants"
             participants={participants}
             count={participants.length}
+            onRemoveParticipant={onRemoveParticipant}
           />
         )}
         
@@ -78,6 +90,7 @@ const ParticipantsPanel = ({ coOrganizers, participants, optionalParticipants }:
             title="Optional"
             participants={optionalParticipants}
             count={optionalParticipants.length}
+            onRemoveParticipant={onRemoveOptionalParticipant}
           />
         )}
         

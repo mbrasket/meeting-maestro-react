@@ -102,6 +102,21 @@ const MeetingForm = () => {
     }));
   };
 
+  const handleRemoveCoOrganizer = (participant: Person) => {
+    const updated = formData.coOrganizers.filter(p => p.id !== participant.id);
+    handleInputChange('coOrganizers', updated);
+  };
+
+  const handleRemoveParticipant = (participant: Person) => {
+    const updated = formData.participants.filter(p => p.id !== participant.id);
+    handleInputChange('participants', updated);
+  };
+
+  const handleRemoveOptionalParticipant = (participant: Person) => {
+    const updated = formData.optionalParticipants.filter(p => p.id !== participant.id);
+    handleInputChange('optionalParticipants', updated);
+  };
+
   const handleCreateMeeting = () => {
     // Convert Person arrays to email strings and location array to string for backend compatibility
     const meetingData = {
@@ -154,6 +169,9 @@ const MeetingForm = () => {
         coOrganizers={formData.coOrganizers}
         participants={formData.participants}
         optionalParticipants={formData.optionalParticipants}
+        onRemoveCoOrganizer={handleRemoveCoOrganizer}
+        onRemoveParticipant={handleRemoveParticipant}
+        onRemoveOptionalParticipant={handleRemoveOptionalParticipant}
       />
     </div>
   );

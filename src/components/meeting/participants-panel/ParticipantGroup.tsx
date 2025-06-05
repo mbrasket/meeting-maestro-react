@@ -29,9 +29,10 @@ interface ParticipantGroupProps {
   title: string;
   participants: Person[];
   count: number;
+  onRemoveParticipant?: (participant: Person) => void;
 }
 
-const ParticipantGroup = ({ title, participants, count }: ParticipantGroupProps) => {
+const ParticipantGroup = ({ title, participants, count, onRemoveParticipant }: ParticipantGroupProps) => {
   const styles = useStyles();
 
   return (
@@ -44,7 +45,11 @@ const ParticipantGroup = ({ title, participants, count }: ParticipantGroupProps)
       
       <div className={styles.list}>
         {participants.map((participant) => (
-          <ParticipantItem key={participant.id} participant={participant} />
+          <ParticipantItem 
+            key={participant.id} 
+            participant={participant} 
+            onRemove={onRemoveParticipant}
+          />
         ))}
       </div>
     </div>
