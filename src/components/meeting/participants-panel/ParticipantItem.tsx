@@ -1,4 +1,5 @@
 
+import { useState } from 'react';
 import {
   Avatar,
   Text,
@@ -19,9 +20,6 @@ const useStyles = makeStyles({
     position: 'relative',
     '&:hover': {
       backgroundColor: tokens.colorNeutralBackground2,
-    },
-    '&:hover .delete-button': {
-      opacity: 1,
     },
   },
   details: {
@@ -51,7 +49,6 @@ const useStyles = makeStyles({
     position: 'absolute',
     top: tokens.spacingVerticalXS,
     right: tokens.spacingHorizontalXS,
-    opacity: 0,
     transition: 'opacity 0.2s ease',
     minWidth: '24px',
     width: '24px',
@@ -66,6 +63,7 @@ interface ParticipantItemProps {
 
 const ParticipantItem = ({ participant, onRemove }: ParticipantItemProps) => {
   const styles = useStyles();
+  const [isHovered, setIsHovered] = useState(false);
 
   const handleRemove = () => {
     if (onRemove) {
@@ -73,8 +71,20 @@ const ParticipantItem = ({ participant, onRemove }: ParticipantItemProps) => {
     }
   };
 
+  const handleMouseEnter = () => {
+    setIsHovered(true);
+  };
+
+  const handleMouseLeave = () => {
+    setIsHovered(false);
+  };
+
   return (
-    <div className={styles.item}>
+    <div 
+      className={styles.item}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
       <Avatar
         image={{ src: participant.avatar }}
         name={participant.name}
@@ -98,7 +108,8 @@ const ParticipantItem = ({ participant, onRemove }: ParticipantItemProps) => {
           appearance="subtle"
           size="small"
           icon={<Dismiss20Regular />}
-          className={`${styles.deleteButton} delete-button`}
+          className={styles.deleteButton}
+          style={{ opacity: isHovered ? 1 : 0 }}
           onClick={handleRemove}
           title="Remove participant"
         />
