@@ -40,6 +40,12 @@ const MeetingForm = () => {
     endTime: '',
     location: [],
     isRecurring: false,
+    recurringPattern: {
+      weekdays: [false, false, false, false, false, false, false],
+      startTime: '',
+      endTime: '',
+    },
+    oneOffInstances: [],
   });
 
   const handleInputChange = (field: keyof FormData, value: string | boolean | Person[] | string[]) => {

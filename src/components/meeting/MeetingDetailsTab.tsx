@@ -1,4 +1,3 @@
-
 import {
   Input,
   Switch,
@@ -28,6 +27,8 @@ import MeetingFieldWithIcon from './meeting-details/MeetingFieldWithIcon';
 import MeetingFieldWithIconAndMenu from './meeting-details/MeetingFieldWithIconAndMenu';
 import MeetingTimeFields from './meeting-details/MeetingTimeFields';
 import MeetingDescriptionField from './meeting-details/MeetingDescriptionField';
+import RecurringPatternSection from './recurring/RecurringPatternSection';
+import OneOffInstancesSection from './recurring/OneOffInstancesSection';
 
 const useStyles = makeStyles({
   formField: {
@@ -65,6 +66,14 @@ const MeetingDetailsTab = ({ formData, onInputChange }: MeetingDetailsTabProps) 
 
   const handleAddLocationToHistory = (location: string) => {
     addLocation(location);
+  };
+
+  const handleRecurringPatternChange = (pattern: FormData['recurringPattern']) => {
+    onInputChange('recurringPattern', pattern);
+  };
+
+  const handleOneOffInstancesChange = (instances: FormData['oneOffInstances']) => {
+    onInputChange('oneOffInstances', instances);
   };
 
   // Convert location string to array for the picker, handling both string and array values
@@ -184,9 +193,22 @@ const MeetingDetailsTab = ({ formData, onInputChange }: MeetingDetailsTabProps) 
         <Switch
           checked={formData.isRecurring}
           onChange={(_, data) => onInputChange('isRecurring', data.checked)}
-          label="Recurring meeting"
+          label="Make this a series / Add instances"
         />
       </Field>
+
+      {formData.isRecurring && (
+        <>
+          <RecurringPatternSection
+            pattern={formData.recurringPattern}
+            onPatternChange={handleRecurringPatternChange}
+          />
+          <OneOffInstancesSection
+            instances={formData.oneOffInstances}
+            onInstancesChange={handleOneOffInstancesChange}
+          />
+        </>
+      )}
     </div>
   );
 };
