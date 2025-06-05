@@ -51,7 +51,17 @@ const useStyles = makeStyles({
       borderRadius: '0',
       paddingLeft: '0',
       paddingRight: '0',
+      paddingTop: tokens.spacingVerticalXS,
+      paddingBottom: tokens.spacingVerticalXS,
       width: '100%',
+      backgroundColor: 'transparent',
+      fontSize: tokens.fontSizeBase300,
+      lineHeight: tokens.lineHeightBase300,
+      minHeight: '32px',
+    },
+    '& input:focus': {
+      borderBottomColor: tokens.colorBrandStroke1,
+      outline: 'none',
     },
     '& button': {
       display: 'none !important',
