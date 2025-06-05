@@ -13,6 +13,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useState } from 'react';
 
 const useStyles = makeStyles({
   toolbar: {
@@ -52,6 +53,13 @@ const useStyles = makeStyles({
       backgroundColor: tokens.colorNeutralBackground1Hover,
     }
   },
+  dropdownTriggerOpen: {
+    backgroundColor: tokens.colorBrandBackground2,
+    color: tokens.colorBrandForeground2,
+    '&:hover': {
+      backgroundColor: tokens.colorBrandBackground2Hover,
+    }
+  },
 });
 
 interface MeetingToolbarProps {
@@ -72,6 +80,9 @@ const MeetingToolbar = ({
   onDelete
 }: MeetingToolbarProps) => {
   const styles = useStyles();
+  const [categoryOpen, setCategoryOpen] = useState(false);
+  const [reminderOpen, setReminderOpen] = useState(false);
+  const [moreOpen, setMoreOpen] = useState(false);
   
   const categories = ['General', 'Team Meeting', 'Client Call', 'Review', 'Training'];
   const reminders = ['15 mins', '30 mins', '1 hour', '2 hours', '1 day'];
@@ -97,9 +108,9 @@ const MeetingToolbar = ({
 
       <div className={styles.toolbarRight}>
         {/* Meeting Categories Dropdown */}
-        <DropdownMenu>
+        <DropdownMenu onOpenChange={setCategoryOpen}>
           <DropdownMenuTrigger asChild>
-            <button className={styles.dropdownTrigger}>
+            <button className={`${styles.dropdownTrigger} ${categoryOpen ? styles.dropdownTriggerOpen : ''}`}>
               <Tag20Regular />
               <span>{selectedCategory}</span>
               <ChevronDown20Regular />
@@ -118,9 +129,9 @@ const MeetingToolbar = ({
         </DropdownMenu>
 
         {/* Meeting Reminders Dropdown */}
-        <DropdownMenu>
+        <DropdownMenu onOpenChange={setReminderOpen}>
           <DropdownMenuTrigger asChild>
-            <button className={styles.dropdownTrigger}>
+            <button className={`${styles.dropdownTrigger} ${reminderOpen ? styles.dropdownTriggerOpen : ''}`}>
               <Alert20Regular />
               <span>{selectedReminder}</span>
               <ChevronDown20Regular />
@@ -139,9 +150,9 @@ const MeetingToolbar = ({
         </DropdownMenu>
 
         {/* More Options Menu */}
-        <DropdownMenu>
+        <DropdownMenu onOpenChange={setMoreOpen}>
           <DropdownMenuTrigger asChild>
-            <button className={styles.dropdownTrigger}>
+            <button className={`${styles.dropdownTrigger} ${moreOpen ? styles.dropdownTriggerOpen : ''}`}>
               <MoreHorizontal20Regular />
             </button>
           </DropdownMenuTrigger>
