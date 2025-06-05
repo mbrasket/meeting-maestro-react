@@ -1,4 +1,3 @@
-
 import {
   Field,
   makeStyles,
@@ -29,10 +28,10 @@ const useStyles = makeStyles({
     flex: 1,
   },
   dateField: {
-    width: '140px', // Fixed narrow width for date
+    width: '120px', // Fixed narrow width for date
   },
   timeField: {
-    width: '100px', // Fixed narrow width for time inputs
+    width: '90px', // Fixed narrow width for time inputs
   },
   arrowContainer: {
     display: 'flex',
@@ -44,24 +43,23 @@ const useStyles = makeStyles({
   dateInput: {
     width: '100%',
     '& input': {
+      border: 'none',
       borderBottom: `1px solid ${tokens.colorNeutralStroke1}`,
-      borderTop: 'none',
-      borderLeft: 'none',
-      borderRight: 'none',
       borderRadius: '0',
-      paddingLeft: '0',
-      paddingRight: '0',
-      paddingTop: tokens.spacingVerticalXS,
-      paddingBottom: tokens.spacingVerticalXS,
-      width: '100%',
+      padding: `${tokens.spacingVerticalXS} 0`,
       backgroundColor: 'transparent',
       fontSize: tokens.fontSizeBase300,
       lineHeight: tokens.lineHeightBase300,
       minHeight: '32px',
+      width: '100%',
     },
     '& input:focus': {
       borderBottomColor: tokens.colorBrandStroke1,
       outline: 'none',
+      boxShadow: 'none',
+    },
+    '& input:hover': {
+      borderBottomColor: tokens.colorNeutralStroke1Hover,
     },
     '& button': {
       display: 'none !important',
