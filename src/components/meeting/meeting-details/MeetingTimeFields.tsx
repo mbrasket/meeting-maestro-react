@@ -18,16 +18,22 @@ const useStyles = makeStyles({
     width: '100%',
   },
   dateField: {
-    width: '120px',
+    flex: 1,
+    minWidth: '120px',
+    '& input[type="date"]::-webkit-calendar-picker-indicator': {
+      display: 'none',
+    },
   },
   timeField: {
-    width: '90px',
+    minWidth: '90px',
+    flex: '0 0 auto',
   },
   arrowContainer: {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
     color: tokens.colorNeutralForeground2,
+    flex: '0 0 auto',
   },
 });
 
