@@ -13,19 +13,9 @@ import MeetingFieldWithIcon from './MeetingFieldWithIcon';
 const useStyles = makeStyles({
   timeFieldsContainer: {
     display: 'flex',
-    gap: tokens.spacingHorizontalS,
     alignItems: 'center',
+    gap: '8px',
     width: '100%',
-  },
-  fieldGroup: {
-    display: 'flex',
-    flexDirection: 'column',
-  },
-  timeFieldsRow: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: tokens.spacingHorizontalXS,
-    flex: 1,
   },
   dateField: {
     width: '120px',
@@ -37,7 +27,6 @@ const useStyles = makeStyles({
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: '0 4px',
     color: tokens.colorNeutralForeground2,
   },
 });
@@ -65,38 +54,36 @@ const MeetingTimeFields = ({ formData, onInputChange }: MeetingTimeFieldsProps) 
   return (
     <MeetingFieldWithIcon icon={<Calendar20Regular />}>
       <div className={styles.timeFieldsContainer}>
-        <div className={styles.fieldGroup}>
-          <Field required className={styles.dateField}>
-            <Input
-              appearance="underline"
-              type="date"
-              value={formData.startDate}
-              onChange={handleDateChange}
-              placeholder="Select date"
-            />
-          </Field>
+        <Field required className={styles.dateField}>
+          <Input
+            appearance="underline"
+            type="date"
+            value={formData.startDate}
+            onChange={handleDateChange}
+            placeholder="Select date"
+          />
+        </Field>
+
+        <div className={styles.timeField}>
+          <TimeInput
+            value={formData.startTime}
+            onChange={handleStartTimeChange}
+            placeholder="Start time"
+            required
+          />
         </div>
 
-        <div className={styles.timeFieldsRow}>
-          <div className={styles.timeField}>
-            <TimeInput
-              value={formData.startTime}
-              onChange={handleStartTimeChange}
-              placeholder="Start time"
-              required
-            />
-          </div>
-          <div className={styles.arrowContainer}>
-            <ArrowRight20Regular />
-          </div>
-          <div className={styles.timeField}>
-            <TimeInput
-              value={formData.endTime}
-              onChange={handleEndTimeChange}
-              placeholder="End time"
-              required
-            />
-          </div>
+        <div className={styles.arrowContainer}>
+          <ArrowRight20Regular />
+        </div>
+
+        <div className={styles.timeField}>
+          <TimeInput
+            value={formData.endTime}
+            onChange={handleEndTimeChange}
+            placeholder="End time"
+            required
+          />
         </div>
       </div>
     </MeetingFieldWithIcon>
