@@ -1,3 +1,4 @@
+
 import {
   Input,
   Switch,
@@ -18,7 +19,7 @@ import {
   Location20Regular,
   MoreHorizontal20Regular
 } from '@fluentui/react-icons';
-import { FormData } from './types';
+import { FormData, RecurringPattern, OneOffInstance } from './types';
 import PeoplePicker from './PeoplePicker';
 import LocationPicker from './LocationPicker';
 import { samplePeople, sampleLocations, Person } from '../../data/sampleData';
@@ -45,7 +46,7 @@ const useStyles = makeStyles({
 
 interface MeetingDetailsTabProps {
   formData: FormData;
-  onInputChange: (field: keyof FormData, value: string | boolean | Person[] | string[]) => void;
+  onInputChange: (field: keyof FormData, value: string | boolean | Person[] | string[] | RecurringPattern | OneOffInstance[]) => void;
 }
 
 const MeetingDetailsTab = ({ formData, onInputChange }: MeetingDetailsTabProps) => {
@@ -68,11 +69,11 @@ const MeetingDetailsTab = ({ formData, onInputChange }: MeetingDetailsTabProps) 
     addLocation(location);
   };
 
-  const handleRecurringPatternChange = (pattern: FormData['recurringPattern']) => {
+  const handleRecurringPatternChange = (pattern: RecurringPattern) => {
     onInputChange('recurringPattern', pattern);
   };
 
-  const handleOneOffInstancesChange = (instances: FormData['oneOffInstances']) => {
+  const handleOneOffInstancesChange = (instances: OneOffInstance[]) => {
     onInputChange('oneOffInstances', instances);
   };
 
