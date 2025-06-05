@@ -58,8 +58,8 @@ const RecurringPatternSection = ({ pattern, onPatternChange }: RecurringPatternS
   };
 
   const validateAndFormatTime = (timeString: string): string => {
-    // Remove any non-numeric characters except colon
-    const cleaned = timeString.replace(/[^\d:]/g, '');
+    // Remove any non-numeric characters except colon and spaces
+    const cleaned = timeString.replace(/[^\d:\sam\spm]/gi, '').trim();
     
     // Try to parse various time formats
     const timeRegex = /^(\d{1,2}):?(\d{0,2})\s*(am|pm)?$/i;
@@ -71,7 +71,7 @@ const RecurringPatternSection = ({ pattern, onPatternChange }: RecurringPatternS
     let minutes = parseInt(match[2] || '0', 10);
     const period = match[3]?.toLowerCase();
     
-    // Handle 12-hour format
+    // Handle 12-hour format conversion to 24-hour for internal storage
     if (period) {
       if (period === 'pm' && hours !== 12) hours += 12;
       if (period === 'am' && hours === 12) hours = 0;
@@ -81,8 +81,11 @@ const RecurringPatternSection = ({ pattern, onPatternChange }: RecurringPatternS
     if (hours > 23) hours = 23;
     if (minutes > 59) minutes = 59;
     
-    // Format as HH:MM
-    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+    // Convert back to 12-hour format for display
+    const displayHours = hours === 0 ? 12 : hours > 12 ? hours - 12 : hours;
+    const displayPeriod = hours >= 12 ? 'PM' : 'AM';
+    
+    return `${displayHours}:${minutes.toString().padStart(2, '0')} ${displayPeriod}`;
   };
 
   const handleTimeBlur = (field: 'startTime' | 'endTime', value: string) => {

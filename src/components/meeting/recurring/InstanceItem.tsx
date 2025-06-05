@@ -1,11 +1,11 @@
 
 import {
-  Input,
-  Field,
   Button,
+  Field,
   makeStyles,
   tokens,
 } from '@fluentui/react-components';
+import { DatePicker } from '@fluentui/react-datepicker-compat';
 import { Delete20Regular } from '@fluentui/react-icons';
 import { OneOffInstance } from '../types';
 
@@ -41,18 +41,26 @@ interface InstanceItemProps {
 const InstanceItem = ({ instance, onUpdate, onDelete }: InstanceItemProps) => {
   const styles = useStyles();
 
-  const handleDateTimeChange = (value: string) => {
-    onUpdate({ ...instance, dateTime: value });
+  const handleDateTimeChange = (date: Date | null | undefined) => {
+    if (date) {
+      // Format date to ISO string for storage
+      const isoString = date.toISOString().slice(0, 16); // Remove seconds and timezone
+      onUpdate({ ...instance, dateTime: isoString });
+    }
   };
+
+  // Convert stored datetime string to Date object for DatePicker
+  const selectedDate = instance.dateTime ? new Date(instance.dateTime) : undefined;
 
   return (
     <div className={styles.instanceItem}>
       <Field className={styles.dateTimeField}>
-        <Input
-          appearance="underline"
-          type="datetime-local"
-          value={instance.dateTime}
-          onChange={(_, data) => handleDateTimeChange(data.value)}
+        <DatePicker
+          placeholder="Select date and time"
+          value={selectedDate}
+          onSelectDate={handleDateTimeChange}
+          showTime={true}
+          formatDate={(date) => date ? date.toLocaleString() : ''}
         />
       </Field>
       <Button
