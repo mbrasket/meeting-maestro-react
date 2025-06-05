@@ -1,13 +1,13 @@
 
 import { Button, makeStyles, tokens } from '@fluentui/react-components';
 import { 
-  Tag, 
-  Bell, 
-  MoreHorizontal, 
-  Send, 
-  Trash2,
-  ChevronDown
-} from 'lucide-react';
+  Tag20Regular,
+  Alert20Regular,
+  MoreHorizontal20Regular,
+  Send20Regular,
+  Delete20Regular,
+  ChevronDown20Regular
+} from '@fluentui/react-icons';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -79,14 +79,14 @@ const MeetingToolbar = ({
       <div className={styles.toolbarLeft}>
         <Button
           appearance="primary"
-          icon={<Send size={16} />}
+          icon={<Send20Regular />}
           onClick={onSend}
         >
           Send
         </Button>
         <Button
           appearance="subtle"
-          icon={<Trash2 size={16} />}
+          icon={<Delete20Regular />}
           onClick={onDelete}
         >
           Delete
@@ -98,9 +98,9 @@ const MeetingToolbar = ({
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button className={styles.dropdownTrigger}>
-              <Tag size={16} />
+              <Tag20Regular />
               <span>{selectedCategory}</span>
-              <ChevronDown size={14} />
+              <ChevronDown20Regular />
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="z-50 bg-white border shadow-lg">
@@ -119,9 +119,9 @@ const MeetingToolbar = ({
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button className={styles.dropdownTrigger}>
-              <Bell size={16} />
+              <Alert20Regular />
               <span>{selectedReminder}</span>
-              <ChevronDown size={14} />
+              <ChevronDown20Regular />
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="z-50 bg-white border shadow-lg">
@@ -140,8 +140,8 @@ const MeetingToolbar = ({
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button className={styles.dropdownTrigger}>
-              <MoreHorizontal size={16} />
-              <ChevronDown size={14} />
+              <MoreHorizontal20Regular />
+              <ChevronDown20Regular />
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="z-50 bg-white border shadow-lg">

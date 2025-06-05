@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import {
   Card,
@@ -87,7 +86,7 @@ const MeetingForm = () => {
       />
 
       <Card className={styles.card}>
-        <div className={`${styles.content} fluent-isolation`}>
+        <div className={styles.content}>
           <MeetingDetailsTab formData={formData} onInputChange={handleInputChange} />
         </div>
       </Card>
