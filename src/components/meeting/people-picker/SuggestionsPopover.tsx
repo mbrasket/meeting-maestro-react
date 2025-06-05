@@ -1,5 +1,5 @@
 
-import { forwardRef } from 'react';
+import { forwardRef, cloneElement, isValidElement } from 'react';
 import {
   Popover,
   PopoverTrigger,
@@ -42,7 +42,7 @@ interface SuggestionsPopoverProps {
   selectedIndex: number;
   onSuggestionClick: (person: Person) => void;
   onSuggestionHover: (index: number) => void;
-  children: React.ReactNode;
+  children: React.ReactElement;
 }
 
 const SuggestionsPopover = forwardRef<HTMLDivElement, SuggestionsPopoverProps>(({
@@ -67,7 +67,7 @@ const SuggestionsPopover = forwardRef<HTMLDivElement, SuggestionsPopoverProps>((
       }}
     >
       <PopoverTrigger disableButtonEnhancement>
-        {children}
+        {isValidElement(children) ? children : <div>{children}</div>}
       </PopoverTrigger>
       
       <PopoverSurface ref={ref} className={styles.popoverSurface}>
