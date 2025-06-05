@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect, KeyboardEvent, ChangeEvent } from 'react';
 import { Input, Field, makeStyles, tokens } from '@fluentui/react-components';
 import { ArrowRight16Regular } from '@fluentui/react-icons';
@@ -88,7 +89,7 @@ const getNextHalfHour = (addHours = 0) => {
   const displayHours = hours === 0 ? 12 : hours > 12 ? hours - 12 : hours;
   const period = hours >= 12 ? 'PM' : 'AM';
   
-  return `${displayHours.toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')} ${period}`;
+  return `${displayHours.toString().padStart(2, '0')}${now.getMinutes().toString().padStart(2, '0')} ${period}`;
 };
 
 const TimeInput = ({ 
@@ -96,7 +97,7 @@ const TimeInput = ({
   endValue = '',
   onChange, 
   onEndChange,
-  placeholder = 'HH:MM AM/PM', 
+  placeholder = 'HHMM AM/PM', 
   label, 
   required,
   isDual = false 
@@ -122,94 +123,90 @@ const TimeInput = ({
     }
   }, [isDual, value, endValue, onChange, onEndChange, defaultStartTime, defaultEndTime]);
 
-  // Valid minute increments
-  const minuteIncrements = [0, 5, 15, 30, 45, 55];
-
-  // Parse time string to get components
+  // Parse time string to get components (expecting HHMM AM/PM format)
   const parseTime = (timeStr: string) => {
-    const match = timeStr.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+    const match = timeStr.match(/^(\d{1,4})\s*(AM|PM)$/i);
     if (match) {
+      const timeDigits = match[1].padStart(4, '0');
+      const hours = parseInt(timeDigits.substring(0, 2), 10);
+      const minutes = parseInt(timeDigits.substring(2, 4), 10);
       return {
-        hours: parseInt(match[1], 10),
-        minutes: parseInt(match[2], 10),
-        period: match[3].toUpperCase() as 'AM' | 'PM'
+        hours: hours === 0 ? 12 : hours > 12 ? hours - 12 : hours,
+        minutes,
+        period: match[2].toUpperCase() as 'AM' | 'PM'
       };
     }
     return null;
   };
 
-  // Format time components to string
+  // Format time components to string (HHMM AM/PM format)
   const formatTime = (hours: number, minutes: number, period: 'AM' | 'PM') => {
     const h = hours.toString().padStart(2, '0');
     const m = minutes.toString().padStart(2, '0');
-    return `${h}:${m} ${period}`;
-  };
-
-  // Determine which section cursor is in
-  const getCurrentSection = (position: number, timeStr: string) => {
-    if (position <= 2) return 'hours';
-    if (position >= 3 && position <= 5) return 'minutes';
-    if (position >= 6) return 'period';
-    return 'hours';
-  };
-
-  // Get next/previous minute increment
-  const getNextMinute = (current: number, direction: 'up' | 'down') => {
-    const currentIndex = minuteIncrements.findIndex(m => m >= current);
-    if (direction === 'up') {
-      return currentIndex < minuteIncrements.length - 1 
-        ? minuteIncrements[currentIndex + 1] 
-        : minuteIncrements[0];
-    } else {
-      return currentIndex > 0 
-        ? minuteIncrements[currentIndex - 1] 
-        : minuteIncrements[minuteIncrements.length - 1];
-    }
+    return `${h}${m} ${period}`;
   };
 
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>, isEndTime: boolean) => {
     const input = e.currentTarget;
     const position = input.selectionStart || 0;
     const currentValue = isEndTime ? (endValue || defaultEndTime) : (isDual ? (value || defaultStartTime) : displayValue);
-    const section = getCurrentSection(position, currentValue);
 
-    if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+    // Handle digit input with overwrite behavior
+    if (/\d/.test(e.key)) {
       e.preventDefault();
       
-      const parsed = parseTime(currentValue);
-      if (!parsed) {
-        const defaultTime = '12:00 AM';
+      const digits = currentValue.replace(/[^\d]/g, '').padStart(4, '0');
+      const period = currentValue.includes('PM') ? 'PM' : 'AM';
+      
+      let newDigits = digits;
+      
+      // Determine which digit position to replace based on cursor position
+      if (position <= 1) {
+        // First digit (tens of hours)
+        newDigits = e.key + digits.substring(1);
+      } else if (position <= 2) {
+        // Second digit (units of hours)
+        newDigits = digits.substring(0, 1) + e.key + digits.substring(2);
+      } else if (position <= 3) {
+        // Third digit (tens of minutes)
+        newDigits = digits.substring(0, 2) + e.key + digits.substring(3);
+      } else if (position <= 4) {
+        // Fourth digit (units of minutes)
+        newDigits = digits.substring(0, 3) + e.key;
+      }
+      
+      // Validate the time
+      const hours = parseInt(newDigits.substring(0, 2), 10);
+      const minutes = parseInt(newDigits.substring(2, 4), 10);
+      
+      if (hours >= 1 && hours <= 12 && minutes >= 0 && minutes <= 59) {
+        const newTime = `${newDigits} ${period}`;
+        
         if (isDual) {
           if (isEndTime) {
-            onEndChange?.(defaultTime);
+            onEndChange?.(newTime);
           } else {
-            onChange?.(defaultTime);
+            onChange?.(newTime);
           }
         } else {
-          setDisplayValue(defaultTime);
-          onChange?.(defaultTime);
+          setDisplayValue(newTime);
+          onChange?.(newTime);
         }
-        return;
+        
+        // Move cursor to next position
+        setTimeout(() => {
+          const nextPos = Math.min(position + 1, 4);
+          input.setSelectionRange(nextPos, nextPos);
+        }, 0);
       }
-
-      const direction = e.key === 'ArrowDown' ? 'up' : 'down';
-      let newHours = parsed.hours;
-      let newMinutes = parsed.minutes;
-      let newPeriod = parsed.period;
-
-      if (section === 'hours') {
-        if (direction === 'up') {
-          newHours = newHours === 12 ? 1 : newHours + 1;
-        } else {
-          newHours = newHours === 1 ? 12 : newHours - 1;
-        }
-      } else if (section === 'minutes') {
-        newMinutes = getNextMinute(parsed.minutes, direction);
-      } else if (section === 'period') {
-        newPeriod = parsed.period === 'AM' ? 'PM' : 'AM';
-      }
-
-      const newTime = formatTime(newHours, newMinutes, newPeriod);
+    }
+    
+    // Handle AM/PM toggle
+    else if (e.key.toLowerCase() === 'a' || e.key.toLowerCase() === 'p') {
+      e.preventDefault();
+      const period = e.key.toLowerCase() === 'a' ? 'AM' : 'PM';
+      const digits = currentValue.replace(/[^\d]/g, '').padStart(4, '0');
+      const newTime = `${digits} ${period}`;
       
       if (isDual) {
         if (isEndTime) {
@@ -221,42 +218,66 @@ const TimeInput = ({
         setDisplayValue(newTime);
         onChange?.(newTime);
       }
-
-      // Restore cursor position after state update
-      setTimeout(() => {
-        if (input) {
-          input.setSelectionRange(position, position);
+    }
+    
+    // Handle backspace
+    else if (e.key === 'Backspace') {
+      e.preventDefault();
+      const digits = currentValue.replace(/[^\d]/g, '').padStart(4, '0');
+      const period = currentValue.includes('PM') ? 'PM' : 'AM';
+      
+      let newDigits = digits;
+      if (position > 0) {
+        const replacePos = Math.max(0, position - 1);
+        newDigits = digits.substring(0, replacePos) + '0' + digits.substring(replacePos + 1);
+      }
+      
+      const newTime = `${newDigits} ${period}`;
+      
+      if (isDual) {
+        if (isEndTime) {
+          onEndChange?.(newTime);
+        } else {
+          onChange?.(newTime);
         }
+      } else {
+        setDisplayValue(newTime);
+        onChange?.(newTime);
+      }
+      
+      setTimeout(() => {
+        const newPos = Math.max(0, position - 1);
+        input.setSelectionRange(newPos, newPos);
       }, 0);
+    }
+    
+    // Handle arrow keys for navigation
+    else if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+      // Allow default navigation behavior
+    }
+    
+    // Prevent all other keys
+    else {
+      e.preventDefault();
     }
   };
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>, isEndTime: boolean) => {
-    let inputValue = e.target.value;
-
-    // Remove any non-digit, non-colon, non-space, non-A, non-M, non-P characters
-    inputValue = inputValue.replace(/[^0-9:AMP\s]/gi, '');
-
-    // Convert to uppercase for AM/PM
-    inputValue = inputValue.toUpperCase();
-
-    if (isDual) {
-      if (isEndTime) {
-        onEndChange?.(inputValue);
-      } else {
-        onChange?.(inputValue);
-      }
-    } else {
-      setDisplayValue(inputValue);
-      onChange?.(inputValue);
-    }
+    // Prevent normal change behavior since we handle everything in keyDown
+    e.preventDefault();
   };
 
   const handleBlur = (isEndTime: boolean) => {
     const currentValue = isEndTime ? (endValue || defaultEndTime) : (isDual ? (value || defaultStartTime) : displayValue);
-    const parsed = parseTime(currentValue);
-    if (parsed) {
-      const formattedTime = formatTime(parsed.hours, parsed.minutes, parsed.period);
+    const digits = currentValue.replace(/[^\d]/g, '').padStart(4, '0');
+    const period = currentValue.includes('PM') ? 'PM' : 'AM';
+    
+    // Validate and format
+    const hours = parseInt(digits.substring(0, 2), 10);
+    const minutes = parseInt(digits.substring(2, 4), 10);
+    
+    if (hours >= 1 && hours <= 12 && minutes >= 0 && minutes <= 59) {
+      const formattedTime = `${digits} ${period}`;
       if (formattedTime !== currentValue) {
         if (isDual) {
           if (isEndTime) {
@@ -286,9 +307,9 @@ const TimeInput = ({
         onChange={(e) => handleChange(e, false)}
         onKeyDown={(e) => handleKeyDown(e, false)}
         onBlur={() => handleBlur(false)}
-        placeholder="12:00 AM"
+        placeholder="1200 AM"
         className={styles.dualTimeInput}
-        maxLength={8}
+        maxLength={7}
       />
       <div className={styles.arrowSeparator}>
         <ArrowRight16Regular />
@@ -299,9 +320,9 @@ const TimeInput = ({
         onChange={(e) => handleChange(e, true)}
         onKeyDown={(e) => handleKeyDown(e, true)}
         onBlur={() => handleBlur(true)}
-        placeholder="01:00 PM"
+        placeholder="0100 PM"
         className={styles.dualTimeInput}
-        maxLength={8}
+        maxLength={7}
       />
     </div>
   ) : (
@@ -312,7 +333,7 @@ const TimeInput = ({
       onBlur={() => handleBlur(false)}
       placeholder={placeholder}
       className={styles.timeInput}
-      maxLength={8}
+      maxLength={7}
     />
   );
 
