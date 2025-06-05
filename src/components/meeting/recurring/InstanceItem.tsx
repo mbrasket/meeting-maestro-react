@@ -15,10 +15,11 @@ const useStyles = makeStyles({
     display: 'flex',
     alignItems: 'flex-end',
     gap: tokens.spacingHorizontalM,
-    padding: tokens.spacingVerticalS,
-    border: `1px solid ${tokens.colorNeutralStroke2}`,
-    borderRadius: tokens.borderRadiusSmall,
-    marginBottom: tokens.spacingVerticalS,
+    padding: tokens.spacingVerticalM,
+    borderBottom: `1px solid ${tokens.colorNeutralStroke2}`,
+    '&:last-child': {
+      borderBottom: 'none',
+    },
   },
   dateTimeContainer: {
     flex: 1,
