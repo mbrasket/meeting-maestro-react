@@ -25,7 +25,7 @@ const useStyles = makeStyles({
     alignItems: 'center',
     justifyContent: 'space-between',
     width: '100vw',
-    padding: `${tokens.spacingVerticalM} ${tokens.spacingHorizontalXL}`,
+    padding: '8px',
     backgroundColor: tokens.colorNeutralBackground2,
     borderBottom: `1px solid ${tokens.colorNeutralStroke2}`,
   },
