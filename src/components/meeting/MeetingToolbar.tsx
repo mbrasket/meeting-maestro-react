@@ -1,4 +1,3 @@
-
 import { Button, makeStyles, tokens } from '@fluentui/react-components';
 import { 
   Tag20Regular,
@@ -17,15 +16,18 @@ import {
 
 const useStyles = makeStyles({
   toolbar: {
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 1000,
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
     width: '100vw',
-    marginLeft: 'calc(-50vw + 50%)',
     padding: `${tokens.spacingVerticalM} ${tokens.spacingHorizontalXL}`,
     backgroundColor: tokens.colorNeutralBackground2,
     borderBottom: `1px solid ${tokens.colorNeutralStroke2}`,
-    marginBottom: tokens.spacingVerticalL,
   },
   toolbarLeft: {
     display: 'flex',

@@ -15,6 +15,7 @@ const useStyles = makeStyles({
     maxWidth: '800px',
     margin: '0 auto',
     padding: tokens.spacingVerticalM,
+    paddingTop: '80px', // Add space for fixed toolbar
     backgroundColor: tokens.colorNeutralBackground1,
     minHeight: '100vh',
   },
