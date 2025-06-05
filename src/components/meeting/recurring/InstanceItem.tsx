@@ -1,3 +1,4 @@
+
 import {
   Button,
   Field,
@@ -75,28 +76,22 @@ const InstanceItem = ({ instance, onUpdate, onDelete }: InstanceItemProps) => {
   };
 
   const handleTimeBlur = (timeValue: string) => {
-    // Validate and format time on blur
-    const timeRegex = /^(\d{1,2}):?(\d{0,2})\s*(am|pm)?$/i;
+    // Only process if the value has actually changed and is valid
+    if (!timeValue.trim()) return;
+    
+    // Simple time validation - accept HH:MM format or H:MM format
+    const timeRegex = /^(\d{1,2}):(\d{2})$/;
     const match = timeValue.match(timeRegex);
     
     if (match) {
       let hours = parseInt(match[1], 10);
-      let minutes = parseInt(match[2] || '0', 10);
-      const period = match[3]?.toLowerCase();
-      
-      // Handle 12-hour format conversion
-      if (period) {
-        if (period === 'pm' && hours !== 12) hours += 12;
-        if (period === 'am' && hours === 12) hours = 0;
-      }
+      let minutes = parseInt(match[2], 10);
       
       // Validate ranges
-      if (hours > 23) hours = 23;
-      if (minutes > 59) minutes = 59;
-      
-      // Update with 24-hour format for storage
-      const formattedTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
-      handleTimeChange(formattedTime);
+      if (hours >= 0 && hours <= 23 && minutes >= 0 && minutes <= 59) {
+        const formattedTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+        handleTimeChange(formattedTime);
+      }
     }
   };
 
@@ -127,7 +122,13 @@ const InstanceItem = ({ instance, onUpdate, onDelete }: InstanceItemProps) => {
               // Select all text when focused to make editing easier
               e.target.select();
             }}
-            onBlur={(e) => handleTimeBlur(e.target.value)}
+            onBlur={(e) => {
+              // Only process if the input value is different from display
+              const inputValue = e.target.value.trim();
+              if (inputValue && inputValue !== displayTime) {
+                handleTimeBlur(inputValue);
+              }
+            }}
             placeholder="Time"
             contentBefore={<Clock20Regular />}
           />
