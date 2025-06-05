@@ -14,34 +14,35 @@ import MeetingFieldWithIcon from './MeetingFieldWithIcon';
 const useStyles = makeStyles({
   timeFieldsContainer: {
     display: 'flex',
-    gap: tokens.spacingHorizontalM,
+    gap: tokens.spacingHorizontalS,
     alignItems: 'center',
+    width: '100%',
   },
   fieldGroup: {
-    flex: 1,
     display: 'flex',
     flexDirection: 'column',
   },
   timeFieldsRow: {
     display: 'flex',
     alignItems: 'center',
-    gap: tokens.spacingHorizontalS,
-    flex: 2, // Takes 2/3 of the space compared to date field
+    gap: tokens.spacingHorizontalXS,
+    flex: 1,
   },
   dateField: {
-    flex: 1, // Takes 1/3 of the space
+    width: '140px', // Fixed narrow width for date
   },
   timeField: {
-    flex: 1,
+    width: '100px', // Fixed narrow width for time inputs
   },
   arrowContainer: {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: '0 8px',
+    padding: '0 4px',
     color: tokens.colorNeutralForeground2,
   },
   dateInput: {
+    width: '100%',
     '& input': {
       borderBottom: `1px solid ${tokens.colorNeutralStroke1}`,
       borderTop: 'none',
@@ -50,6 +51,7 @@ const useStyles = makeStyles({
       borderRadius: '0',
       paddingLeft: '0',
       paddingRight: '0',
+      width: '100%',
     },
     '& button': {
       display: 'none !important',
@@ -64,6 +66,12 @@ const useStyles = makeStyles({
       display: 'none !important',
     },
     '& .ms-Icon': {
+      display: 'none !important',
+    },
+    '& .fui-CalendarDayGrid__button': {
+      display: 'none !important',
+    },
+    '& [role="button"]': {
       display: 'none !important',
     },
   },
