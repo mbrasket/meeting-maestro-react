@@ -13,11 +13,11 @@ import ParticipantsPanel from './meeting/ParticipantsPanel';
 
 const useStyles = makeStyles({
   container: {
-    maxWidth: '800px',
+    maxWidth: '100%',
     margin: '0 auto',
     padding: tokens.spacingVerticalM,
     paddingTop: '80px', // Add space for fixed toolbar
-    paddingRight: '320px', // Add space for participants panel
+    paddingRight: '340px', // Add space for participants panel (320px + 20px margin)
     backgroundColor: tokens.colorNeutralBackground1,
     minHeight: '100vh',
   },

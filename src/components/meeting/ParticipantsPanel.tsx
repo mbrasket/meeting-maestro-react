@@ -11,7 +11,7 @@ import ParticipantGroup from './participants-panel/ParticipantGroup';
 const useStyles = makeStyles({
   panel: {
     height: '100vh',
-    width: '300px',
+    width: '320px',
     position: 'fixed',
     right: 0,
     top: 0,
