@@ -70,6 +70,8 @@ const MeetingTimeFields = ({ formData, onInputChange }: MeetingTimeFieldsProps) 
             onSelectDate={handleDateChange}
             formatDate={(date) => date?.toLocaleDateString() || ''}
             appearance="underline"
+            allowTextInput={true}
+            disableAutoFocus={false}
           />
         </Field>
 
