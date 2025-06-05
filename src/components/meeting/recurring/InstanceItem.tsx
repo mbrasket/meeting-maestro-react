@@ -27,9 +27,11 @@ const useStyles = makeStyles({
   },
   dateField: {
     flex: 1,
+    minWidth: 0, // Prevent flex item from overflowing
   },
   timeField: {
-    width: '120px',
+    flex: 1,
+    minWidth: 0, // Prevent flex item from overflowing
   },
   deleteButton: {
     minWidth: 'auto',
@@ -100,10 +102,8 @@ const InstanceItem = ({ instance, onUpdate, onDelete }: InstanceItemProps) => {
 
   // Extract date and time from stored datetime string
   const selectedDate = instance.dateTime ? new Date(instance.dateTime) : undefined;
-  const timeValue = selectedDate ? 
-    `${selectedDate.getHours().toString().padStart(2, '0')}:${selectedDate.getMinutes().toString().padStart(2, '0')}` : '';
 
-  // Format time for display (12-hour format)
+  // Format time for display (12-hour format) - keep it stable
   const displayTime = selectedDate ? 
     selectedDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }) : '';
 
@@ -123,8 +123,9 @@ const InstanceItem = ({ instance, onUpdate, onDelete }: InstanceItemProps) => {
             appearance="underline"
             type="text"
             value={displayTime}
-            onChange={(_, data) => {
-              // Allow free typing
+            onFocus={(e) => {
+              // Select all text when focused to make editing easier
+              e.target.select();
             }}
             onBlur={(e) => handleTimeBlur(e.target.value)}
             placeholder="Time"
