@@ -3,9 +3,10 @@ import {
   Field,
   makeStyles,
   tokens,
+  Input,
 } from '@fluentui/react-components';
 import { DatePicker } from '@fluentui/react-datepicker-compat';
-import { Calendar20Regular, ArrowRight20Regular } from '@fluentui/react-icons';
+import { ArrowRight20Regular } from '@fluentui/react-icons';
 import { FormData } from '../types';
 import TimeInput from './TimeInput';
 
@@ -14,34 +15,24 @@ const useStyles = makeStyles({
     display: 'flex',
     gap: tokens.spacingHorizontalM,
     marginBottom: '16px',
+    alignItems: 'center',
   },
-  timeFieldGroup: {
+  fieldGroup: {
     flex: 1,
     display: 'flex',
     flexDirection: 'column',
-    gap: tokens.spacingVerticalXS,
-  },
-  timeFieldWithIcon: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: tokens.spacingHorizontalS,
-    height: '32px',
-    padding: `${tokens.spacingVerticalXS} ${tokens.spacingHorizontalS}`,
-    borderRadius: tokens.borderRadiusSmall,
   },
   timeFieldsRow: {
     display: 'flex',
     alignItems: 'center',
     gap: tokens.spacingHorizontalS,
-    width: '100%',
+    flex: 2, // Takes 2/3 of the space compared to date field
   },
-  iconContainer: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: '20px',
-    height: '20px',
-    color: tokens.colorNeutralForeground2,
+  dateField: {
+    flex: 1, // Takes 1/3 of the space
+  },
+  timeField: {
+    flex: 1,
   },
   arrowContainer: {
     display: 'flex',
@@ -50,11 +41,16 @@ const useStyles = makeStyles({
     padding: '0 8px',
     color: tokens.colorNeutralForeground2,
   },
-  dateField: {
-    flex: 1,
-  },
-  timeField: {
-    flex: 1,
+  dateInput: {
+    '& input': {
+      borderBottom: `1px solid ${tokens.colorNeutralStroke1}`,
+      borderTop: 'none',
+      borderLeft: 'none',
+      borderRight: 'none',
+      borderRadius: '0',
+      paddingLeft: '0',
+      paddingRight: '0',
+    },
   },
 });
 
@@ -66,54 +62,66 @@ interface MeetingTimeFieldsProps {
 const MeetingTimeFields = ({ formData, onInputChange }: MeetingTimeFieldsProps) => {
   const styles = useStyles();
 
-  const handleDateChange = (field: 'startTime', date: Date | null | undefined) => {
+  const handleDateChange = (date: Date | null | undefined) => {
     if (date) {
-      onInputChange(field, date.toISOString().slice(0, 16));
+      // Only update the date part, preserve time if it exists
+      const dateStr = date.toISOString().slice(0, 10); // YYYY-MM-DD format
+      onInputChange('startDate', dateStr);
     }
   };
 
-  const startDate = formData.startTime ? new Date(formData.startTime) : undefined;
+  const handleStartTimeChange = (timeValue: string) => {
+    onInputChange('startTime', timeValue);
+  };
+
+  const handleEndTimeChange = (timeValue: string) => {
+    onInputChange('endTime', timeValue);
+  };
+
+  // Parse the date from startTime if it exists, otherwise use current date
+  const getDateValue = () => {
+    if (formData.startTime) {
+      const date = new Date(formData.startTime);
+      return isNaN(date.getTime()) ? undefined : date;
+    }
+    return undefined;
+  };
 
   return (
     <div className={styles.timeFieldsContainer}>
-      <div className={styles.timeFieldGroup}>
-        <div className={styles.timeFieldWithIcon}>
-          <div className={styles.iconContainer}>
-            <Calendar20Regular />
-          </div>
-          <Field required className={styles.dateField}>
-            <DatePicker
-              placeholder="Select start date"
-              value={startDate}
-              onSelectDate={(date) => handleDateChange('startTime', date)}
-              formatDate={(date) => date ? date.toLocaleDateString() : ''}
-              showMonthPickerAsOverlay={true}
-            />
-          </Field>
-        </div>
+      <div className={styles.fieldGroup}>
+        <Field required className={styles.dateField}>
+          <DatePicker
+            appearance="underline"
+            placeholder="Select date"
+            value={getDateValue()}
+            onSelectDate={handleDateChange}
+            formatDate={(date) => date ? date.toLocaleDateString() : ''}
+            showMonthPickerAsOverlay={true}
+            className={styles.dateInput}
+          />
+        </Field>
       </div>
 
-      <div className={styles.timeFieldGroup}>
-        <div className={styles.timeFieldsRow}>
-          <div className={styles.timeField}>
-            <TimeInput
-              value={formData.startTime}
-              onChange={(value) => onInputChange('startTime', value)}
-              placeholder="HH:MM AM/PM"
-              required
-            />
-          </div>
-          <div className={styles.arrowContainer}>
-            <ArrowRight20Regular />
-          </div>
-          <div className={styles.timeField}>
-            <TimeInput
-              value={formData.endTime}
-              onChange={(value) => onInputChange('endTime', value)}
-              placeholder="HH:MM AM/PM"
-              required
-            />
-          </div>
+      <div className={styles.timeFieldsRow}>
+        <div className={styles.timeField}>
+          <TimeInput
+            value={formData.startTime}
+            onChange={handleStartTimeChange}
+            placeholder="Start time"
+            required
+          />
+        </div>
+        <div className={styles.arrowContainer}>
+          <ArrowRight20Regular />
+        </div>
+        <div className={styles.timeField}>
+          <TimeInput
+            value={formData.endTime}
+            onChange={handleEndTimeChange}
+            placeholder="End time"
+            required
+          />
         </div>
       </div>
     </div>

@@ -1,13 +1,10 @@
-
 import React, { useState, useRef, useEffect, KeyboardEvent, ChangeEvent } from 'react';
-import { Input, Field, makeStyles, tokens } from '@fluentui/react-components';
+import { Input, Field, makeStyles } from '@fluentui/react-components';
 
 const useStyles = makeStyles({
   timeInput: {
     fontFamily: 'monospace',
     letterSpacing: '0.5px',
-    paddingLeft: '12px',
-    paddingRight: '12px',
     textAlign: 'left',
   },
 });
@@ -185,6 +182,7 @@ const TimeInput = ({ value = '', onChange, placeholder = 'HH:MM AM/PM', label, r
   const inputComponent = (
     <Input
       ref={inputRef}
+      appearance="underline"
       value={displayValue}
       onChange={handleChange}
       onKeyDown={handleKeyDown}

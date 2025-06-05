@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import {
   Card,
@@ -39,6 +38,7 @@ const MeetingForm = () => {
     description: '',
     startTime: '',
     endTime: '',
+    startDate: '', // Add separate date field
     location: [],
     isRecurring: false,
     recurringPattern: {
