@@ -1,14 +1,12 @@
 
 import {
-  Input,
-  Field,
   Text,
   makeStyles,
   tokens,
 } from '@fluentui/react-components';
-import { Clock20Regular } from '@fluentui/react-icons';
 import { RecurringPattern } from '../types';
 import WeekdaySelector from './WeekdaySelector';
+import TimeInput from '../meeting-details/TimeInput';
 
 const useStyles = makeStyles({
   section: {
@@ -33,15 +31,14 @@ const useStyles = makeStyles({
   timeFields: {
     display: 'flex',
     gap: tokens.spacingHorizontalM,
-    alignItems: 'center',
+    alignItems: 'flex-end',
   },
   timeField: {
     flex: 1,
   },
-  iconContainer: {
-    display: 'flex',
-    alignItems: 'center',
-    color: tokens.colorNeutralForeground2,
+  toText: {
+    alignSelf: 'center',
+    marginBottom: tokens.spacingVerticalS,
   },
 });
 
@@ -55,42 +52,6 @@ const RecurringPatternSection = ({ pattern, onPatternChange }: RecurringPatternS
 
   const handleWeekdayChange = (weekdays: boolean[]) => {
     onPatternChange({ ...pattern, weekdays });
-  };
-
-  const validateAndFormatTime = (timeString: string): string => {
-    // Remove any non-numeric characters except colon and spaces
-    const cleaned = timeString.replace(/[^\d:\sam\spm]/gi, '').trim();
-    
-    // Try to parse various time formats
-    const timeRegex = /^(\d{1,2}):?(\d{0,2})\s*(am|pm)?$/i;
-    const match = cleaned.match(timeRegex);
-    
-    if (!match) return timeString; // Return original if no match
-    
-    let hours = parseInt(match[1], 10);
-    let minutes = parseInt(match[2] || '0', 10);
-    const period = match[3]?.toLowerCase();
-    
-    // Handle 12-hour format conversion to 24-hour for internal storage
-    if (period) {
-      if (period === 'pm' && hours !== 12) hours += 12;
-      if (period === 'am' && hours === 12) hours = 0;
-    }
-    
-    // Validate ranges
-    if (hours > 23) hours = 23;
-    if (minutes > 59) minutes = 59;
-    
-    // Convert back to 12-hour format for display
-    const displayHours = hours === 0 ? 12 : hours > 12 ? hours - 12 : hours;
-    const displayPeriod = hours >= 12 ? 'PM' : 'AM';
-    
-    return `${displayHours}:${minutes.toString().padStart(2, '0')} ${displayPeriod}`;
-  };
-
-  const handleTimeBlur = (field: 'startTime' | 'endTime', value: string) => {
-    const formattedTime = validateAndFormatTime(value);
-    onPatternChange({ ...pattern, [field]: formattedTime });
   };
 
   const handleTimeChange = (field: 'startTime' | 'endTime', value: string) => {
@@ -112,30 +73,23 @@ const RecurringPatternSection = ({ pattern, onPatternChange }: RecurringPatternS
       <div className={styles.fieldGroup}>
         <Text className={styles.fieldLabel}>Time</Text>
         <div className={styles.timeFields}>
-          <div className={styles.iconContainer}>
-            <Clock20Regular />
-          </div>
-          <Field className={styles.timeField}>
-            <Input
-              appearance="underline"
-              type="text"
+          <div className={styles.timeField}>
+            <TimeInput
+              label="Start Time"
               value={pattern.startTime}
-              onChange={(_, data) => handleTimeChange('startTime', data.value)}
-              onBlur={(e) => handleTimeBlur('startTime', e.target.value)}
-              placeholder="Start time (e.g., 9:00 AM)"
+              onChange={(time) => handleTimeChange('startTime', time)}
+              placeholder="9:00 AM"
             />
-          </Field>
-          <Text>to</Text>
-          <Field className={styles.timeField}>
-            <Input
-              appearance="underline"
-              type="text"
+          </div>
+          <Text className={styles.toText}>to</Text>
+          <div className={styles.timeField}>
+            <TimeInput
+              label="End Time"
               value={pattern.endTime}
-              onChange={(_, data) => handleTimeChange('endTime', data.value)}
-              onBlur={(e) => handleTimeBlur('endTime', e.target.value)}
-              placeholder="End time (e.g., 5:00 PM)"
+              onChange={(time) => handleTimeChange('endTime', time)}
+              placeholder="5:00 PM"
             />
-          </Field>
+          </div>
         </div>
       </div>
     </div>

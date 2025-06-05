@@ -2,8 +2,6 @@
 import {
   Input,
   Field,
-  Dropdown,
-  Option,
   makeStyles,
   tokens,
 } from '@fluentui/react-components';
@@ -11,26 +9,10 @@ import { Clock20Regular } from '@fluentui/react-icons';
 import { useState, useEffect } from 'react';
 
 const useStyles = makeStyles({
-  timeContainer: {
+  field: {
     display: 'flex',
     flexDirection: 'column',
     gap: tokens.spacingVerticalXS,
-  },
-  timeInputField: {
-    flex: 1,
-  },
-  timeDropdowns: {
-    display: 'flex',
-    gap: tokens.spacingHorizontalXS,
-  },
-  hourDropdown: {
-    minWidth: '60px',
-  },
-  minuteDropdown: {
-    minWidth: '60px',
-  },
-  ampmDropdown: {
-    minWidth: '55px',
   },
 });
 
@@ -39,122 +21,80 @@ interface TimeInputProps {
   value?: string;
   onChange?: (value: string) => void;
   placeholder?: string;
+  required?: boolean;
 }
 
-const TimeInput = ({ label, value = '', onChange, placeholder = "9:00AM" }: TimeInputProps) => {
+const TimeInput = ({ label, value = '', onChange, placeholder = "9:00 AM", required }: TimeInputProps) => {
   const styles = useStyles();
-  
-  // Generate options
-  const hourOptions = Array.from({ length: 12 }, (_, i) => (i + 1).toString());
-  const minuteOptions = ['00', '05', '15', '30', '45', '55'];
-  const ampmOptions = ['AM', 'PM'];
-
-  const parseTime = (timeStr: string) => {
-    if (!timeStr) return { hour: '9', minute: '00', ampm: 'AM', displayTime: '' };
-    
-    const timeRegex = /^(\d{1,2}):?(\d{0,2})\s*(AM|PM)?$/i;
-    const match = timeStr.trim().match(timeRegex);
-    
-    if (!match) return { hour: '9', minute: '00', ampm: 'AM', displayTime: timeStr };
-    
-    let hour = match[1];
-    let minute = match[2] || '00';
-    let ampm = match[3]?.toUpperCase() || 'AM';
-    
-    // Validate and normalize
-    const hourNum = parseInt(hour);
-    if (hourNum < 1 || hourNum > 12) hour = '9';
-    
-    const minuteNum = parseInt(minute);
-    if (minuteNum < 0 || minuteNum > 59) minute = '00';
-    
-    const displayTime = `${hour}:${minute}${ampm}`;
-    
-    return { hour, minute, ampm, displayTime };
-  };
-
-  const constructTimeString = (hour: string, minute: string, ampm: string) => {
-    return `${hour}:${minute}${ampm}`;
-  };
-
-  const [timeState, setTimeState] = useState(() => parseTime(value));
+  const [displayValue, setDisplayValue] = useState(value);
 
   useEffect(() => {
-    setTimeState(parseTime(value));
+    setDisplayValue(value);
   }, [value]);
 
-  const handleTextInputChange = (inputValue: string) => {
-    const parsed = parseTime(inputValue);
-    setTimeState({ ...parsed, displayTime: inputValue });
-  };
+  const parseAndFormatTime = (input: string): string => {
+    if (!input.trim()) return '';
 
-  const handleTextInputBlur = (inputValue: string) => {
-    const parsed = parseTime(inputValue);
-    const newTimeString = constructTimeString(parsed.hour, parsed.minute, parsed.ampm);
-    setTimeState({ ...parsed, displayTime: newTimeString });
-    onChange?.(newTimeString);
-  };
-
-  const handleDropdownChange = (type: 'hour' | 'minute' | 'ampm', selectedValue: string) => {
-    const newState = {
-      ...timeState,
-      [type]: selectedValue,
-    };
+    // Remove any extra spaces and normalize
+    const cleaned = input.trim().toLowerCase();
     
-    const newTimeString = constructTimeString(newState.hour, newState.minute, newState.ampm);
-    setTimeState({ ...newState, displayTime: newTimeString });
-    onChange?.(newTimeString);
+    // Handle various formats: 9, 9am, 9:00, 9:00am, 21:00, etc.
+    const timeRegex = /^(\d{1,2}):?(\d{0,2})\s*(am|pm|a|p)?$/i;
+    const match = cleaned.match(timeRegex);
+    
+    if (!match) return input; // Return original if no match
+    
+    let hours = parseInt(match[1]);
+    let minutes = parseInt(match[2] || '0');
+    let period = match[3];
+    
+    // Handle 24-hour format conversion
+    if (!period && hours > 12) {
+      period = 'pm';
+      hours = hours - 12;
+    } else if (!period) {
+      period = hours < 12 ? 'am' : 'pm';
+      if (hours === 0) hours = 12;
+    }
+    
+    // Normalize period
+    if (period) {
+      period = period.charAt(0).toLowerCase() === 'a' ? 'AM' : 'PM';
+    }
+    
+    // Handle 12-hour format edge cases
+    if (period === 'AM' && hours === 12) hours = 12;
+    if (period === 'PM' && hours === 12) hours = 12;
+    
+    // Validate ranges
+    if (hours < 1 || hours > 12) hours = 9;
+    if (minutes < 0 || minutes > 59) minutes = 0;
+    
+    return `${hours}:${minutes.toString().padStart(2, '0')} ${period}`;
+  };
+
+  const handleChange = (newValue: string) => {
+    setDisplayValue(newValue);
+  };
+
+  const handleBlur = () => {
+    const formatted = parseAndFormatTime(displayValue);
+    setDisplayValue(formatted);
+    onChange?.(formatted);
   };
 
   return (
-    <div className={styles.timeContainer}>
-      <Field className={styles.timeInputField}>
-        <Input
-          appearance="underline"
-          type="text"
-          value={timeState.displayTime}
-          onChange={(_, data) => handleTextInputChange(data.value)}
-          onBlur={(e) => handleTextInputBlur(e.target.value)}
-          placeholder={placeholder}
-          contentBefore={<Clock20Regular />}
-        />
-      </Field>
-      
-      <div className={styles.timeDropdowns}>
-        <Dropdown
-          className={styles.hourDropdown}
-          value={timeState.hour}
-          selectedOptions={[timeState.hour]}
-          onOptionSelect={(_, data) => handleDropdownChange('hour', data.optionValue || '9')}
-        >
-          {hourOptions.map(hour => (
-            <Option key={hour} value={hour}>{hour}</Option>
-          ))}
-        </Dropdown>
-        
-        <Dropdown
-          className={styles.minuteDropdown}
-          value={timeState.minute}
-          selectedOptions={[timeState.minute]}
-          onOptionSelect={(_, data) => handleDropdownChange('minute', data.optionValue || '00')}
-        >
-          {minuteOptions.map(minute => (
-            <Option key={minute} value={minute}>{minute}</Option>
-          ))}
-        </Dropdown>
-        
-        <Dropdown
-          className={styles.ampmDropdown}
-          value={timeState.ampm}
-          selectedOptions={[timeState.ampm]}
-          onOptionSelect={(_, data) => handleDropdownChange('ampm', data.optionValue || 'AM')}
-        >
-          {ampmOptions.map(period => (
-            <Option key={period} value={period}>{period}</Option>
-          ))}
-        </Dropdown>
-      </div>
-    </div>
+    <Field label={label} required={required} className={styles.field}>
+      <Input
+        appearance="underline"
+        type="text"
+        value={displayValue}
+        onChange={(_, data) => handleChange(data.value)}
+        onBlur={handleBlur}
+        placeholder={placeholder}
+        contentBefore={<Clock20Regular />}
+      />
+    </Field>
   );
 };
 

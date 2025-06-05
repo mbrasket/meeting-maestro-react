@@ -55,10 +55,10 @@ const MeetingTimeFields = ({ formData, onInputChange }: MeetingTimeFieldsProps) 
     
     const date = new Date(dateTimeStr);
     const hour = date.getHours();
-    const displayHour = hour === 0 ? '12' : hour > 12 ? (hour - 12).toString() : hour.toString();
+    const displayHour = hour === 0 ? 12 : hour > 12 ? (hour - 12).toString() : hour.toString();
     const minute = date.getMinutes().toString().padStart(2, '0');
     const ampm = hour >= 12 ? 'PM' : 'AM';
-    const timeString = `${displayHour}:${minute}${ampm}`;
+    const timeString = `${displayHour}:${minute} ${ampm}`;
     
     return { date, timeString };
   };
@@ -66,7 +66,7 @@ const MeetingTimeFields = ({ formData, onInputChange }: MeetingTimeFieldsProps) 
   const constructDateTime = (date: Date | undefined, timeString: string) => {
     if (!date || !timeString) return '';
     
-    const timeRegex = /^(\d{1,2}):(\d{2})(AM|PM)$/i;
+    const timeRegex = /^(\d{1,2}):(\d{2})\s*(AM|PM)$/i;
     const match = timeString.match(timeRegex);
     
     if (!match) return '';
@@ -88,7 +88,7 @@ const MeetingTimeFields = ({ formData, onInputChange }: MeetingTimeFieldsProps) 
     if (!date) return;
     
     const current = parseDateTime(formData[field]);
-    const newDateTime = constructDateTime(date, current.timeString || '9:00AM');
+    const newDateTime = constructDateTime(date, current.timeString || '9:00 AM');
     onInputChange(field, newDateTime);
   };
 
@@ -119,9 +119,11 @@ const MeetingTimeFields = ({ formData, onInputChange }: MeetingTimeFieldsProps) 
           </Field>
         </div>
         <TimeInput
+          label="Start Time"
           value={startTime.timeString}
           onChange={(time) => handleTimeChange('startTime', time)}
-          placeholder="9:00AM"
+          placeholder="9:00 AM"
+          required
         />
       </div>
 
@@ -140,9 +142,11 @@ const MeetingTimeFields = ({ formData, onInputChange }: MeetingTimeFieldsProps) 
           </Field>
         </div>
         <TimeInput
+          label="End Time"
           value={endTime.timeString}
           onChange={(time) => handleTimeChange('endTime', time)}
-          placeholder="10:00AM"
+          placeholder="10:00 AM"
+          required
         />
       </div>
     </div>
