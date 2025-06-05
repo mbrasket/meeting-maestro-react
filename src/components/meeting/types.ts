@@ -20,6 +20,7 @@ export interface FormData {
   description: string;
   startTime: string;
   endTime: string;
+  startDate: string; // Add the missing startDate field
   location: string | string[];
   isRecurring: boolean;
   recurringPattern: RecurringPattern;
