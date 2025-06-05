@@ -5,8 +5,9 @@ import {
   tokens,
 } from '@fluentui/react-components';
 import { DatePicker } from '@fluentui/react-datepicker-compat';
-import { Calendar20Regular } from '@fluentui/react-icons';
+import { Calendar20Regular, Clock20Regular } from '@fluentui/react-icons';
 import { FormData } from '../types';
+import TimeInput from './TimeInput';
 
 const useStyles = makeStyles({
   timeFieldsContainer: {
@@ -49,14 +50,13 @@ interface MeetingTimeFieldsProps {
 const MeetingTimeFields = ({ formData, onInputChange }: MeetingTimeFieldsProps) => {
   const styles = useStyles();
 
-  const handleDateChange = (field: 'startTime' | 'endTime', date: Date | null | undefined) => {
+  const handleDateChange = (field: 'startTime', date: Date | null | undefined) => {
     if (date) {
       onInputChange(field, date.toISOString().slice(0, 16));
     }
   };
 
   const startDate = formData.startTime ? new Date(formData.startTime) : undefined;
-  const endDate = formData.endTime ? new Date(formData.endTime) : undefined;
 
   return (
     <div className={styles.timeFieldsContainer}>
@@ -79,16 +79,15 @@ const MeetingTimeFields = ({ formData, onInputChange }: MeetingTimeFieldsProps) 
       <div className={styles.timeFieldGroup}>
         <div className={styles.timeFieldWithIcon}>
           <div className={styles.iconContainer}>
-            <Calendar20Regular />
+            <Clock20Regular />
           </div>
-          <Field required className={styles.dateField}>
-            <DatePicker
-              placeholder="Select end date"
-              value={endDate}
-              onSelectDate={(date) => handleDateChange('endTime', date)}
-              formatDate={(date) => date ? date.toLocaleDateString() : ''}
-            />
-          </Field>
+          <TimeInput
+            value={formData.endTime}
+            onChange={(value) => onInputChange('endTime', value)}
+            placeholder="HH:MM AM/PM"
+            label=""
+            required
+          />
         </div>
       </div>
     </div>
