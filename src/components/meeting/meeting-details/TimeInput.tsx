@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect, KeyboardEvent, ChangeEvent } from 'react';
 import { Input, Field, makeStyles, tokens } from '@fluentui/react-components';
 
@@ -87,7 +86,8 @@ const TimeInput = ({ value = '', onChange, placeholder = 'HH:MM AM/PM', label, r
         return;
       }
 
-      const direction = e.key === 'ArrowUp' ? 'up' : 'down';
+      // Reversed: ArrowDown increments, ArrowUp decrements
+      const direction = e.key === 'ArrowDown' ? 'up' : 'down';
       let newHours = parsed.hours;
       let newMinutes = parsed.minutes;
       let newPeriod = parsed.period;
