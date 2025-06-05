@@ -40,6 +40,43 @@ const useStyles = makeStyles({
   },
 });
 
+// Helper function to get the next whole half hour
+const getNextHalfHour = () => {
+  const now = new Date();
+  const minutes = now.getMinutes() <= 30 ? 30 : 0;
+  if (minutes === 0) {
+    now.setHours(now.getHours() + 1);
+  }
+  now.setMinutes(minutes);
+  
+  let hours = now.getHours();
+  const period = hours >= 12 ? 'PM' : 'AM';
+  hours = hours % 12 || 12;
+  
+  return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')} ${period}`;
+};
+
+// Helper function to add 30 minutes to a time
+const addThirtyMinutes = (timeStr: string) => {
+  const match = timeStr.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+  if (!match) return timeStr;
+  
+  let hours = parseInt(match[1], 10);
+  let minutes = parseInt(match[2], 10);
+  const period = match[3].toUpperCase();
+  
+  minutes += 30;
+  if (minutes >= 60) {
+    minutes -= 60;
+    hours += 1;
+    if (hours > 12) {
+      hours = 1;
+    }
+  }
+  
+  return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')} ${period}`;
+};
+
 interface OneOffInstancesSectionProps {
   instances: OneOffInstance[];
   onInstancesChange: (instances: OneOffInstance[]) => void;
@@ -49,9 +86,16 @@ const OneOffInstancesSection = ({ instances, onInstancesChange }: OneOffInstance
   const styles = useStyles();
 
   const handleAddInstance = () => {
+    const today = new Date().toISOString().split('T')[0];
+    const defaultStartTime = getNextHalfHour();
+    const defaultEndTime = addThirtyMinutes(defaultStartTime);
+    
     const newInstance: OneOffInstance = {
       id: `instance-${Date.now()}`,
-      dateTime: '',
+      dateTime: `${today}T${defaultStartTime}:00`,
+      date: today,
+      startTime: defaultStartTime,
+      endTime: defaultEndTime,
     };
     onInstancesChange([...instances, newInstance]);
   };

@@ -9,7 +9,10 @@ export interface RecurringPattern {
 
 export interface OneOffInstance {
   id: string;
-  dateTime: string;
+  dateTime: string; // Keep for backward compatibility
+  date?: string;
+  startTime?: string;
+  endTime?: string;
 }
 
 export interface FormData {

@@ -6,8 +6,9 @@ import {
   tokens,
 } from '@fluentui/react-components';
 import { DatePicker } from '@fluentui/react-datepicker-compat';
-import { Delete20Regular } from '@fluentui/react-icons';
+import { Delete20Regular, ArrowRight20Regular } from '@fluentui/react-icons';
 import { OneOffInstance } from '../types';
+import TimeInput from '../meeting-details/TimeInput';
 
 const useStyles = makeStyles({
   instanceItem: {
@@ -27,7 +28,18 @@ const useStyles = makeStyles({
   },
   dateField: {
     flex: 1,
-    minWidth: 0,
+    minWidth: '120px',
+  },
+  timeField: {
+    minWidth: '90px',
+    flex: '0 0 auto',
+  },
+  arrowContainer: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    color: tokens.colorNeutralForeground2,
+    flex: '0 0 auto',
   },
   deleteButton: {
     minWidth: 'auto',
@@ -50,23 +62,70 @@ const InstanceItem = ({ instance, onUpdate, onDelete }: InstanceItemProps) => {
 
   const handleDateChange = (date: Date | null | undefined) => {
     if (date) {
-      onUpdate({ ...instance, dateTime: date.toISOString().slice(0, 16) });
+      const dateString = date.toISOString().split('T')[0];
+      onUpdate({ 
+        ...instance, 
+        date: dateString,
+        dateTime: `${dateString}T${instance.startTime || '09:00'}:00`
+      });
     }
   };
 
-  const selectedDate = instance.dateTime ? new Date(instance.dateTime) : undefined;
+  const handleStartTimeChange = (timeValue: string) => {
+    onUpdate({ 
+      ...instance, 
+      startTime: timeValue,
+      dateTime: `${instance.date || new Date().toISOString().split('T')[0]}T${timeValue}:00`
+    });
+  };
+
+  const handleEndTimeChange = (timeValue: string) => {
+    onUpdate({ 
+      ...instance, 
+      endTime: timeValue
+    });
+  };
+
+  // Extract date from dateTime or use current date
+  const selectedDate = instance.date ? new Date(instance.date) : 
+    instance.dateTime ? new Date(instance.dateTime) : undefined;
 
   return (
     <div className={styles.instanceItem}>
       <div className={styles.dateTimeContainer}>
-        <Field label="Date" className={styles.dateField}>
+        <Field required className={styles.dateField}>
           <DatePicker
             placeholder="Select date"
             value={selectedDate}
             onSelectDate={handleDateChange}
-            formatDate={(date) => date ? date.toLocaleDateString() : ''}
+            formatDate={(date) => date?.toLocaleDateString() || ''}
+            appearance="underline"
+            allowTextInput={true}
+            disableAutoFocus={false}
           />
         </Field>
+
+        <div className={styles.timeField}>
+          <TimeInput
+            value={instance.startTime || ''}
+            onChange={handleStartTimeChange}
+            placeholder="Start time"
+            required
+          />
+        </div>
+
+        <div className={styles.arrowContainer}>
+          <ArrowRight20Regular />
+        </div>
+
+        <div className={styles.timeField}>
+          <TimeInput
+            value={instance.endTime || ''}
+            onChange={handleEndTimeChange}
+            placeholder="End time"
+            required
+          />
+        </div>
       </div>
       <Button
         appearance="subtle"
