@@ -1,3 +1,4 @@
+
 import { Button, makeStyles, tokens } from '@fluentui/react-components';
 import { 
   Tag20Regular,
@@ -54,10 +55,9 @@ const useStyles = makeStyles({
     }
   },
   dropdownTriggerOpen: {
-    backgroundColor: tokens.colorBrandBackground2,
-    color: tokens.colorBrandForeground2,
+    backgroundColor: tokens.colorNeutralBackground1Hover,
     '&:hover': {
-      backgroundColor: tokens.colorBrandBackground2Hover,
+      backgroundColor: tokens.colorNeutralBackground1Hover,
     }
   },
 });
