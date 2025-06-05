@@ -29,10 +29,12 @@ const useStyles = makeStyles({
     borderRightStyle: 'solid',
     borderBottomStyle: 'solid',
     borderLeftStyle: 'solid',
-    maxWidth: '120px',
+    maxWidth: '200px',
+    width: 'fit-content',
     fontSize: tokens.fontSizeBase200,
     flexShrink: 0,
     cursor: 'pointer',
+    whiteSpace: 'nowrap',
     '&:focus': {
       outline: `2px solid ${tokens.colorBrandStroke1}`,
       outlineOffset: '1px',
@@ -45,6 +47,13 @@ const useStyles = makeStyles({
     borderBottomColor: tokens.colorBrandStroke1,
     borderLeftColor: tokens.colorBrandStroke1,
   },
+  nameText: {
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+    flex: 1,
+    minWidth: 0,
+  },
   dismissButton: {
     border: 'none',
     background: 'transparent',
@@ -53,6 +62,7 @@ const useStyles = makeStyles({
     borderRadius: tokens.borderRadiusSmall,
     display: 'flex',
     alignItems: 'center',
+    flexShrink: 0,
     '&:hover': {
       backgroundColor: tokens.colorNeutralBackground3,
     },
@@ -86,9 +96,11 @@ const PersonChip = ({ person, isSelected, onRemove, onKeyDown, onFocus, chipRef 
         name={person.name}
         size={16}
       />
-      <Text size={200} truncate title={person.name}>
-        {person.name}
-      </Text>
+      <div className={styles.nameText}>
+        <Text size={200} title={person.name}>
+          {person.name}
+        </Text>
+      </div>
       <button
         className={styles.dismissButton}
         onClick={(e) => {
