@@ -1,4 +1,3 @@
-
 import { Button, makeStyles, tokens } from '@fluentui/react-components';
 import { 
   Tag20Regular,
@@ -27,7 +26,7 @@ const useStyles = makeStyles({
     justifyContent: 'space-between',
     width: '100vw',
     padding: '8px',
-    backgroundColor: tokens.colorNeutralBackground2,
+    backgroundColor: tokens.colorNeutralBackground3,
     borderBottom: `1px solid ${tokens.colorNeutralStroke2}`,
   },
   toolbarLeft: {
