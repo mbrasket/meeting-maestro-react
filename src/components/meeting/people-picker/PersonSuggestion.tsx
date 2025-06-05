@@ -55,7 +55,7 @@ const PersonSuggestion = ({ person, isSelected, onClick, onMouseEnter }: PersonS
       onMouseEnter={onMouseEnter}
       data-suggestion-option
       style={{
-        backgroundColor: isSelected ? tokens.colorNeutralBackground2 : 'transparent'
+        backgroundColor: isSelected ? tokens.colorNeutralBackground3 : 'transparent'
       }}
     >
       <Avatar
