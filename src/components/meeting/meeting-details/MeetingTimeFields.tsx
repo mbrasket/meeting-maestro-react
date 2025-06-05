@@ -5,7 +5,7 @@ import {
   tokens,
 } from '@fluentui/react-components';
 import { DatePicker } from '@fluentui/react-datepicker-compat';
-import { Calendar20Regular, Clock20Regular } from '@fluentui/react-icons';
+import { Calendar20Regular, ArrowRight } from '@fluentui/react-icons';
 import { FormData } from '../types';
 import TimeInput from './TimeInput';
 
@@ -29,6 +29,14 @@ const useStyles = makeStyles({
     padding: `${tokens.spacingVerticalXS} ${tokens.spacingHorizontalS}`,
     borderRadius: tokens.borderRadiusSmall,
   },
+  timeFieldsRow: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: tokens.spacingHorizontalS,
+    height: '32px',
+    padding: `${tokens.spacingVerticalXS} ${tokens.spacingHorizontalS}`,
+    borderRadius: tokens.borderRadiusSmall,
+  },
   iconContainer: {
     display: 'flex',
     alignItems: 'center',
@@ -37,7 +45,17 @@ const useStyles = makeStyles({
     height: '20px',
     color: tokens.colorNeutralForeground2,
   },
+  arrowContainer: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: '0 8px',
+    color: tokens.colorNeutralForeground2,
+  },
   dateField: {
+    flex: 1,
+  },
+  timeField: {
     flex: 1,
   },
 });
@@ -78,15 +96,20 @@ const MeetingTimeFields = ({ formData, onInputChange }: MeetingTimeFieldsProps) 
       </div>
 
       <div className={styles.timeFieldGroup}>
-        <div className={styles.timeFieldWithIcon}>
-          <div className={styles.iconContainer}>
-            <Clock20Regular />
+        <div className={styles.timeFieldsRow}>
+          <TimeInput
+            value={formData.startTime}
+            onChange={(value) => onInputChange('startTime', value)}
+            placeholder="HH:MM AM/PM"
+            required
+          />
+          <div className={styles.arrowContainer}>
+            <ArrowRight size={16} />
           </div>
           <TimeInput
             value={formData.endTime}
             onChange={(value) => onInputChange('endTime', value)}
             placeholder="HH:MM AM/PM"
-            label=""
             required
           />
         </div>

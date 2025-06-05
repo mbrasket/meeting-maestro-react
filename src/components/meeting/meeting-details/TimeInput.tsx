@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect, KeyboardEvent, ChangeEvent } from 'react';
 import { Input, Field, makeStyles, tokens } from '@fluentui/react-components';
 
@@ -5,6 +6,9 @@ const useStyles = makeStyles({
   timeInput: {
     fontFamily: 'monospace',
     letterSpacing: '0.5px',
+    paddingLeft: '12px',
+    paddingRight: '12px',
+    textAlign: 'left',
   },
 });
 
@@ -20,10 +24,34 @@ const TimeInput = ({ value = '', onChange, placeholder = 'HH:MM AM/PM', label, r
   const styles = useStyles();
   const inputRef = useRef<HTMLInputElement>(null);
   const [displayValue, setDisplayValue] = useState(value || '');
-  const [cursorPosition, setCursorPosition] = useState(0);
 
-  // Valid minute increments
-  const minuteIncrements = [0, 5, 15, 30, 45, 55];
+  // Get default time (next half hour from now)
+  const getDefaultTime = (offsetHours = 0) => {
+    const now = new Date();
+    now.setHours(now.getHours() + offsetHours);
+    const minutes = now.getMinutes() <= 30 ? 30 : 0;
+    if (minutes === 0) {
+      now.setHours(now.getHours() + 1);
+    }
+    now.setMinutes(minutes);
+    
+    let hours = now.getHours();
+    const period = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12 || 12;
+    
+    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')} ${period}`;
+  };
+
+  // Initialize with default time if no value provided
+  useEffect(() => {
+    if (!value && !displayValue) {
+      const defaultTime = getDefaultTime();
+      setDisplayValue(defaultTime);
+      onChange?.(defaultTime);
+    } else {
+      setDisplayValue(value || '');
+    }
+  }, [value]);
 
   // Parse time string to get components
   const parseTime = (timeStr: string) => {
@@ -46,25 +74,11 @@ const TimeInput = ({ value = '', onChange, placeholder = 'HH:MM AM/PM', label, r
   };
 
   // Determine which section cursor is in
-  const getCurrentSection = (position: number, timeStr: string) => {
+  const getCurrentSection = (position: number) => {
     if (position <= 2) return 'hours';
     if (position >= 3 && position <= 5) return 'minutes';
     if (position >= 6) return 'period';
     return 'hours';
-  };
-
-  // Get next/previous minute increment
-  const getNextMinute = (current: number, direction: 'up' | 'down') => {
-    const currentIndex = minuteIncrements.findIndex(m => m >= current);
-    if (direction === 'up') {
-      return currentIndex < minuteIncrements.length - 1 
-        ? minuteIncrements[currentIndex + 1] 
-        : minuteIncrements[0];
-    } else {
-      return currentIndex > 0 
-        ? minuteIncrements[currentIndex - 1] 
-        : minuteIncrements[minuteIncrements.length - 1];
-    }
   };
 
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
@@ -72,22 +86,20 @@ const TimeInput = ({ value = '', onChange, placeholder = 'HH:MM AM/PM', label, r
     if (!input) return;
 
     const position = input.selectionStart || 0;
-    const section = getCurrentSection(position, displayValue);
+    const section = getCurrentSection(position);
     const parsed = parseTime(displayValue);
 
     if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
       e.preventDefault();
       
       if (!parsed) {
-        // Set default time if no valid time
-        const defaultTime = '12:00 AM';
+        const defaultTime = getDefaultTime();
         setDisplayValue(defaultTime);
         onChange?.(defaultTime);
         return;
       }
 
-      // Reversed: ArrowDown increments, ArrowUp decrements
-      const direction = e.key === 'ArrowDown' ? 'up' : 'down';
+      const direction = e.key === 'ArrowUp' ? 'up' : 'down';
       let newHours = parsed.hours;
       let newMinutes = parsed.minutes;
       let newPeriod = parsed.period;
@@ -99,7 +111,17 @@ const TimeInput = ({ value = '', onChange, placeholder = 'HH:MM AM/PM', label, r
           newHours = newHours === 1 ? 12 : newHours - 1;
         }
       } else if (section === 'minutes') {
-        newMinutes = getNextMinute(parsed.minutes, direction);
+        const increments = [0, 15, 30, 45];
+        const currentIndex = increments.findIndex(m => m >= parsed.minutes);
+        if (direction === 'up') {
+          newMinutes = currentIndex < increments.length - 1 
+            ? increments[currentIndex + 1] 
+            : increments[0];
+        } else {
+          newMinutes = currentIndex > 0 
+            ? increments[currentIndex - 1] 
+            : increments[increments.length - 1];
+        }
       } else if (section === 'period') {
         newPeriod = parsed.period === 'AM' ? 'PM' : 'AM';
       }
@@ -108,43 +130,48 @@ const TimeInput = ({ value = '', onChange, placeholder = 'HH:MM AM/PM', label, r
       setDisplayValue(newTime);
       onChange?.(newTime);
 
-      // Restore cursor position after state update
       setTimeout(() => {
         if (input) {
           input.setSelectionRange(position, position);
         }
       }, 0);
     }
+
+    // Handle digit input for overwrite behavior
+    if (/^\d$/.test(e.key)) {
+      e.preventDefault();
+      const digit = e.key;
+      let newValue = displayValue;
+      
+      if (section === 'hours' && position <= 1) {
+        const digitIndex = position;
+        newValue = newValue.substring(0, digitIndex) + digit + newValue.substring(digitIndex + 1);
+      } else if (section === 'minutes' && position >= 3 && position <= 4) {
+        const digitIndex = position;
+        newValue = newValue.substring(0, digitIndex) + digit + newValue.substring(digitIndex + 1);
+      }
+      
+      setDisplayValue(newValue);
+      const parsed = parseTime(newValue);
+      if (parsed && parsed.hours >= 1 && parsed.hours <= 12 && 
+          parsed.minutes >= 0 && parsed.minutes <= 59) {
+        onChange?.(newValue);
+      }
+      
+      setTimeout(() => {
+        if (input) {
+          input.setSelectionRange(position + 1, position + 1);
+        }
+      }, 0);
+    }
   };
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    let inputValue = e.target.value;
-    const position = e.target.selectionStart || 0;
-
-    // Remove any non-digit, non-colon, non-space, non-A, non-M, non-P characters
-    inputValue = inputValue.replace(/[^0-9:AMP\s]/gi, '');
-
-    // Auto-format as user types
-    if (inputValue.length >= 2 && !inputValue.includes(':')) {
-      inputValue = inputValue.slice(0, 2) + ':' + inputValue.slice(2);
-    }
-
-    // Convert to uppercase for AM/PM
-    inputValue = inputValue.toUpperCase();
-
-    setDisplayValue(inputValue);
-    setCursorPosition(position);
-
-    // Validate and call onChange only if it's a complete time
-    const parsed = parseTime(inputValue);
-    if (parsed && parsed.hours >= 1 && parsed.hours <= 12 && 
-        parsed.minutes >= 0 && parsed.minutes <= 59) {
-      onChange?.(inputValue);
-    }
+    // Only allow controlled changes through keyboard events
+    // This prevents issues with cursor positioning
   };
 
   const handleBlur = () => {
-    // Try to auto-complete partial input on blur
     const parsed = parseTime(displayValue);
     if (parsed) {
       const formattedTime = formatTime(parsed.hours, parsed.minutes, parsed.period);
@@ -154,10 +181,6 @@ const TimeInput = ({ value = '', onChange, placeholder = 'HH:MM AM/PM', label, r
       }
     }
   };
-
-  useEffect(() => {
-    setDisplayValue(value || '');
-  }, [value]);
 
   const inputComponent = (
     <Input
