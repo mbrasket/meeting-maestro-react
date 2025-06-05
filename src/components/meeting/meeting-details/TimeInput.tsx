@@ -1,18 +1,46 @@
 
+import { TimeInput as HeroTimeInput } from '@heroui/react';
+import { Time } from '@internationalized/date';
 import {
-  Input,
   Field,
   makeStyles,
   tokens,
 } from '@fluentui/react-components';
 import { Clock20Regular } from '@fluentui/react-icons';
-import { useState, useEffect } from 'react';
 
 const useStyles = makeStyles({
   field: {
     display: 'flex',
     flexDirection: 'column',
     gap: tokens.spacingVerticalXS,
+  },
+  heroTimeInput: {
+    '& .hero-input': {
+      backgroundColor: 'transparent',
+      border: 'none',
+      borderBottom: `1px solid ${tokens.colorNeutralStroke1}`,
+      borderRadius: '0',
+      padding: `${tokens.spacingVerticalXS} 0`,
+      fontSize: tokens.fontSizeBase300,
+      fontFamily: tokens.fontFamilyBase,
+      color: tokens.colorNeutralForeground1,
+      '&:focus': {
+        borderBottomColor: tokens.colorBrandStroke1,
+        outline: 'none',
+        boxShadow: 'none',
+      },
+    },
+    '& .hero-input-wrapper': {
+      backgroundColor: 'transparent',
+      border: 'none',
+      boxShadow: 'none',
+    },
+    '& .hero-label': {
+      fontSize: tokens.fontSizeBase200,
+      color: tokens.colorNeutralForeground2,
+      fontFamily: tokens.fontFamilyBase,
+      fontWeight: tokens.fontWeightRegular,
+    },
   },
 });
 
@@ -26,74 +54,65 @@ interface TimeInputProps {
 
 const TimeInput = ({ label, value = '', onChange, placeholder = "9:00 AM", required }: TimeInputProps) => {
   const styles = useStyles();
-  const [displayValue, setDisplayValue] = useState(value);
 
-  useEffect(() => {
-    setDisplayValue(value);
-  }, [value]);
-
-  const parseAndFormatTime = (input: string): string => {
-    if (!input.trim()) return '';
-
-    // Remove any extra spaces and normalize
-    const cleaned = input.trim().toLowerCase();
+  // Convert string time to Time object for HeroUI
+  const parseTimeString = (timeStr: string): Time | null => {
+    if (!timeStr) return null;
     
-    // Handle various formats: 9, 9am, 9:00, 9:00am, 21:00, etc.
-    const timeRegex = /^(\d{1,2}):?(\d{0,2})\s*(am|pm|a|p)?$/i;
-    const match = cleaned.match(timeRegex);
+    const timeRegex = /^(\d{1,2}):(\d{2})\s*(AM|PM)$/i;
+    const match = timeStr.match(timeRegex);
     
-    if (!match) return input; // Return original if no match
+    if (!match) return null;
     
     let hours = parseInt(match[1]);
-    let minutes = parseInt(match[2] || '0');
-    let period = match[3];
+    const minutes = parseInt(match[2]);
+    const ampm = match[3].toUpperCase();
     
-    // Handle 24-hour format conversion
-    if (!period && hours > 12) {
-      period = 'pm';
-      hours = hours - 12;
-    } else if (!period) {
-      period = hours < 12 ? 'am' : 'pm';
-      if (hours === 0) hours = 12;
-    }
+    if (ampm === 'PM' && hours !== 12) hours += 12;
+    if (ampm === 'AM' && hours === 12) hours = 0;
     
-    // Normalize period
-    if (period) {
-      period = period.charAt(0).toLowerCase() === 'a' ? 'AM' : 'PM';
-    }
-    
-    // Handle 12-hour format edge cases
-    if (period === 'AM' && hours === 12) hours = 12;
-    if (period === 'PM' && hours === 12) hours = 12;
-    
-    // Validate ranges
-    if (hours < 1 || hours > 12) hours = 9;
-    if (minutes < 0 || minutes > 59) minutes = 0;
-    
-    return `${hours}:${minutes.toString().padStart(2, '0')} ${period}`;
+    return new Time(hours, minutes);
   };
 
-  const handleChange = (newValue: string) => {
-    setDisplayValue(newValue);
+  // Convert Time object to string for our component
+  const formatTimeToString = (time: Time): string => {
+    let hours = time.hour;
+    const minutes = time.minute;
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    
+    if (hours === 0) hours = 12;
+    else if (hours > 12) hours -= 12;
+    
+    return `${hours}:${minutes.toString().padStart(2, '0')} ${ampm}`;
   };
 
-  const handleBlur = () => {
-    const formatted = parseAndFormatTime(displayValue);
-    setDisplayValue(formatted);
-    onChange?.(formatted);
+  const handleTimeChange = (time: Time | null) => {
+    if (time) {
+      const timeString = formatTimeToString(time);
+      onChange?.(timeString);
+    }
   };
+
+  const timeValue = parseTimeString(value);
 
   return (
     <Field label={label} required={required} className={styles.field}>
-      <Input
-        appearance="underline"
-        type="text"
-        value={displayValue}
-        onChange={(_, data) => handleChange(data.value)}
-        onBlur={handleBlur}
-        placeholder={placeholder}
-        contentBefore={<Clock20Regular />}
-      />
+      <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacingHorizontalXS }}>
+        <Clock20Regular style={{ color: tokens.colorNeutralForeground2 }} />
+        <div className={styles.heroTimeInput}>
+          <HeroTimeInput
+            value={timeValue}
+            onChange={handleTimeChange}
+            variant="underlined"
+            size="sm"
+            classNames={{
+              input: 'hero-input',
+              inputWrapper: 'hero-input-wrapper',
+              label: 'hero-label',
+            }}
+          />
+        </div>
+      </div>
     </Field>
   );
 };
