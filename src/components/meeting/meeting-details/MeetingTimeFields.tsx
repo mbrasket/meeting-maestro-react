@@ -51,6 +51,12 @@ const useStyles = makeStyles({
       paddingLeft: '0',
       paddingRight: '0',
     },
+    '& button': {
+      display: 'none !important',
+    },
+    '& [data-icon-name]': {
+      display: 'none !important',
+    },
   },
 });
 
@@ -100,26 +106,6 @@ const MeetingTimeFields = ({ formData, onInputChange }: MeetingTimeFieldsProps) 
             className={styles.dateInput}
             showGoToToday={false}
             allowTextInput={false}
-            calendarProps={{
-              showGoToToday: false,
-            }}
-            textField={{
-              iconProps: { iconName: undefined },
-              styles: {
-                fieldGroup: {
-                  border: 'none',
-                },
-                field: {
-                  border: 'none',
-                  borderBottom: '1px solid',
-                  borderRadius: 0,
-                  padding: '0',
-                },
-                icon: {
-                  display: 'none',
-                },
-              },
-            }}
           />
         </Field>
       </div>
