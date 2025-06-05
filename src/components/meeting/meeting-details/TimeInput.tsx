@@ -42,6 +42,9 @@ const useStyles = makeStyles({
     letterSpacing: '0.5px',
     border: 'none',
     backgroundColor: 'transparent',
+    padding: '4px 0',
+    width: '70px',
+    textAlign: 'center',
     '&:focus': {
       outline: 'none',
     },
@@ -49,8 +52,10 @@ const useStyles = makeStyles({
   arrowSeparator: {
     display: 'flex',
     alignItems: 'center',
-    padding: `0 ${tokens.spacingHorizontalXS}`,
+    justifyContent: 'center',
+    padding: '0 8px',
     color: tokens.colorNeutralForeground2,
+    flexShrink: 0,
   },
 });
 
@@ -64,6 +69,27 @@ interface TimeInputProps {
   required?: boolean;
   isDual?: boolean;
 }
+
+// Helper function to get next half hour
+const getNextHalfHour = (addHours = 0) => {
+  const now = new Date();
+  now.setHours(now.getHours() + addHours);
+  const minutes = now.getMinutes();
+  const roundedMinutes = minutes <= 30 ? 30 : 60;
+  
+  if (roundedMinutes === 60) {
+    now.setHours(now.getHours() + 1);
+    now.setMinutes(0);
+  } else {
+    now.setMinutes(roundedMinutes);
+  }
+  
+  const hours = now.getHours();
+  const displayHours = hours === 0 ? 12 : hours > 12 ? hours - 12 : hours;
+  const period = hours >= 12 ? 'PM' : 'AM';
+  
+  return `${displayHours.toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')} ${period}`;
+};
 
 const TimeInput = ({ 
   value = '', 
@@ -79,9 +105,23 @@ const TimeInput = ({
   const startInputRef = useRef<HTMLInputElement>(null);
   const endInputRef = useRef<HTMLInputElement>(null);
   
-  // For single mode, use the existing value
-  const [displayValue, setDisplayValue] = useState(value || '');
+  // Set default values if not provided
+  const defaultStartTime = value || getNextHalfHour();
+  const defaultEndTime = endValue || getNextHalfHour(1);
   
+  // For single mode, use the existing value
+  const [displayValue, setDisplayValue] = useState(value || defaultStartTime);
+  
+  // Initialize with defaults if values are empty
+  useEffect(() => {
+    if (isDual && !value && onChange) {
+      onChange(defaultStartTime);
+    }
+    if (isDual && !endValue && onEndChange) {
+      onEndChange(defaultEndTime);
+    }
+  }, [isDual, value, endValue, onChange, onEndChange, defaultStartTime, defaultEndTime]);
+
   // Valid minute increments
   const minuteIncrements = [0, 5, 15, 30, 45, 55];
 
@@ -127,56 +167,10 @@ const TimeInput = ({
     }
   };
 
-  const handleSingleTimeKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+  const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>, isEndTime: boolean) => {
     const input = e.currentTarget;
     const position = input.selectionStart || 0;
-    const section = getCurrentSection(position, displayValue);
-
-    if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
-      e.preventDefault();
-      
-      const parsed = parseTime(displayValue);
-      if (!parsed) {
-        const defaultTime = '12:00 AM';
-        setDisplayValue(defaultTime);
-        onChange?.(defaultTime);
-        return;
-      }
-
-      const direction = e.key === 'ArrowDown' ? 'up' : 'down';
-      let newHours = parsed.hours;
-      let newMinutes = parsed.minutes;
-      let newPeriod = parsed.period;
-
-      if (section === 'hours') {
-        if (direction === 'up') {
-          newHours = newHours === 12 ? 1 : newHours + 1;
-        } else {
-          newHours = newHours === 1 ? 12 : newHours - 1;
-        }
-      } else if (section === 'minutes') {
-        newMinutes = getNextMinute(parsed.minutes, direction);
-      } else if (section === 'period') {
-        newPeriod = parsed.period === 'AM' ? 'PM' : 'AM';
-      }
-
-      const newTime = formatTime(newHours, newMinutes, newPeriod);
-      setDisplayValue(newTime);
-      onChange?.(newTime);
-
-      // Restore cursor position after state update
-      setTimeout(() => {
-        if (input) {
-          input.setSelectionRange(position, position);
-        }
-      }, 0);
-    }
-  };
-
-  const handleDualTimeKeyDown = (e: KeyboardEvent<HTMLInputElement>, isEndTime: boolean) => {
-    const input = e.currentTarget;
-    const position = input.selectionStart || 0;
-    const currentValue = isEndTime ? endValue : value;
+    const currentValue = isEndTime ? (endValue || defaultEndTime) : (isDual ? (value || defaultStartTime) : displayValue);
     const section = getCurrentSection(position, currentValue);
 
     if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
@@ -185,9 +179,14 @@ const TimeInput = ({
       const parsed = parseTime(currentValue);
       if (!parsed) {
         const defaultTime = '12:00 AM';
-        if (isEndTime) {
-          onEndChange?.(defaultTime);
+        if (isDual) {
+          if (isEndTime) {
+            onEndChange?.(defaultTime);
+          } else {
+            onChange?.(defaultTime);
+          }
         } else {
+          setDisplayValue(defaultTime);
           onChange?.(defaultTime);
         }
         return;
@@ -211,9 +210,15 @@ const TimeInput = ({
       }
 
       const newTime = formatTime(newHours, newMinutes, newPeriod);
-      if (isEndTime) {
-        onEndChange?.(newTime);
+      
+      if (isDual) {
+        if (isEndTime) {
+          onEndChange?.(newTime);
+        } else {
+          onChange?.(newTime);
+        }
       } else {
+        setDisplayValue(newTime);
         onChange?.(newTime);
       }
 
@@ -226,7 +231,7 @@ const TimeInput = ({
     }
   };
 
-  const handleSingleTimeChange = (e: ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement>, isEndTime: boolean) => {
     let inputValue = e.target.value;
 
     // Remove any non-digit, non-colon, non-space, non-A, non-M, non-P characters
@@ -235,56 +240,40 @@ const TimeInput = ({
     // Convert to uppercase for AM/PM
     inputValue = inputValue.toUpperCase();
 
-    setDisplayValue(inputValue);
-
-    // Single time validation
-    const parsed = parseTime(inputValue);
-    if (parsed && parsed.hours >= 1 && parsed.hours <= 12 && 
-        parsed.minutes >= 0 && parsed.minutes <= 59) {
-      onChange?.(inputValue);
-    }
-  };
-
-  const handleDualTimeChange = (e: ChangeEvent<HTMLInputElement>, isEndTime: boolean) => {
-    let inputValue = e.target.value;
-
-    // Remove any non-digit, non-colon, non-space, non-A, non-M, non-P characters
-    inputValue = inputValue.replace(/[^0-9:AMP\s]/gi, '');
-
-    // Convert to uppercase for AM/PM
-    inputValue = inputValue.toUpperCase();
-
-    const parsed = parseTime(inputValue);
-    if (parsed && parsed.hours >= 1 && parsed.hours <= 12 && 
-        parsed.minutes >= 0 && parsed.minutes <= 59) {
-      if (isEndTime) {
-        onEndChange?.(inputValue);
-      } else {
+    if (isDual) {
+      const parsed = parseTime(inputValue);
+      if (parsed && parsed.hours >= 1 && parsed.hours <= 12 && 
+          parsed.minutes >= 0 && parsed.minutes <= 59) {
+        if (isEndTime) {
+          onEndChange?.(inputValue);
+        } else {
+          onChange?.(inputValue);
+        }
+      }
+    } else {
+      setDisplayValue(inputValue);
+      const parsed = parseTime(inputValue);
+      if (parsed && parsed.hours >= 1 && parsed.hours <= 12 && 
+          parsed.minutes >= 0 && parsed.minutes <= 59) {
         onChange?.(inputValue);
       }
     }
   };
 
-  const handleSingleTimeBlur = () => {
-    const parsed = parseTime(displayValue);
-    if (parsed) {
-      const formattedTime = formatTime(parsed.hours, parsed.minutes, parsed.period);
-      if (formattedTime !== displayValue) {
-        setDisplayValue(formattedTime);
-        onChange?.(formattedTime);
-      }
-    }
-  };
-
-  const handleDualTimeBlur = (isEndTime: boolean) => {
-    const currentValue = isEndTime ? endValue : value;
+  const handleBlur = (isEndTime: boolean) => {
+    const currentValue = isEndTime ? (endValue || defaultEndTime) : (isDual ? (value || defaultStartTime) : displayValue);
     const parsed = parseTime(currentValue);
     if (parsed) {
       const formattedTime = formatTime(parsed.hours, parsed.minutes, parsed.period);
       if (formattedTime !== currentValue) {
-        if (isEndTime) {
-          onEndChange?.(formattedTime);
+        if (isDual) {
+          if (isEndTime) {
+            onEndChange?.(formattedTime);
+          } else {
+            onChange?.(formattedTime);
+          }
         } else {
+          setDisplayValue(formattedTime);
           onChange?.(formattedTime);
         }
       }
@@ -293,18 +282,18 @@ const TimeInput = ({
 
   useEffect(() => {
     if (!isDual) {
-      setDisplayValue(value || '');
+      setDisplayValue(value || defaultStartTime);
     }
-  }, [value, isDual]);
+  }, [value, isDual, defaultStartTime]);
 
   const inputComponent = isDual ? (
     <div className={styles.dualTimeContainer}>
       <Input
         ref={startInputRef}
-        value={value}
-        onChange={(e) => handleDualTimeChange(e, false)}
-        onKeyDown={(e) => handleDualTimeKeyDown(e, false)}
-        onBlur={() => handleDualTimeBlur(false)}
+        value={value || defaultStartTime}
+        onChange={(e) => handleChange(e, false)}
+        onKeyDown={(e) => handleKeyDown(e, false)}
+        onBlur={() => handleBlur(false)}
         placeholder="12:00 AM"
         className={styles.dualTimeInput}
         maxLength={8}
@@ -314,10 +303,10 @@ const TimeInput = ({
       </div>
       <Input
         ref={endInputRef}
-        value={endValue}
-        onChange={(e) => handleDualTimeChange(e, true)}
-        onKeyDown={(e) => handleDualTimeKeyDown(e, true)}
-        onBlur={() => handleDualTimeBlur(true)}
+        value={endValue || defaultEndTime}
+        onChange={(e) => handleChange(e, true)}
+        onKeyDown={(e) => handleKeyDown(e, true)}
+        onBlur={() => handleBlur(true)}
         placeholder="01:00 PM"
         className={styles.dualTimeInput}
         maxLength={8}
@@ -326,9 +315,9 @@ const TimeInput = ({
   ) : (
     <Input
       value={displayValue}
-      onChange={handleSingleTimeChange}
-      onKeyDown={handleSingleTimeKeyDown}
-      onBlur={handleSingleTimeBlur}
+      onChange={(e) => handleChange(e, false)}
+      onKeyDown={(e) => handleKeyDown(e, false)}
+      onBlur={() => handleBlur(false)}
       placeholder={placeholder}
       className={styles.timeInput}
       maxLength={8}
