@@ -1,3 +1,4 @@
+
 import { Button, makeStyles, tokens } from '@fluentui/react-components';
 import { 
   Tag20Regular,
@@ -32,12 +33,12 @@ const useStyles = makeStyles({
   toolbarLeft: {
     display: 'flex',
     alignItems: 'center',
-    gap: tokens.spacingHorizontalM,
+    gap: '8px',
   },
   toolbarRight: {
     display: 'flex',
     alignItems: 'center',
-    gap: tokens.spacingHorizontalS,
+    gap: '8px',
   },
   dropdownTrigger: {
     border: 'none',
@@ -143,7 +144,6 @@ const MeetingToolbar = ({
           <DropdownMenuTrigger asChild>
             <button className={styles.dropdownTrigger}>
               <MoreHorizontal20Regular />
-              <ChevronDown20Regular />
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="z-50 bg-white border shadow-lg">
