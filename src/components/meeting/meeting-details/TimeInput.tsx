@@ -1,9 +1,9 @@
+
 import React, { useState, useRef, useEffect, KeyboardEvent, ChangeEvent } from 'react';
 import { Input, Field, makeStyles } from '@fluentui/react-components';
 
 const useStyles = makeStyles({
   timeInput: {
-    fontFamily: 'monospace',
     letterSpacing: '0.5px',
     textAlign: 'left',
   },
@@ -78,6 +78,29 @@ const TimeInput = ({ value = '', onChange, placeholder = 'HH:MM AM/PM', label, r
     return 'hours';
   };
 
+  // Move cursor to next/previous section for tabbing
+  const moveToSection = (section: 'hours' | 'minutes' | 'period') => {
+    const input = inputRef.current;
+    if (!input) return;
+
+    let position = 0;
+    switch (section) {
+      case 'hours':
+        position = 0;
+        break;
+      case 'minutes':
+        position = 3;
+        break;
+      case 'period':
+        position = 6;
+        break;
+    }
+    
+    setTimeout(() => {
+      input.setSelectionRange(position, position + (section === 'period' ? 2 : 2));
+    }, 0);
+  };
+
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     const input = inputRef.current;
     if (!input) return;
@@ -86,7 +109,41 @@ const TimeInput = ({ value = '', onChange, placeholder = 'HH:MM AM/PM', label, r
     const section = getCurrentSection(position);
     const parsed = parseTime(displayValue);
 
-    if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+    // Handle Tab key for section navigation
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      if (e.shiftKey) {
+        // Shift+Tab - move to previous section
+        switch (section) {
+          case 'minutes':
+            moveToSection('hours');
+            break;
+          case 'period':
+            moveToSection('minutes');
+            break;
+          case 'hours':
+            moveToSection('period');
+            break;
+        }
+      } else {
+        // Tab - move to next section
+        switch (section) {
+          case 'hours':
+            moveToSection('minutes');
+            break;
+          case 'minutes':
+            moveToSection('period');
+            break;
+          case 'period':
+            moveToSection('hours');
+            break;
+        }
+      }
+      return;
+    }
+
+    // Reversed arrow key behavior: Down = increment, Up = decrement
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
       e.preventDefault();
       
       if (!parsed) {
@@ -96,7 +153,7 @@ const TimeInput = ({ value = '', onChange, placeholder = 'HH:MM AM/PM', label, r
         return;
       }
 
-      const direction = e.key === 'ArrowUp' ? 'up' : 'down';
+      const direction = e.key === 'ArrowDown' ? 'up' : 'down'; // Reversed
       let newHours = parsed.hours;
       let newMinutes = parsed.minutes;
       let newPeriod = parsed.period;

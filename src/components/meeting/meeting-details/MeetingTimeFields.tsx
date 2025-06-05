@@ -57,6 +57,26 @@ const MeetingTimeFields = ({ formData, onInputChange }: MeetingTimeFieldsProps) 
     onInputChange('endTime', timeValue);
   };
 
+  const handleDateKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    // Reverse arrow key behavior for date field: Down = increment, Up = decrement
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+      e.preventDefault();
+      const input = e.currentTarget;
+      const currentValue = input.value;
+      
+      if (currentValue) {
+        const date = new Date(currentValue);
+        if (!isNaN(date.getTime())) {
+          const direction = e.key === 'ArrowDown' ? 1 : -1; // Reversed
+          date.setDate(date.getDate() + direction);
+          
+          const newValue = date.toISOString().split('T')[0];
+          onInputChange('startDate', newValue);
+        }
+      }
+    }
+  };
+
   return (
     <MeetingFieldWithIcon icon={<Calendar20Regular />}>
       <div className={styles.timeFieldsContainer}>
@@ -66,6 +86,7 @@ const MeetingTimeFields = ({ formData, onInputChange }: MeetingTimeFieldsProps) 
             type="date"
             value={formData.startDate}
             onChange={handleDateChange}
+            onKeyDown={handleDateKeyDown}
             placeholder="Select date"
           />
         </Field>
