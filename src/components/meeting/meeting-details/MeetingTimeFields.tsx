@@ -5,7 +5,7 @@ import {
   tokens,
 } from '@fluentui/react-components';
 import { DatePicker } from '@fluentui/react-datepicker-compat';
-import { Calendar20Regular, ArrowRight } from '@fluentui/react-icons';
+import { Calendar20Regular, ChevronRight20Regular } from '@fluentui/react-icons';
 import { FormData } from '../types';
 import TimeInput from './TimeInput';
 
@@ -104,7 +104,7 @@ const MeetingTimeFields = ({ formData, onInputChange }: MeetingTimeFieldsProps) 
             required
           />
           <div className={styles.arrowContainer}>
-            <ArrowRight size={16} />
+            <ChevronRight20Regular />
           </div>
           <TimeInput
             value={formData.endTime}
