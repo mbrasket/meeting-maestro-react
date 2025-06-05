@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import {
   Card,
@@ -10,6 +9,7 @@ import { Person } from '../data/sampleData';
 import MeetingToolbar from './meeting/MeetingToolbar';
 import MeetingDetailsTab from './meeting/MeetingDetailsTab';
 import MeetingSeriesPanel from './meeting/MeetingSeriesPanel';
+import ParticipantsPanel from './meeting/ParticipantsPanel';
 
 const useStyles = makeStyles({
   container: {
@@ -17,6 +17,7 @@ const useStyles = makeStyles({
     margin: '0 auto',
     padding: tokens.spacingVerticalM,
     paddingTop: '80px', // Add space for fixed toolbar
+    paddingRight: '320px', // Add space for participants panel
     backgroundColor: tokens.colorNeutralBackground1,
     minHeight: '100vh',
   },
@@ -148,6 +149,12 @@ const MeetingForm = () => {
           </div>
         </Card>
       )}
+
+      <ParticipantsPanel
+        coOrganizers={formData.coOrganizers}
+        participants={formData.participants}
+        optionalParticipants={formData.optionalParticipants}
+      />
     </div>
   );
 };
