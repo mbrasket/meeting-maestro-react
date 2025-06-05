@@ -56,6 +56,14 @@ const MeetingTimeFields = ({ formData, onInputChange }: MeetingTimeFieldsProps) 
     }
   };
 
+  const handleStartTimeChange = (time: string) => {
+    onInputChange('startTime', time);
+  };
+
+  const handleEndTimeChange = (time: string) => {
+    onInputChange('endTime', time);
+  };
+
   const startDate = formData.startTime ? new Date(formData.startTime) : undefined;
 
   return (
@@ -83,11 +91,13 @@ const MeetingTimeFields = ({ formData, onInputChange }: MeetingTimeFieldsProps) 
             <Clock20Regular />
           </div>
           <TimeInput
-            value={formData.endTime}
-            onChange={(value) => onInputChange('endTime', value)}
-            placeholder="HH:MM AM/PM"
+            value={formData.startTime}
+            endValue={formData.endTime}
+            onChange={handleStartTimeChange}
+            onEndChange={handleEndTimeChange}
             label=""
             required
+            isDual={true}
           />
         </div>
       </div>
