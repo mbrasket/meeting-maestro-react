@@ -31,12 +31,12 @@ export const useChipNavigation = <T>(
       case 'Delete':
         e.preventDefault();
         onRemove(items[index], index);
-        break;
+        return 'handleFocusAfterDelete';
       case 'Enter':
       case ' ':
         e.preventDefault();
         onRemove(items[index], index);
-        break;
+        return 'handleFocusAfterDelete';
     }
     return null;
   }, [items, onRemove]);

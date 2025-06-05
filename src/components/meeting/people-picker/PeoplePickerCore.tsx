@@ -1,4 +1,3 @@
-
 import { useState, useCallback, useRef, KeyboardEvent, useEffect } from 'react';
 import { Field, makeStyles } from '@fluentui/react-components';
 import { Person } from '../../../data/sampleData';
@@ -92,7 +91,26 @@ const PeoplePickerCore = ({
 
   const removePersonAtIndex = useCallback((person: Person, index: number) => {
     removePerson(person);
-  }, [removePerson]);
+    
+    // Focus management after deletion
+    setTimeout(() => {
+      if (value.length > 1) {
+        // If there are other chips, focus the next one or the previous one
+        const nextIndex = index < value.length - 1 ? index : index - 1;
+        if (chipRefs.current[nextIndex]) {
+          chipRefs.current[nextIndex]?.focus();
+          setChipSelection(nextIndex);
+        } else {
+          inputRef.current?.focus();
+          resetChipSelection();
+        }
+      } else {
+        // If this was the last chip, focus the input
+        inputRef.current?.focus();
+        resetChipSelection();
+      }
+    }, 0);
+  }, [removePerson, value.length]);
 
   const {
     selectedIndex,
@@ -224,6 +242,8 @@ const PeoplePickerCore = ({
     const result = handleChipKeyDown(e, index);
     if (result === 'focusInput') {
       inputRef.current?.focus();
+    } else if (result === 'handleFocusAfterDelete') {
+      // Focus will be handled by removePersonAtIndex
     }
   };
 
