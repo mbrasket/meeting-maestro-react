@@ -54,7 +54,16 @@ const useStyles = makeStyles({
     '& button': {
       display: 'none !important',
     },
+    '& svg': {
+      display: 'none !important',
+    },
     '& [data-icon-name]': {
+      display: 'none !important',
+    },
+    '& .ms-DatePicker-event--without-label': {
+      display: 'none !important',
+    },
+    '& .ms-Icon': {
       display: 'none !important',
     },
   },
