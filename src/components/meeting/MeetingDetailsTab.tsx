@@ -19,7 +19,7 @@ import {
   Location20Regular,
   MoreHorizontal20Regular
 } from '@fluentui/react-icons';
-import { FormData, RecurringPattern, OneOffInstance } from './types';
+import { FormData } from './types';
 import PeoplePicker from './PeoplePicker';
 import LocationPicker from './LocationPicker';
 import { samplePeople, sampleLocations, Person } from '../../data/sampleData';
@@ -28,8 +28,6 @@ import MeetingFieldWithIcon from './meeting-details/MeetingFieldWithIcon';
 import MeetingFieldWithIconAndMenu from './meeting-details/MeetingFieldWithIconAndMenu';
 import MeetingTimeFields from './meeting-details/MeetingTimeFields';
 import MeetingDescriptionField from './meeting-details/MeetingDescriptionField';
-import RecurringPatternSection from './recurring/RecurringPatternSection';
-import OneOffInstancesSection from './recurring/OneOffInstancesSection';
 
 const useStyles = makeStyles({
   formField: {
@@ -46,7 +44,7 @@ const useStyles = makeStyles({
 
 interface MeetingDetailsTabProps {
   formData: FormData;
-  onInputChange: (field: keyof FormData, value: string | boolean | Person[] | string[] | RecurringPattern | OneOffInstance[]) => void;
+  onInputChange: (field: keyof FormData, value: string | boolean | Person[] | string[]) => void;
 }
 
 const MeetingDetailsTab = ({ formData, onInputChange }: MeetingDetailsTabProps) => {
@@ -67,14 +65,6 @@ const MeetingDetailsTab = ({ formData, onInputChange }: MeetingDetailsTabProps) 
 
   const handleAddLocationToHistory = (location: string) => {
     addLocation(location);
-  };
-
-  const handleRecurringPatternChange = (pattern: RecurringPattern) => {
-    onInputChange('recurringPattern', pattern);
-  };
-
-  const handleOneOffInstancesChange = (instances: OneOffInstance[]) => {
-    onInputChange('oneOffInstances', instances);
   };
 
   // Convert location string to array for the picker, handling both string and array values
@@ -197,19 +187,6 @@ const MeetingDetailsTab = ({ formData, onInputChange }: MeetingDetailsTabProps) 
           label="Make this a series / Add instances"
         />
       </Field>
-
-      {formData.isRecurring && (
-        <>
-          <RecurringPatternSection
-            pattern={formData.recurringPattern}
-            onPatternChange={handleRecurringPatternChange}
-          />
-          <OneOffInstancesSection
-            instances={formData.oneOffInstances}
-            onInstancesChange={handleOneOffInstancesChange}
-          />
-        </>
-      )}
     </div>
   );
 };
