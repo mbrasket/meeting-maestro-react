@@ -1,6 +1,7 @@
 import { makeStyles, tokens, Text, Checkbox } from '@fluentui/react-components';
 import { DroppableStateSnapshot } from '@hello-pangea/dnd';
 import { Flag } from 'lucide-react';
+import { CalendarItem } from '../types';
 
 const useStyles = makeStyles({
   ghostCard: {
@@ -53,9 +54,10 @@ const useStyles = makeStyles({
 
 interface GhostCardProps {
   snapshot: DroppableStateSnapshot;
+  allItems?: CalendarItem[];
 }
 
-export const GhostCard = ({ snapshot }: GhostCardProps) => {
+export const GhostCard = ({ snapshot, allItems = [] }: GhostCardProps) => {
   const styles = useStyles();
 
   if (!snapshot.isDraggingOver || !snapshot.draggingFromThisWith) {
@@ -93,9 +95,35 @@ export const GhostCard = ({ snapshot }: GhostCardProps) => {
           styleClass: styles.highlight,
         };
       }
+    } else {
+      // Handle existing calendar items being moved
+      const existingItem = allItems.find(item => item.id === draggableId);
+      if (existingItem) {
+        const styleClass = (() => {
+          switch (existingItem.type) {
+            case 'event':
+              return styles.event;
+            case 'task':
+              return styles.task;
+            case 'highlight':
+              return styles.highlight;
+            case 'milestone':
+              return styles.milestone;
+            default:
+              return styles.event;
+          }
+        })();
+        
+        return {
+          type: existingItem.type,
+          title: existingItem.title,
+          styleClass,
+          completed: existingItem.completed,
+        };
+      }
     }
     
-    // Default for existing items being moved (we don't have access to the actual item data here)
+    // Default fallback
     return {
       type: 'event',
       title: 'Moving item...',
@@ -110,7 +138,7 @@ export const GhostCard = ({ snapshot }: GhostCardProps) => {
       case 'task':
         return (
           <div className={styles.taskContent}>
-            <Checkbox checked={false} disabled />
+            <Checkbox checked={itemPreview.completed || false} disabled />
             <Text size={200} weight="medium">
               {itemPreview.title}
             </Text>

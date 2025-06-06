@@ -17,6 +17,7 @@ interface TimeSlotProps {
   selectedItemIds: Set<string>;
   onSelectItem: (itemId: string, ctrlKey: boolean) => void;
   onClearSelection: () => void;
+  allItems?: CalendarItem[]; // Add this to get access to all items for drag preview
 }
 
 const TimeSlot = ({ 
@@ -28,7 +29,8 @@ const TimeSlot = ({
   onDeleteItem, 
   selectedItemIds, 
   onSelectItem, 
-  onClearSelection 
+  onClearSelection,
+  allItems = [] // Default to empty array
 }: TimeSlotProps) => {
   const [resizingItemId, setResizingItemId] = useState<string | null>(null);
   const droppableId = `${day.toDateString()}-${slot}`;
@@ -78,7 +80,7 @@ const TimeSlot = ({
           isHalfHourBoundary={isHalfHourBoundary}
           onSlotClick={handleSlotClick}
         >
-          <GhostCard snapshot={snapshot} />
+          <GhostCard snapshot={snapshot} allItems={allItems} />
           
           {itemsWithPositions.map((itemData, index) => {
             const { item, column, totalColumns, startSlot } = itemData;

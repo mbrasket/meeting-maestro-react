@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import {
   makeStyles,
@@ -227,6 +226,7 @@ const CalendarGrid = ({
                     slot={slot}
                     items={slotItems}
                     allDayItems={allDayItems}
+                    allItems={items}
                     onUpdateItem={onUpdateItem}
                     onDeleteItem={onDeleteItem}
                     selectedItemIds={selectedItemIds}
