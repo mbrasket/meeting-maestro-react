@@ -8,7 +8,7 @@ const useStyles = makeStyles({
     height: '7px',
     position: 'relative',
     minHeight: '7px',
-    padding: '1px',
+    padding: '0px', // Reduced from 1px
   },
   halfHourBorder: {
     borderBottom: `1px solid ${tokens.colorNeutralStroke2}`,

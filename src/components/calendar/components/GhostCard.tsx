@@ -5,8 +5,8 @@ import { DroppableStateSnapshot } from '@hello-pangea/dnd';
 const useStyles = makeStyles({
   ghostCard: {
     position: 'absolute',
-    left: '6px',
-    right: '6px',
+    left: '2px', // Reduced from 6px
+    right: '2px', // Reduced from 6px
     height: '28px',
     backgroundColor: tokens.colorBrandBackground,
     border: `2px dashed ${tokens.colorBrandStroke1}`,

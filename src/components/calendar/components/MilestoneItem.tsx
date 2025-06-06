@@ -80,8 +80,8 @@ export const MilestoneItem = ({
     const columnWidth = 100 / totalColumns;
     const left = column * columnWidth;
     return {
-      left: `calc(${left}% + 4px)`, // Add consistent padding
-      width: `calc(${columnWidth}% - 8px)`, // Subtract padding from width
+      left: `calc(${left}% + 2px)`, // Reduced from 4px
+      width: `calc(${columnWidth}% - 4px)`, // Reduced from 8px (2px left + 2px right)
       height: '6px', // Fixed height for milestones
     };
   };
