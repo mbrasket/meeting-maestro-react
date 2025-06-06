@@ -37,6 +37,7 @@ const CalendarPage = () => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Control') {
         setIsCtrlPressed(true);
+        console.log('CTRL key pressed');
       } else if (event.key === 'Escape') {
         setSelectedItemIds(new Set());
       } else if (event.key === 'Delete' && selectedItemIds.size > 0) {
@@ -47,6 +48,7 @@ const CalendarPage = () => {
     const handleKeyUp = (event: KeyboardEvent) => {
       if (event.key === 'Control') {
         setIsCtrlPressed(false);
+        console.log('CTRL key released');
       }
     };
 
@@ -116,6 +118,7 @@ const CalendarPage = () => {
   };
 
   const handleCopyItem = (item: CalendarItem) => {
+    console.log('Copy item requested:', item.id);
     setCopyingItem(item);
   };
 
@@ -125,8 +128,11 @@ const CalendarPage = () => {
     if (!destination) {
       // Clear copying state if drag was cancelled
       setCopyingItem(null);
+      console.log('Drag cancelled, clearing copy state');
       return;
     }
+
+    console.log('Drag ended. Copying item:', copyingItem?.id, 'Target:', destination.droppableId);
 
     // Handle dragging from tools panel to calendar
     if (source.droppableId === 'tools-items' && destination.droppableId.includes('-')) {
@@ -179,16 +185,18 @@ const CalendarPage = () => {
         
         // Check if this was a copy operation (copyingItem is set)
         if (copyingItem && copyingItem.id === item.id) {
+          console.log('Creating copy of item:', item.id);
           // Create a copy of the item
           const copiedItem: CalendarItem = {
             ...item,
-            id: Date.now().toString(),
+            id: `${Date.now()}-copy`,
             startTime: newStartTime,
             endTime: newEndTime,
             title: `${item.title} (Copy)`,
           };
           handleAddItem(copiedItem);
         } else {
+          console.log('Moving item:', item.id);
           // Move the existing item
           handleUpdateItem(item.id, {
             startTime: newStartTime,

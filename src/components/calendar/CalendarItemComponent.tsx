@@ -1,3 +1,4 @@
+
 import { useRef, useState } from 'react';
 import { Draggable } from '@hello-pangea/dnd';
 import { makeStyles, tokens } from '@fluentui/react-components';
@@ -163,17 +164,19 @@ const CalendarItemComponent = ({
       isDragDisabled={isResizing}
     >
       {(provided, snapshot) => {
-        // Check if we should copy on drag start
+        // Check if we should copy - CTRL was pressed when drag started
         const shouldCopy = isCtrlPressed && snapshot.isDragging;
         
-        // Trigger copy when drag starts with CTRL pressed
+        // Handle copying logic when drag starts with CTRL
         if (shouldCopy && !isCopying && onCopyItem) {
+          console.log('Starting copy operation for item:', item.id);
           setIsCopying(true);
           onCopyItem(item);
         }
         
         // Reset copying state when drag ends
         if (!snapshot.isDragging && isCopying) {
+          console.log('Ending copy operation for item:', item.id);
           setIsCopying(false);
         }
 
