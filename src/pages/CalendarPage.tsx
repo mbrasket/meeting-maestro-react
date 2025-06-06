@@ -138,10 +138,12 @@ const CalendarPage = () => {
   const handleDragStart = (initial: any) => {
     const { draggableId, source } = initial;
     
-    console.log('DragStart - CTRL pressed:', keyboardRef.current.ctrlKey, 'draggableId:', draggableId);
+    // Get the current CTRL state at the moment of drag start
+    const isCtrlPressed = keyboardRef.current.ctrlKey;
+    console.log('DragStart - CTRL pressed:', isCtrlPressed, 'draggableId:', draggableId);
     
     // Only handle cloning for existing calendar items (not tools) when CTRL is pressed
-    if (keyboardRef.current.ctrlKey && !source.droppableId.startsWith('tools-')) {
+    if (isCtrlPressed && !source.droppableId.startsWith('tools-')) {
       const originalItem = calendarItems.find(item => item.id === draggableId);
       if (originalItem) {
         console.log('Creating clone of item:', originalItem.id);

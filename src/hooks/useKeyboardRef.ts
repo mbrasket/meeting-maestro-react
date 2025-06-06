@@ -40,15 +40,28 @@ export const useKeyboardRef = () => {
       };
     };
 
+    const handleVisibilityChange = () => {
+      // Reset all keys when tab becomes hidden
+      if (document.hidden) {
+        keyboardRef.current = {
+          ctrlKey: false,
+          shiftKey: false,
+          altKey: false,
+        };
+      }
+    };
+
     // Use capture phase to get events before React DnD
     document.addEventListener('keydown', handleKeyDown, { capture: true });
     document.addEventListener('keyup', handleKeyUp, { capture: true });
     window.addEventListener('blur', handleBlur);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
 
     return () => {
       document.removeEventListener('keydown', handleKeyDown, { capture: true });
       document.removeEventListener('keyup', handleKeyUp, { capture: true });
-      window.removeEventListener('blur', handleBlur);
+      window.addEventListener('blur', handleBlur);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, []);
 
