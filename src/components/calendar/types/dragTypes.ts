@@ -1,8 +1,10 @@
 
+import { CalendarItemType } from './index';
+
 export interface DragState {
   isDragging: boolean;
   draggedItemId: string | null;
-  draggedItemType: string | null;
+  draggedItemType: CalendarItemType | null;
   sourceType: 'tools' | 'calendar';
   targetDay: Date | null;
   targetSlot: number | null;

@@ -7,7 +7,7 @@ import {
   Checkbox,
 } from '@fluentui/react-components';
 import { Calendar, CheckSquare, Highlighter, Flag } from 'lucide-react';
-import { CalendarItemTemplate } from './types';
+import { CalendarItemTemplate, CalendarItemType } from './types';
 
 const useStyles = makeStyles({
   toolItem: {

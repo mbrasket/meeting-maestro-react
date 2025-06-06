@@ -1,15 +1,16 @@
 
 import { useState, useCallback } from 'react';
 import { CalendarItem } from '../types';
+import { DragState } from '../types/dragTypes';
 
-interface DragState {
+interface SimpleDragState {
   isDragging: boolean;
   draggedItemId: string | null;
   draggedItemType: string | null;
 }
 
 export const useDragState = () => {
-  const [dragState, setDragState] = useState<DragState>({
+  const [dragState, setDragState] = useState<SimpleDragState>({
     isDragging: false,
     draggedItemId: null,
     draggedItemType: null,
