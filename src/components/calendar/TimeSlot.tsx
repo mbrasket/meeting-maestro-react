@@ -8,12 +8,17 @@ const useStyles = makeStyles({
   slot: {
     height: '20px',
     position: 'relative',
-    borderBottom: slot => slot % 12 === 0 ? `1px solid ${tokens.colorNeutralStroke2}` : `1px solid ${tokens.colorNeutralStroke3}`,
     minHeight: '20px',
+  },
+  hourBorder: {
+    borderBottom: `1px solid ${tokens.colorNeutralStroke2}`,
+  },
+  regularBorder: {
+    borderBottom: `1px solid ${tokens.colorNeutralStroke3}`,
   },
   dropZone: {
     backgroundColor: tokens.colorBrandBackground2,
-    opacity: 0.3,
+    opacity: '0.3',
   },
 });
 
@@ -28,6 +33,7 @@ interface TimeSlotProps {
 const TimeSlot = ({ day, slot, items, onUpdateItem, onDeleteItem }: TimeSlotProps) => {
   const styles = useStyles();
   const droppableId = `${day.toDateString()}-${slot}`;
+  const isHourBoundary = slot % 12 === 0;
 
   return (
     <Droppable droppableId={droppableId}>
@@ -35,7 +41,7 @@ const TimeSlot = ({ day, slot, items, onUpdateItem, onDeleteItem }: TimeSlotProp
         <div 
           ref={provided.innerRef}
           {...provided.droppableProps}
-          className={`${styles.slot} ${snapshot.isDraggingOver ? styles.dropZone : ''}`}
+          className={`${styles.slot} ${isHourBoundary ? styles.hourBorder : styles.regularBorder} ${snapshot.isDraggingOver ? styles.dropZone : ''}`}
         >
           {items.map((item, index) => {
             // Only render the item in its starting slot to avoid duplicates
