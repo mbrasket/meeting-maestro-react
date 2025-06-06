@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import {
   makeStyles,
@@ -10,7 +11,6 @@ import { useKeyboardRef } from '../hooks/useKeyboardRef';
 import { useTimeRangeSelection } from '../hooks/useTimeRangeSelection';
 import { useDragAndDrop } from '../hooks/useDragAndDrop';
 import { DragDropProvider } from '../contexts/DragDropContext';
-import { detectCollisions } from '../utils/collisionDetection';
 
 const useStyles = makeStyles({
   container: {
@@ -149,26 +149,6 @@ const CalendarPage = () => {
           </div>
         )}
         
-        {/* Enhanced debug panel */}
-        {process.env.NODE_ENV === 'development' && (
-          <div style={{
-            position: 'fixed',
-            top: '120px',
-            right: '20px',
-            backgroundColor: '#000',
-            color: '#fff',
-            padding: '8px',
-            borderRadius: '4px',
-            fontSize: '11px',
-            maxWidth: '200px',
-            zIndex: 999
-          }}>
-            <div>CTRL Debug:</div>
-            <div>State: {keyboardRef.current.ctrlKey ? 'PRESSED' : 'released'}</div>
-            <div>Items: {calendarItems.length}</div>
-          </div>
-        )}
-
         <div className={styles.mainContent} data-calendar-grid>
           <CalendarGrid
             items={calendarItems}
