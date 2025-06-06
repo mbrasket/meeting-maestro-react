@@ -87,39 +87,35 @@ export const GhostCard = ({ snapshot, allItems = [] }: GhostCardProps) => {
     // Handle tool items from the panel
     if (draggableId.startsWith('tool-')) {
       if (draggableId.includes('milestone')) {
-        const preview: ItemPreview = {
+        return {
           type: 'milestone',
           title: 'New Milestone',
           styleClass: styles.milestone,
         };
-        return preview;
       }
       
       if (draggableId.includes('event')) {
-        const preview: ItemPreview = {
+        return {
           type: 'event',
           title: 'New Event',
           styleClass: styles.event,
         };
-        return preview;
       }
       
       if (draggableId.includes('task')) {
-        const preview: ItemPreview = {
+        return {
           type: 'task',
           title: 'New Task',
           styleClass: styles.task,
         };
-        return preview;
       }
       
       if (draggableId.includes('highlight')) {
-        const preview: ItemPreview = {
+        return {
           type: 'highlight',
           title: 'New Time Block',
           styleClass: styles.highlight,
         };
-        return preview;
       }
     }
     
@@ -141,22 +137,20 @@ export const GhostCard = ({ snapshot, allItems = [] }: GhostCardProps) => {
         }
       })();
       
-      const preview: ItemPreview = {
+      return {
         type: existingItem.type,
         title: existingItem.title,
         styleClass,
         completed: existingItem.completed,
       };
-      return preview;
     }
     
     // Default fallback
-    const defaultPreview: ItemPreview = {
+    return {
       type: 'event',
       title: 'Moving item...',
       styleClass: styles.event,
     };
-    return defaultPreview;
   };
 
   const itemPreview = getItemPreview();
