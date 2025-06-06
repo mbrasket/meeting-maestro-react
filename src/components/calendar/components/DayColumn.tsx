@@ -6,6 +6,7 @@ import { format } from 'date-fns';
 import { CalendarItem } from '../types';
 import CalendarItemComponent from '../CalendarItemComponent';
 import { calculateOverlapPositions } from '../utils/overlapCalculations';
+import { DragState } from '../types/dragTypes';
 
 const useStyles = makeStyles({
   dayColumn: {
@@ -71,16 +72,6 @@ const useStyles = makeStyles({
     transition: 'all 0.2s ease',
   },
 });
-
-interface DragState {
-  isDragging: boolean;
-  draggedItemId: string | null;
-  draggedItemType: string | null;
-  sourceType: 'tools' | 'calendar';
-  targetDay: Date | null;
-  targetSlot: number | null;
-  isValidDrop: boolean;
-}
 
 interface DayColumnProps {
   day: Date;
