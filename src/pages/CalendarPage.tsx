@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import {
   makeStyles,
@@ -10,6 +9,7 @@ import { CalendarItem } from '../components/calendar/types';
 import { useKeyboardRef } from '../hooks/useKeyboardRef';
 import { useTimeRangeSelection } from '../hooks/useTimeRangeSelection';
 import { DragDropProvider } from '../contexts/DragDropContext';
+import { useDragAndDrop } from '../hooks/useDragAndDrop';
 
 const useStyles = makeStyles({
   container: {
@@ -48,6 +48,15 @@ const CalendarContent = () => {
   
   const keyboardRef = useKeyboardRef();
   const timeRangeSelection = useTimeRangeSelection();
+
+  // Initialize drag and drop handlers
+  const { handleDragStart, handleDragEnd } = useDragAndDrop({
+    items: calendarItems,
+    onUpdateItem: handleUpdateItem,
+    onAddItem: handleAddItem,
+    onDeleteItem: handleDeleteItem,
+    setCalendarItems,
+  });
 
   // Handle keyboard shortcuts
   useEffect(() => {

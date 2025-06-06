@@ -11,8 +11,6 @@ import {
   DragStartEvent,
   DragOverEvent,
   DragEndEvent,
-  Active,
-  Over,
 } from '@dnd-kit/core';
 import {
   sortableKeyboardCoordinates,
@@ -39,17 +37,9 @@ export const useDragDropContext = () => {
 
 interface DragDropProviderProps {
   children: ReactNode;
-  onDragStart?: (event: DragStartEvent) => void;
-  onDragOver?: (event: DragOverEvent) => void;
-  onDragEnd?: (event: DragEndEvent) => void;
 }
 
-export const DragDropProvider = ({ 
-  children, 
-  onDragStart, 
-  onDragOver, 
-  onDragEnd 
-}: DragDropProviderProps) => {
+export const DragDropProvider = ({ children }: DragDropProviderProps) => {
   const [activeId, setActiveId] = useState<string | null>(null);
   const [draggedItem, setDraggedItem] = useState<CalendarItem | null>(null);
   const [isCloning, setIsCloning] = useState(false);
@@ -67,18 +57,18 @@ export const DragDropProvider = ({
 
   const handleDragStart = (event: DragStartEvent) => {
     setActiveId(event.active.id as string);
-    onDragStart?.(event);
+    console.log('DragStart in context:', event.active.id);
   };
 
   const handleDragOver = (event: DragOverEvent) => {
-    onDragOver?.(event);
+    // Handle drag over logic here if needed
   };
 
   const handleDragEnd = (event: DragEndEvent) => {
+    console.log('DragEnd in context:', event.active.id, 'over:', event.over?.id);
     setActiveId(null);
     setDraggedItem(null);
     setIsCloning(false);
-    onDragEnd?.(event);
   };
 
   const contextValue: DragDropContextType = {

@@ -10,7 +10,6 @@ import { format, addWeeks, subWeeks } from 'date-fns';
 import { CalendarItem } from './types';
 import { getWeekDays, slotToTime } from './utils/timeUtils';
 import TimeSlot from './TimeSlot';
-import { useDragAndDrop } from '../../hooks/useDragAndDrop';
 
 const useStyles = makeStyles({
   container: {
@@ -181,7 +180,7 @@ const CalendarGrid = ({
         
         {/* Day headers */}
         {weekDays.map((day, index) => (
-          <div key={index} className={styles.dayHeader}>
+          <div key={`day-header-${index}`} className={styles.dayHeader}>
             <Text size={300} weight="semibold">
               {format(day, 'EEE d')}
             </Text>
@@ -190,8 +189,8 @@ const CalendarGrid = ({
         
         {/* Time labels and day columns */}
         {timeSlots.map((slot) => (
-          <>
-            <div key={`time-${slot}`} className={styles.timeColumn}>
+          <React.Fragment key={`slot-${slot}`}>
+            <div className={styles.timeColumn}>
               {hourlySlots.includes(slot) ? (
                 <div className={styles.timeLabel}>
                   {slotToTime(slot)}
@@ -218,7 +217,7 @@ const CalendarGrid = ({
               });
 
               return (
-                <div key={`${slot}-${dayIndex}`} className={styles.dayColumn}>
+                <div key={`slot-${slot}-day-${dayIndex}`} className={styles.dayColumn}>
                   <TimeSlot
                     day={day}
                     slot={slot}
@@ -237,7 +236,7 @@ const CalendarGrid = ({
                 </div>
               );
             })}
-          </>
+          </React.Fragment>
         ))}
       </div>
     </div>
