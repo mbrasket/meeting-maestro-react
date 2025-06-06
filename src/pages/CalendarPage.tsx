@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { DragDropContext, DropResult } from '@hello-pangea/dnd';
 import {
@@ -46,6 +45,15 @@ const CalendarPage = () => {
       document.removeEventListener('keydown', handleKeyDown);
     };
   }, [selectedItemIds]);
+
+  // Helper function to check if CTRL key is pressed
+  const isCtrlKeyPressed = (): boolean => {
+    const event = window.event;
+    if (event && ('ctrlKey' in event)) {
+      return (event as KeyboardEvent | MouseEvent).ctrlKey;
+    }
+    return false;
+  };
 
   const handleAddItem = (item: CalendarItem) => {
     setCalendarItems(prev => [...prev, { ...item, id: Date.now().toString() }]);
@@ -110,16 +118,14 @@ const CalendarPage = () => {
   };
 
   const handleBeforeDragStart = (initial: any) => {
-    // Check if CTRL is pressed at the exact moment of drag start
-    const isCtrlPressed = window.event?.ctrlKey || false;
+    const isCtrlPressed = isCtrlKeyPressed();
     console.log('BeforeDragStart - CTRL pressed:', isCtrlPressed, 'draggableId:', initial.draggableId);
   };
 
   const handleDragStart = (initial: any) => {
     const { draggableId, source } = initial;
     
-    // Check CTRL key state directly from the current event
-    const isCtrlPressed = window.event?.ctrlKey || false;
+    const isCtrlPressed = isCtrlKeyPressed();
     console.log('DragStart - CTRL pressed:', isCtrlPressed, 'draggableId:', draggableId);
     
     // Only handle cloning for existing calendar items (not tools)
