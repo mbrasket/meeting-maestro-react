@@ -1,4 +1,3 @@
-
 import { makeStyles, tokens, Text, Checkbox } from '@fluentui/react-components';
 import { DroppableStateSnapshot } from '@hello-pangea/dnd';
 import { Flag } from 'lucide-react';
@@ -63,6 +62,13 @@ interface GhostCardProps {
   allItems?: CalendarItem[];
 }
 
+interface ItemPreview {
+  type: string;
+  title: string;
+  styleClass: string;
+  completed?: boolean;
+}
+
 export const GhostCard = ({ snapshot, allItems = [] }: GhostCardProps) => {
   const styles = useStyles();
 
@@ -79,7 +85,7 @@ export const GhostCard = ({ snapshot, allItems = [] }: GhostCardProps) => {
   const draggableId = snapshot.draggingFromThisWith;
   
   // Determine item type and content from draggableId
-  const getItemPreview = () => {
+  const getItemPreview = (): ItemPreview => {
     if (draggableId.startsWith('tool-')) {
       // Handle tool items from the panel
       if (draggableId.includes('milestone')) {
@@ -177,7 +183,6 @@ export const GhostCard = ({ snapshot, allItems = [] }: GhostCardProps) => {
   return (
     <div 
       className={`${styles.ghostCard} ${itemPreview.styleClass}`}
-      style={{ borderColor: 'inherit' }}
     >
       {renderContent()}
     </div>
