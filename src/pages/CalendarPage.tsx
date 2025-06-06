@@ -1,13 +1,12 @@
+
 import { useState, useEffect } from 'react';
-import { DragDropContext, DropResult } from '@hello-pangea/dnd';
 import {
   makeStyles,
   tokens,
 } from '@fluentui/react-components';
-import CalendarGrid from '../components/calendar/CalendarGrid';
+import OptimizedCalendarGrid from '../components/calendar/OptimizedCalendarGrid';
 import ToolsPanel from '../components/calendar/ToolsPanel';
 import { CalendarItem } from '../components/calendar/types';
-import { snapToGrid } from '../components/calendar/utils/timeUtils';
 
 const useStyles = makeStyles({
   container: {
@@ -100,86 +99,23 @@ const CalendarPage = () => {
     setSelectedItemIds(new Set());
   };
 
-  const handleDragEnd = (result: DropResult) => {
-    const { destination, source, draggableId } = result;
-
-    if (!destination) return;
-
-    // Handle dragging from tools panel to calendar
-    if (source.droppableId === 'tools-items' && destination.droppableId.includes('-')) {
-      const [dateStr, slotStr] = destination.droppableId.split('-');
-      const targetDate = new Date(dateStr);
-      const targetSlot = parseInt(slotStr);
-      
-      // Convert slot to actual time (each slot is 5 minutes)
-      const hours = Math.floor(targetSlot / 12);
-      const minutes = (targetSlot % 12) * 5;
-      targetDate.setHours(hours, minutes, 0, 0);
-      
-      // Determine type from draggableId - fix the milestone detection
-      const type = draggableId.includes('milestone') ? 'milestone' :
-                   draggableId.includes('event') ? 'event' : 
-                   draggableId.includes('task') ? 'task' :
-                   draggableId.includes('highlight') ? 'highlight' : 'event';
-      
-      // Create new item from tool template
-      const duration = type === 'milestone' ? 0 : 60; // Default 1 hour, 0 for milestones
-      
-      const newItem: CalendarItem = {
-        id: Date.now().toString(),
-        type,
-        title: `New ${type.charAt(0).toUpperCase() + type.slice(1)}`,
-        startTime: snapToGrid(targetDate),
-        endTime: snapToGrid(new Date(targetDate.getTime() + duration * 60 * 1000)),
-        completed: false,
-      };
-      
-      handleAddItem(newItem);
-    }
-    
-    // Handle moving existing calendar items
-    if (!source.droppableId.startsWith('tools-') && !destination.droppableId.startsWith('tools-')) {
-      const item = calendarItems.find(item => item.id === draggableId);
-      if (item) {
-        const [dateStr, slotStr] = destination.droppableId.split('-');
-        const targetDate = new Date(dateStr);
-        const targetSlot = parseInt(slotStr);
-        
-        // Convert slot to actual time
-        const hours = Math.floor(targetSlot / 12);
-        const minutes = (targetSlot % 12) * 5;
-        targetDate.setHours(hours, minutes, 0, 0);
-        
-        const duration = item.endTime.getTime() - item.startTime.getTime();
-        const newStartTime = snapToGrid(targetDate);
-        const newEndTime = new Date(newStartTime.getTime() + duration);
-        
-        handleUpdateItem(item.id, {
-          startTime: newStartTime,
-          endTime: newEndTime,
-        });
-      }
-    }
-  };
-
   return (
-    <DragDropContext onDragEnd={handleDragEnd}>
-      <div className={styles.container}>
-        <div className={styles.mainContent}>
-          <CalendarGrid
-            items={calendarItems}
-            currentWeek={currentWeek}
-            onUpdateItem={handleUpdateItem}
-            onDeleteItem={handleDeleteItem}
-            onWeekChange={setCurrentWeek}
-            selectedItemIds={selectedItemIds}
-            onSelectItem={handleSelectItem}
-            onClearSelection={handleClearSelection}
-          />
-        </div>
-        <ToolsPanel onAddItem={handleAddItem} />
+    <div className={styles.container}>
+      <div className={styles.mainContent}>
+        <OptimizedCalendarGrid
+          items={calendarItems}
+          currentWeek={currentWeek}
+          onUpdateItem={handleUpdateItem}
+          onDeleteItem={handleDeleteItem}
+          onWeekChange={setCurrentWeek}
+          selectedItemIds={selectedItemIds}
+          onSelectItem={handleSelectItem}
+          onClearSelection={handleClearSelection}
+          onAddItem={handleAddItem}
+        />
       </div>
-    </DragDropContext>
+      <ToolsPanel onAddItem={handleAddItem} />
+    </div>
   );
 };
 
