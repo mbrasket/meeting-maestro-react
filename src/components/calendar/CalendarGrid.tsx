@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import {
   makeStyles,
@@ -37,14 +38,19 @@ const useStyles = makeStyles({
     gridTemplateColumns: '60px repeat(7, 1fr)',
     overflow: 'auto',
     position: 'relative',
+    minWidth: '800px',
   },
   timeColumn: {
     borderRightColor: tokens.colorNeutralStroke1,
     borderRightWidth: '1px',
     borderRightStyle: 'solid',
+    position: 'sticky',
+    left: 0,
+    backgroundColor: tokens.colorNeutralBackground1,
+    zIndex: 1,
   },
   timeLabel: {
-    height: '60px', // 12 slots * 5px each
+    height: '20px', // Each 5-minute slot is 20px
     display: 'flex',
     alignItems: 'flex-start',
     justifyContent: 'center',
@@ -57,6 +63,7 @@ const useStyles = makeStyles({
     borderRightColor: tokens.colorNeutralStroke1,
     borderRightWidth: '1px',
     borderRightStyle: 'solid',
+    minWidth: '100px',
   },
   dayHeader: {
     height: '40px',
@@ -67,6 +74,9 @@ const useStyles = makeStyles({
     borderBottomWidth: '1px',
     borderBottomStyle: 'solid',
     backgroundColor: tokens.colorNeutralBackground2,
+    position: 'sticky',
+    top: 0,
+    zIndex: 2,
   },
 });
 
@@ -96,8 +106,10 @@ const CalendarGrid = ({
     onWeekChange(addWeeks(currentWeek, 1));
   };
 
-  // Generate time slots (every hour for display)
-  const timeSlots = Array.from({ length: 24 }, (_, i) => i);
+  // Generate time slots for every 5 minutes (288 slots in 24 hours)
+  const timeSlots = Array.from({ length: 288 }, (_, i) => i);
+  // Only show hourly labels
+  const hourlySlots = Array.from({ length: 24 }, (_, i) => i * 12);
 
   return (
     <div className={styles.container}>
@@ -119,7 +131,7 @@ const CalendarGrid = ({
         </div>
       </div>
       
-      <div className={styles.grid} style={{ gridTemplateRows: '40px repeat(24, 60px)' }}>
+      <div className={styles.grid} style={{ gridTemplateRows: '40px repeat(288, 20px)' }}>
         {/* Time column header */}
         <div className={styles.timeColumn}></div>
         
@@ -133,23 +145,24 @@ const CalendarGrid = ({
         ))}
         
         {/* Time labels and day columns */}
-        {timeSlots.map((hour) => (
+        {timeSlots.map((slot) => (
           <>
-            <div key={`time-${hour}`} className={styles.timeColumn}>
+            <div key={`time-${slot}`} className={styles.timeColumn}>
               <div className={styles.timeLabel}>
-                {slotToTime(hour * 12)}
+                {hourlySlots.includes(slot) ? slotToTime(slot) : ''}
               </div>
             </div>
             {weekDays.map((day, dayIndex) => (
-              <div key={`${hour}-${dayIndex}`} className={styles.dayColumn}>
+              <div key={`${slot}-${dayIndex}`} className={styles.dayColumn}>
                 <TimeSlot
                   day={day}
-                  hour={hour}
+                  slot={slot}
                   items={items.filter(item => {
                     const itemDay = new Date(item.startTime).toDateString();
                     const slotDay = day.toDateString();
-                    const itemHour = new Date(item.startTime).getHours();
-                    return itemDay === slotDay && itemHour === hour;
+                    const itemStartSlot = Math.floor(new Date(item.startTime).getHours() * 12 + new Date(item.startTime).getMinutes() / 5);
+                    const itemEndSlot = Math.floor(new Date(item.endTime).getHours() * 12 + new Date(item.endTime).getMinutes() / 5);
+                    return itemDay === slotDay && slot >= itemStartSlot && slot < itemEndSlot;
                   })}
                   onUpdateItem={onUpdateItem}
                   onDeleteItem={onDeleteItem}

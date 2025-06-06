@@ -20,6 +20,7 @@ const useStyles = makeStyles({
   mainContent: {
     flex: 1,
     overflow: 'hidden',
+    minWidth: 0, // Prevent flex item from growing beyond container
   },
 });
 
@@ -51,11 +52,14 @@ const CalendarPage = () => {
 
     // Handle dragging from tools panel to calendar
     if (source.droppableId.startsWith('tools-') && destination.droppableId.includes('-')) {
-      const [dateStr, hourStr] = destination.droppableId.split('-');
+      const [dateStr, slotStr] = destination.droppableId.split('-');
       const targetDate = new Date(dateStr);
-      const targetHour = parseInt(hourStr);
+      const targetSlot = parseInt(slotStr);
       
-      targetDate.setHours(targetHour, 0, 0, 0);
+      // Convert slot to actual time (each slot is 5 minutes)
+      const hours = Math.floor(targetSlot / 12);
+      const minutes = (targetSlot % 12) * 5;
+      targetDate.setHours(hours, minutes, 0, 0);
       
       // Create new item from tool template
       const newItem: CalendarItem = {
@@ -76,11 +80,14 @@ const CalendarPage = () => {
     if (!source.droppableId.startsWith('tools-') && !destination.droppableId.startsWith('tools-')) {
       const item = calendarItems.find(item => item.id === draggableId);
       if (item) {
-        const [dateStr, hourStr] = destination.droppableId.split('-');
+        const [dateStr, slotStr] = destination.droppableId.split('-');
         const targetDate = new Date(dateStr);
-        const targetHour = parseInt(hourStr);
+        const targetSlot = parseInt(slotStr);
         
-        targetDate.setHours(targetHour, 0, 0, 0);
+        // Convert slot to actual time
+        const hours = Math.floor(targetSlot / 12);
+        const minutes = (targetSlot % 12) * 5;
+        targetDate.setHours(hours, minutes, 0, 0);
         
         const duration = item.endTime.getTime() - item.startTime.getTime();
         const newStartTime = snapToGrid(targetDate);

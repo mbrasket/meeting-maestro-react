@@ -1,4 +1,5 @@
-import { useState } from 'react';
+
+import { useState, useRef } from 'react';
 import { Draggable } from '@hello-pangea/dnd';
 import {
   makeStyles,
@@ -47,6 +48,7 @@ const useStyles = makeStyles({
     height: '4px' as const,
     cursor: 'ns-resize' as const,
     backgroundColor: 'transparent' as const,
+    zIndex: 10,
     ':hover': {
       backgroundColor: tokens.colorNeutralStroke1,
     },
@@ -77,6 +79,8 @@ interface CalendarItemComponentProps {
 const CalendarItemComponent = ({ item, index, onUpdate, onDelete }: CalendarItemComponentProps) => {
   const styles = useStyles();
   const [isResizing, setIsResizing] = useState(false);
+  const [resizeDirection, setResizeDirection] = useState<'top' | 'bottom' | null>(null);
+  const itemRef = useRef<HTMLDivElement>(null);
 
   const getItemStyles = () => {
     switch (item.type) {
@@ -97,6 +101,52 @@ const CalendarItemComponent = ({ item, index, onUpdate, onDelete }: CalendarItem
     onUpdate({ completed: !item.completed });
   };
 
+  const calculateHeight = () => {
+    const startSlot = Math.floor(new Date(item.startTime).getHours() * 12 + new Date(item.startTime).getMinutes() / 5);
+    const endSlot = Math.floor(new Date(item.endTime).getHours() * 12 + new Date(item.endTime).getMinutes() / 5);
+    return Math.max(1, endSlot - startSlot) * 20; // 20px per 5-minute slot
+  };
+
+  const handleMouseDown = (direction: 'top' | 'bottom') => (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsResizing(true);
+    setResizeDirection(direction);
+
+    const startY = e.clientY;
+    const startTime = new Date(item.startTime);
+    const endTime = new Date(item.endTime);
+
+    const handleMouseMove = (e: MouseEvent) => {
+      const deltaY = e.clientY - startY;
+      const deltaSlots = Math.round(deltaY / 20); // 20px per slot
+
+      if (direction === 'top') {
+        const newStartTime = new Date(startTime);
+        newStartTime.setMinutes(startTime.getMinutes() + deltaSlots * 5);
+        if (newStartTime < endTime) {
+          onUpdate({ startTime: newStartTime });
+        }
+      } else {
+        const newEndTime = new Date(endTime);
+        newEndTime.setMinutes(endTime.getMinutes() + deltaSlots * 5);
+        if (newEndTime > startTime) {
+          onUpdate({ endTime: newEndTime });
+        }
+      }
+    };
+
+    const handleMouseUp = () => {
+      setIsResizing(false);
+      setResizeDirection(null);
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+  };
+
   if (item.type === 'milestone') {
     return (
       <Draggable draggableId={item.id} index={index}>
@@ -106,6 +156,10 @@ const CalendarItemComponent = ({ item, index, onUpdate, onDelete }: CalendarItem
             {...provided.draggableProps}
             {...provided.dragHandleProps}
             className={`${styles.item} ${styles.milestone} ${snapshot.isDragging ? styles.dragging : ''}`}
+            style={{
+              height: '20px',
+              ...provided.draggableProps.style,
+            }}
           >
             <Flag size={12} />
             <Text size={200} style={{ marginLeft: '4px' }}>
@@ -125,12 +179,22 @@ const CalendarItemComponent = ({ item, index, onUpdate, onDelete }: CalendarItem
           {...provided.draggableProps}
           {...provided.dragHandleProps}
           className={`${styles.item} ${getItemStyles()} ${snapshot.isDragging ? styles.dragging : ''}`}
+          style={{
+            height: `${calculateHeight()}px`,
+            ...provided.draggableProps.style,
+          }}
         >
           {/* Resize handles */}
-          {!isResizing && (
+          {!snapshot.isDragging && (
             <>
-              <div className={`${styles.resizeHandle} ${styles.topHandle}`} />
-              <div className={`${styles.resizeHandle} ${styles.bottomHandle}`} />
+              <div 
+                className={`${styles.resizeHandle} ${styles.topHandle}`}
+                onMouseDown={handleMouseDown('top')}
+              />
+              <div 
+                className={`${styles.resizeHandle} ${styles.bottomHandle}`}
+                onMouseDown={handleMouseDown('bottom')}
+              />
             </>
           )}
           
