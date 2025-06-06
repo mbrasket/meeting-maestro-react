@@ -1,3 +1,4 @@
+
 import { useState, useRef } from 'react';
 import { Draggable } from '@hello-pangea/dnd';
 import {
@@ -133,7 +134,7 @@ const CalendarItemComponent = ({ item, index, onUpdate, onDelete, isSelected, on
   const calculateHeight = () => {
     const startSlot = Math.floor(new Date(item.startTime).getHours() * 12 + new Date(item.startTime).getMinutes() / 5);
     const endSlot = Math.floor(new Date(item.endTime).getHours() * 12 + new Date(item.endTime).getMinutes() / 5);
-    return Math.max(1, endSlot - startSlot) * 20; // 20px per 5-minute slot
+    return Math.max(1, endSlot - startSlot) * 7; // 7px per 5-minute slot (84px per hour)
   };
 
   const handleResizeMouseDown = (direction: 'top' | 'bottom') => (e: React.MouseEvent) => {
@@ -147,7 +148,7 @@ const CalendarItemComponent = ({ item, index, onUpdate, onDelete, isSelected, on
 
     const handleMouseMove = (e: MouseEvent) => {
       const deltaY = e.clientY - startY;
-      const deltaSlots = Math.round(deltaY / 20); // 20px per 5-minute slot
+      const deltaSlots = Math.round(deltaY / 7); // 7px per 5-minute slot
 
       if (direction === 'top') {
         const newStartTime = new Date(startTime);
@@ -184,7 +185,7 @@ const CalendarItemComponent = ({ item, index, onUpdate, onDelete, isSelected, on
             {...provided.dragHandleProps}
             className={`${styles.item} ${getItemStyles()} ${snapshot.isDragging ? styles.dragging : ''}`}
             style={{
-              height: '20px',
+              height: '7px',
               ...provided.draggableProps.style,
             }}
             onClick={handleItemClick}

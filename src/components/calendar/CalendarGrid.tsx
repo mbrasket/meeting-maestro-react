@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import {
   makeStyles,
@@ -50,7 +49,7 @@ const useStyles = makeStyles({
     zIndex: 1,
   },
   timeLabel: {
-    height: '20px', // Each 5-minute slot is 20px
+    height: '7px', // Each 5-minute slot is 7px (84px per hour ÷ 12 slots)
     display: 'flex',
     alignItems: 'flex-start',
     justifyContent: 'center',
@@ -146,7 +145,7 @@ const CalendarGrid = ({
       
       <div 
         className={styles.grid} 
-        style={{ gridTemplateRows: '40px repeat(288, 20px)' }}
+        style={{ gridTemplateRows: '40px repeat(288, 7px)' }}
         onClick={handleGridClick}
       >
         {/* Time column header */}

@@ -6,9 +6,9 @@ import CalendarItemComponent from './CalendarItemComponent';
 
 const useStyles = makeStyles({
   slot: {
-    height: '20px',
+    height: '7px', // Each 5-minute slot is 7px (84px per hour ÷ 12 slots)
     position: 'relative',
-    minHeight: '20px',
+    minHeight: '7px',
   },
   halfHourBorder: {
     borderBottom: `1px solid ${tokens.colorNeutralStroke2}`,
@@ -25,7 +25,7 @@ const useStyles = makeStyles({
     position: 'absolute',
     left: '4px',
     right: '4px',
-    height: '40px', // Default height for ghost card
+    height: '28px', // Default height for ghost card (4 slots * 7px = 28px)
     backgroundColor: tokens.colorBrandBackground,
     border: `2px dashed ${tokens.colorBrandStroke1}`,
     borderRadius: '4px',
