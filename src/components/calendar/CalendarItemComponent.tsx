@@ -1,4 +1,3 @@
-
 import { useRef, useState } from 'react';
 import { Draggable } from '@hello-pangea/dnd';
 import { makeStyles, tokens } from '@fluentui/react-components';
@@ -76,6 +75,7 @@ interface CalendarItemComponentProps {
   onResizeStart?: () => void;
   onResizeEnd?: () => void;
   onCopyItem?: (item: CalendarItem) => void;
+  isCtrlPressed?: boolean;
 }
 
 const CalendarItemComponent = ({ 
@@ -90,7 +90,8 @@ const CalendarItemComponent = ({
   isResizeActive = false,
   onResizeStart,
   onResizeEnd,
-  onCopyItem
+  onCopyItem,
+  isCtrlPressed = false
 }: CalendarItemComponentProps) => {
   const styles = useStyles();
   const itemRef = useRef<HTMLDivElement>(null);
@@ -137,18 +138,6 @@ const CalendarItemComponent = ({
     onSelect(item.id, e.ctrlKey);
   };
 
-  const handleDragStart = (e: React.DragEvent) => {
-    if (e.ctrlKey && onCopyItem) {
-      setIsCopying(true);
-      // Create a copy of the item for dragging
-      onCopyItem(item);
-    }
-  };
-
-  const handleDragEnd = () => {
-    setIsCopying(false);
-  };
-
   if (item.type === 'milestone') {
     return (
       <MilestoneItem
@@ -168,42 +157,48 @@ const CalendarItemComponent = ({
     : calculateItemPosition(column, totalColumns);
 
   return (
-    <Draggable draggableId={item.id} index={index} isDragDisabled={isResizing}>
-      {(provided, snapshot) => (
-        <div
-          ref={provided.innerRef}
-          {...provided.draggableProps}
-          className={`${styles.item} ${getItemStyles()} ${snapshot.isDragging ? styles.dragging : ''} ${isCopying ? styles.copying : ''}`}
-          style={{
-            height: `${calculateItemHeight(item)}px`,
-            ...positionStyle,
-            ...provided.draggableProps.style,
-          }}
-          onClick={handleItemClick}
-        >
-          <div 
-            {...provided.dragHandleProps} 
-            style={{ height: '100%', width: '100%', position: 'relative' }}
-            onDragStart={(e) => {
-              // Check if CTRL key is pressed at the start of drag
-              if (e.ctrlKey && onCopyItem) {
-                setIsCopying(true);
-                onCopyItem(item);
-              }
+    <Draggable 
+      draggableId={item.id} 
+      index={index} 
+      isDragDisabled={isResizing}
+    >
+      {(provided, snapshot) => {
+        // Check if we should copy on drag start
+        const shouldCopy = isCtrlPressed && snapshot.isDragging;
+        
+        // Trigger copy when drag starts with CTRL pressed
+        if (shouldCopy && !isCopying && onCopyItem) {
+          setIsCopying(true);
+          onCopyItem(item);
+        }
+        
+        // Reset copying state when drag ends
+        if (!snapshot.isDragging && isCopying) {
+          setIsCopying(false);
+        }
+
+        return (
+          <div
+            ref={provided.innerRef}
+            {...provided.draggableProps}
+            {...provided.dragHandleProps}
+            className={`${styles.item} ${getItemStyles()} ${snapshot.isDragging ? styles.dragging : ''} ${shouldCopy ? styles.copying : ''}`}
+            style={{
+              height: `${calculateItemHeight(item)}px`,
+              ...positionStyle,
+              ...provided.draggableProps.style,
             }}
-            onDragEnd={() => {
-              setIsCopying(false);
-            }}
+            onClick={handleItemClick}
           >
             <ItemContent item={item} onTaskToggle={handleTaskToggle} />
-          </div>
 
-          <ResizeHandles 
-            onResizeMouseDown={handleResizeMouseDown} 
-            isDragging={snapshot.isDragging}
-          />
-        </div>
-      )}
+            <ResizeHandles 
+              onResizeMouseDown={handleResizeMouseDown} 
+              isDragging={snapshot.isDragging}
+            />
+          </div>
+        );
+      }}
     </Draggable>
   );
 };

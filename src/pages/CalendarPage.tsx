@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { DragDropContext, DropResult } from '@hello-pangea/dnd';
 import {
@@ -29,6 +30,7 @@ const CalendarPage = () => {
   const [currentWeek, setCurrentWeek] = useState(new Date());
   const [selectedItemIds, setSelectedItemIds] = useState<Set<string>>(new Set());
   const [copyingItem, setCopyingItem] = useState<CalendarItem | null>(null);
+  const [isCtrlPressed, setIsCtrlPressed] = useState(false);
 
   // Handle keyboard shortcuts and CTRL key tracking
   useEffect(() => {
@@ -200,8 +202,6 @@ const CalendarPage = () => {
     setCopyingItem(null);
   };
 
-  const [isCtrlPressed, setIsCtrlPressed] = useState(false);
-
   return (
     <DragDropContext onDragEnd={handleDragEnd}>
       <div className={styles.container}>
@@ -217,6 +217,7 @@ const CalendarPage = () => {
             onClearSelection={handleClearSelection}
             onAddItem={handleAddItem}
             onCopyItem={handleCopyItem}
+            isCtrlPressed={isCtrlPressed}
           />
         </div>
         <ToolsPanel onAddItem={handleAddItem} />

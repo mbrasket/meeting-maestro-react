@@ -51,6 +51,7 @@ interface TimeSlotProps {
   onSelectItem: (itemId: string, ctrlKey: boolean) => void;
   onClearSelection: () => void;
   onCopyItem: (item: CalendarItem) => void;
+  isCtrlPressed?: boolean;
 }
 
 // Helper function to calculate overlapping items and their positions
@@ -117,7 +118,8 @@ const TimeSlot = ({
   selectedItemIds, 
   onSelectItem, 
   onClearSelection,
-  onCopyItem
+  onCopyItem,
+  isCtrlPressed = false
 }: TimeSlotProps) => {
   const styles = useStyles();
   const [resizingItemId, setResizingItemId] = useState<string | null>(null);
@@ -184,6 +186,7 @@ const TimeSlot = ({
                   onResizeStart={() => handleResizeStart(item.id)}
                   onResizeEnd={handleResizeEnd}
                   onCopyItem={onCopyItem}
+                  isCtrlPressed={isCtrlPressed}
                 />
               );
             }
@@ -213,6 +216,7 @@ const TimeSlot = ({
                   onResizeStart={() => handleResizeStart(resizingItem.id)}
                   onResizeEnd={handleResizeEnd}
                   onCopyItem={onCopyItem}
+                  isCtrlPressed={isCtrlPressed}
                 />
               );
             }

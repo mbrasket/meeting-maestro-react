@@ -1,3 +1,4 @@
+
 import { useState, useRef } from 'react';
 import {
   makeStyles,
@@ -96,6 +97,7 @@ interface CalendarGridProps {
   onClearSelection: () => void;
   onAddItem: (item: CalendarItem) => void;
   onCopyItem: (item: CalendarItem) => void;
+  isCtrlPressed?: boolean;
 }
 
 const CalendarGrid = ({
@@ -109,6 +111,7 @@ const CalendarGrid = ({
   onClearSelection,
   onAddItem,
   onCopyItem,
+  isCtrlPressed = false,
 }: CalendarGridProps) => {
   const styles = useStyles();
   const weekDays = getWeekDays(currentWeek);
@@ -212,6 +215,7 @@ const CalendarGrid = ({
                     onSelectItem={onSelectItem}
                     onClearSelection={onClearSelection}
                     onCopyItem={onCopyItem}
+                    isCtrlPressed={isCtrlPressed}
                   />
                 </div>
               );
