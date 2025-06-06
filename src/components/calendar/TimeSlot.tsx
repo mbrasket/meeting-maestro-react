@@ -250,7 +250,7 @@ const TimeSlot = ({
             </div>
           )}
           
-          {// ... keep existing code (item rendering logic)}
+          {/* Render calendar items */}
           {itemsWithPositions.map((itemData, index) => {
             const { item, column, totalColumns, startSlot } = itemData;
             
