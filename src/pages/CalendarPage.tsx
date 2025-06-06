@@ -4,7 +4,7 @@ import {
   makeStyles,
   tokens,
 } from '@fluentui/react-components';
-import CleanCalendarGrid from '../components/calendar/CleanCalendarGrid';
+import OptimalCalendarGrid from '../components/calendar/OptimalCalendarGrid';
 import CleanToolsPanel from '../components/calendar/CleanToolsPanel';
 import { CalendarItem } from '../components/calendar/types';
 
@@ -98,7 +98,7 @@ const CalendarPage = () => {
   return (
     <div className={styles.container}>
       <div className={styles.mainContent}>
-        <CleanCalendarGrid
+        <OptimalCalendarGrid
           items={calendarItems}
           currentWeek={currentWeek}
           onUpdateItem={handleUpdateItem}

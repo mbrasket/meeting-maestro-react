@@ -1,5 +1,5 @@
 
-import { CalendarItemType } from './index';
+import { CalendarItemType } from '../types';
 
 export interface DragState {
   isDragging: boolean;
