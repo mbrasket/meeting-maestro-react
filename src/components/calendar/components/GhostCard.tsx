@@ -1,24 +1,54 @@
 
-import { makeStyles, tokens } from '@fluentui/react-components';
+import { makeStyles, tokens, Text, Checkbox } from '@fluentui/react-components';
 import { DroppableStateSnapshot } from '@hello-pangea/dnd';
+import { Flag } from 'lucide-react';
 
 const useStyles = makeStyles({
   ghostCard: {
     position: 'absolute',
-    left: '2px', // Reduced from 6px
-    right: '2px', // Reduced from 6px
-    top: '1px', // Account for slot padding
-    height: '26px', // Reduced to fit within padded slot
-    backgroundColor: tokens.colorBrandBackground,
-    border: `2px dashed ${tokens.colorBrandStroke1}`,
+    left: '2px',
+    right: '2px',
+    top: '1px',
+    height: '26px',
     borderRadius: '4px',
     display: 'flex',
     alignItems: 'center',
-    justifyContent: 'center',
-    color: tokens.colorNeutralForegroundOnBrand,
+    justifyContent: 'flex-start',
     fontSize: '12px',
     zIndex: '15',
     opacity: '0.7',
+    padding: '2px 6px',
+    border: `2px dashed ${tokens.colorBrandStroke1}`,
+  },
+  // Item type styles matching CalendarItemComponent
+  event: {
+    backgroundColor: tokens.colorBrandBackground,
+    color: tokens.colorNeutralForegroundOnBrand,
+  },
+  task: {
+    backgroundColor: tokens.colorPaletteGreenBackground1,
+    border: `2px dashed ${tokens.colorPaletteGreenBorder1}`,
+  },
+  highlight: {
+    backgroundColor: tokens.colorPaletteYellowBackground1,
+    border: `2px dashed ${tokens.colorPaletteYellowBorder1}`,
+  },
+  milestone: {
+    backgroundColor: tokens.colorPaletteRedBackground2,
+    border: `2px dashed ${tokens.colorPaletteRedBorder1}`,
+    height: '16px', // Shorter for milestone
+  },
+  taskContent: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '4px',
+    width: '100%',
+  },
+  milestoneContent: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '4px',
+    width: '100%',
   },
 });
 
@@ -29,13 +59,85 @@ interface GhostCardProps {
 export const GhostCard = ({ snapshot }: GhostCardProps) => {
   const styles = useStyles();
 
-  if (!snapshot.isDraggingOver || !snapshot.draggingFromThisWith?.startsWith('tool-')) {
+  if (!snapshot.isDraggingOver || !snapshot.draggingFromThisWith) {
     return null;
   }
 
+  const draggableId = snapshot.draggingFromThisWith;
+  
+  // Determine item type and content from draggableId
+  const getItemPreview = () => {
+    if (draggableId.startsWith('tool-')) {
+      // Handle tool items from the panel
+      if (draggableId.includes('milestone')) {
+        return {
+          type: 'milestone',
+          title: 'New Milestone',
+          styleClass: styles.milestone,
+        };
+      } else if (draggableId.includes('event')) {
+        return {
+          type: 'event',
+          title: 'New Event',
+          styleClass: styles.event,
+        };
+      } else if (draggableId.includes('task')) {
+        return {
+          type: 'task',
+          title: 'New Task',
+          styleClass: styles.task,
+        };
+      } else if (draggableId.includes('highlight')) {
+        return {
+          type: 'highlight',
+          title: 'New Time Block',
+          styleClass: styles.highlight,
+        };
+      }
+    }
+    
+    // Default for existing items being moved (we don't have access to the actual item data here)
+    return {
+      type: 'event',
+      title: 'Moving item...',
+      styleClass: styles.event,
+    };
+  };
+
+  const itemPreview = getItemPreview();
+
+  const renderContent = () => {
+    switch (itemPreview.type) {
+      case 'task':
+        return (
+          <div className={styles.taskContent}>
+            <Checkbox checked={false} disabled size="small" />
+            <Text size={200} weight="medium">
+              {itemPreview.title}
+            </Text>
+          </div>
+        );
+      case 'milestone':
+        return (
+          <div className={styles.milestoneContent}>
+            <Flag size={12} />
+            <Text size={200} weight="medium">
+              {itemPreview.title}
+            </Text>
+          </div>
+        );
+      default:
+        return (
+          <Text size={200} weight="medium">
+            {itemPreview.title}
+          </Text>
+        );
+    }
+  };
+
   return (
-    <div className={styles.ghostCard}>
-      Drop here
+    <div className={`${styles.ghostCard} ${itemPreview.styleClass}`}>
+      {renderContent()}
     </div>
   );
 };

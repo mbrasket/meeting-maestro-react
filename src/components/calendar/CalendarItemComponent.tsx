@@ -34,19 +34,7 @@ const useStyles = makeStyles({
     border: `1px solid ${tokens.colorPaletteYellowBorder1}`,
   },
   selected: {
-    '::before': {
-      content: '""',
-      position: 'absolute',
-      top: '-4px',
-      left: '-4px',
-      right: '-4px',
-      bottom: '-4px',
-      border: `3px solid ${tokens.colorBrandStroke1}`,
-      borderRadius: '8px',
-      backgroundColor: 'transparent',
-      zIndex: '-1',
-      boxShadow: `0 0 0 1px ${tokens.colorNeutralBackground1}, 0 0 8px ${tokens.colorBrandBackground2}`,
-    },
+    boxShadow: `0 0 0 3px ${tokens.colorBrandStroke1}, 0 4px 12px rgba(0, 0, 0, 0.15)`,
     zIndex: '15',
   },
   dragging: {
