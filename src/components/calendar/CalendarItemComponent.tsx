@@ -12,13 +12,13 @@ import { CalendarItem } from './types';
 
 const useStyles = makeStyles({
   item: {
-    position: 'absolute' as const,
-    left: '4px' as const,
-    right: '4px' as const,
-    borderRadius: '4px' as const,
-    padding: '4px 8px' as const,
-    cursor: 'move' as const,
-    userSelect: 'none' as const,
+    position: 'absolute',
+    left: '4px',
+    right: '4px',
+    borderRadius: '4px',
+    padding: '4px 8px',
+    cursor: 'move',
+    userSelect: 'none',
   },
   event: {
     backgroundColor: tokens.colorBrandBackground,
@@ -31,41 +31,41 @@ const useStyles = makeStyles({
   },
   highlight: {
     backgroundColor: tokens.colorPaletteYellowBackground1,
-    opacity: '0.6' as const,
+    opacity: '0.6',
     border: `1px solid ${tokens.colorPaletteYellowBorder1}`,
   },
   milestone: {
-    height: '2px' as const,
+    height: '2px',
     backgroundColor: tokens.colorPaletteRedBackground2,
-    display: 'flex' as const,
-    alignItems: 'center' as const,
-    paddingLeft: '4px' as const,
+    display: 'flex',
+    alignItems: 'center',
+    paddingLeft: '4px',
   },
   resizeHandle: {
-    position: 'absolute' as const,
-    left: '0' as const,
-    right: '0' as const,
-    height: '4px' as const,
-    cursor: 'ns-resize' as const,
-    backgroundColor: 'transparent' as const,
+    position: 'absolute',
+    left: '0',
+    right: '0',
+    height: '4px',
+    cursor: 'ns-resize',
+    backgroundColor: 'transparent',
     zIndex: 10,
     ':hover': {
       backgroundColor: tokens.colorNeutralStroke1,
     },
   },
   topHandle: {
-    top: '-2px' as const,
+    top: '-2px',
   },
   bottomHandle: {
-    bottom: '-2px' as const,
+    bottom: '-2px',
   },
   dragging: {
-    opacity: '0.5' as const,
+    opacity: '0.5',
   },
   taskContent: {
-    display: 'flex' as const,
-    alignItems: 'center' as const,
-    gap: '4px' as const,
+    display: 'flex',
+    alignItems: 'center',
+    gap: '4px',
   },
 });
 
@@ -79,7 +79,6 @@ interface CalendarItemComponentProps {
 const CalendarItemComponent = ({ item, index, onUpdate, onDelete }: CalendarItemComponentProps) => {
   const styles = useStyles();
   const [isResizing, setIsResizing] = useState(false);
-  const [resizeDirection, setResizeDirection] = useState<'top' | 'bottom' | null>(null);
   const itemRef = useRef<HTMLDivElement>(null);
 
   const getItemStyles = () => {
@@ -107,11 +106,10 @@ const CalendarItemComponent = ({ item, index, onUpdate, onDelete }: CalendarItem
     return Math.max(1, endSlot - startSlot) * 20; // 20px per 5-minute slot
   };
 
-  const handleMouseDown = (direction: 'top' | 'bottom') => (e: React.MouseEvent) => {
+  const handleResizeMouseDown = (direction: 'top' | 'bottom') => (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     setIsResizing(true);
-    setResizeDirection(direction);
 
     const startY = e.clientY;
     const startTime = new Date(item.startTime);
@@ -138,7 +136,6 @@ const CalendarItemComponent = ({ item, index, onUpdate, onDelete }: CalendarItem
 
     const handleMouseUp = () => {
       setIsResizing(false);
-      setResizeDirection(null);
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
     };
@@ -149,7 +146,7 @@ const CalendarItemComponent = ({ item, index, onUpdate, onDelete }: CalendarItem
 
   if (item.type === 'milestone') {
     return (
-      <Draggable draggableId={item.id} index={index}>
+      <Draggable draggableId={item.id} index={index} isDragDisabled={isResizing}>
         {(provided, snapshot) => (
           <div
             ref={provided.innerRef}
@@ -172,47 +169,49 @@ const CalendarItemComponent = ({ item, index, onUpdate, onDelete }: CalendarItem
   }
 
   return (
-    <Draggable draggableId={item.id} index={index}>
+    <Draggable draggableId={item.id} index={index} isDragDisabled={isResizing}>
       {(provided, snapshot) => (
         <div
           ref={provided.innerRef}
           {...provided.draggableProps}
-          {...provided.dragHandleProps}
           className={`${styles.item} ${getItemStyles()} ${snapshot.isDragging ? styles.dragging : ''}`}
           style={{
             height: `${calculateHeight()}px`,
             ...provided.draggableProps.style,
           }}
         >
-          {/* Resize handles */}
+          {/* Drag handle - only the content area, not resize handles */}
+          <div {...provided.dragHandleProps} style={{ height: '100%', width: '100%', position: 'relative' }}>
+            {/* Content */}
+            {item.type === 'task' ? (
+              <div className={styles.taskContent}>
+                <Checkbox 
+                  checked={item.completed || false}
+                  onChange={handleTaskToggle}
+                />
+                <Text size={200} style={{ textDecoration: item.completed ? 'line-through' : 'none' }}>
+                  {item.title}
+                </Text>
+              </div>
+            ) : (
+              <Text size={200} weight="medium">
+                {item.title}
+              </Text>
+            )}
+          </div>
+
+          {/* Resize handles - outside of drag handle */}
           {!snapshot.isDragging && (
             <>
               <div 
                 className={`${styles.resizeHandle} ${styles.topHandle}`}
-                onMouseDown={handleMouseDown('top')}
+                onMouseDown={handleResizeMouseDown('top')}
               />
               <div 
                 className={`${styles.resizeHandle} ${styles.bottomHandle}`}
-                onMouseDown={handleMouseDown('bottom')}
+                onMouseDown={handleResizeMouseDown('bottom')}
               />
             </>
-          )}
-          
-          {/* Content */}
-          {item.type === 'task' ? (
-            <div className={styles.taskContent}>
-              <Checkbox 
-                checked={item.completed || false}
-                onChange={handleTaskToggle}
-              />
-              <Text size={200} style={{ textDecoration: item.completed ? 'line-through' : 'none' }}>
-                {item.title}
-              </Text>
-            </div>
-          ) : (
-            <Text size={200} weight="medium">
-              {item.title}
-            </Text>
           )}
         </div>
       )}
