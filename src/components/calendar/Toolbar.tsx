@@ -37,7 +37,6 @@ const Toolbar: React.FC = () => {
                 key={`toolbar-${item.type}`}
                 draggableId={`toolbar-${item.type}-${index}`}
                 index={index}
-                type="CALENDAR_ITEM"
               >
                 {(provided, snapshot) => (
                   <div
