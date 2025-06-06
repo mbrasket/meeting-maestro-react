@@ -121,8 +121,8 @@ const CalendarGrid = ({
 
   // Generate time slots for every 5 minutes (288 slots in 24 hours)
   const timeSlots = Array.from({ length: 288 }, (_, i) => i);
-  // Only show hourly labels
-  const hourlySlots = Array.from({ length: 24 }, (_, i) => i * 12);
+  // Show time labels only at half-hour increments (every 6 slots = 30 minutes)
+  const halfHourSlots = Array.from({ length: 48 }, (_, i) => i * 6);
 
   return (
     <div className={styles.container}>
@@ -166,7 +166,7 @@ const CalendarGrid = ({
           <>
             <div key={`time-${slot}`} className={styles.timeColumn}>
               <div className={styles.timeLabel}>
-                {hourlySlots.includes(slot) ? slotToTime(slot) : ''}
+                {halfHourSlots.includes(slot) ? slotToTime(slot) : ''}
               </div>
             </div>
             {weekDays.map((day, dayIndex) => (

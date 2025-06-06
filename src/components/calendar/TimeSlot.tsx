@@ -10,11 +10,11 @@ const useStyles = makeStyles({
     position: 'relative',
     minHeight: '20px',
   },
-  hourBorder: {
+  halfHourBorder: {
     borderBottom: `1px solid ${tokens.colorNeutralStroke2}`,
   },
-  regularBorder: {
-    borderBottom: `1px solid ${tokens.colorNeutralStroke3}`,
+  noBorder: {
+    // No border for non-half-hour slots
   },
   dropZone: {
     backgroundColor: tokens.colorBrandBackground2,
@@ -53,10 +53,12 @@ interface TimeSlotProps {
 const TimeSlot = ({ day, slot, items, onUpdateItem, onDeleteItem, selectedItemIds, onSelectItem, onClearSelection }: TimeSlotProps) => {
   const styles = useStyles();
   const droppableId = `${day.toDateString()}-${slot}`;
-  const isHourBoundary = slot % 12 === 0;
+  
+  // Show border only at half-hour increments (every 6 slots = 30 minutes)
+  const isHalfHourBoundary = slot % 6 === 0;
   
   const getBorderStyle = () => {
-    return isHourBoundary ? styles.hourBorder : styles.regularBorder;
+    return isHalfHourBoundary ? styles.halfHourBorder : styles.noBorder;
   };
 
   const handleSlotClick = (e: React.MouseEvent) => {
