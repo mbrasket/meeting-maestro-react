@@ -10,7 +10,12 @@ export const pixelsToTime = (pixels: number): string => {
   const totalMinutes = Math.round((pixels / HOUR_HEIGHT) * MINUTES_PER_HOUR / PRECISION_MINUTES) * PRECISION_MINUTES;
   const hours = Math.floor(totalMinutes / MINUTES_PER_HOUR);
   const minutes = totalMinutes % MINUTES_PER_HOUR;
-  return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+  
+  // Ensure we don't go beyond 23:59
+  const finalHours = Math.min(23, Math.max(0, hours));
+  const finalMinutes = Math.min(59, Math.max(0, minutes));
+  
+  return `${finalHours.toString().padStart(2, '0')}:${finalMinutes.toString().padStart(2, '0')}`;
 };
 
 export const calculateDuration = (startTime: string, endTime: string): number => {
@@ -20,8 +25,14 @@ export const calculateDuration = (startTime: string, endTime: string): number =>
 };
 
 export const roundToNearestSlot = (pixels: number): number => {
-  const slotHeight = (PRECISION_MINUTES / MINUTES_PER_HOUR) * HOUR_HEIGHT;
+  const slotHeight = (PRECISION_MINUTES / MINUTES_PER_HOUR) * HOUR_HEIGHT; // 7px for 5-minute slots
   return Math.round(pixels / slotHeight) * slotHeight;
+};
+
+export const getTimeFromPixels = (pixels: number, containerTop: number, scrollTop: number): string => {
+  const adjustedPixels = pixels - containerTop + scrollTop;
+  const roundedPixels = roundToNearestSlot(adjustedPixels);
+  return pixelsToTime(roundedPixels);
 };
 
 export const getWeekDates = (startDate: Date): Date[] => {

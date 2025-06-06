@@ -25,7 +25,7 @@ const Toolbar: React.FC = () => {
     <div className="p-4 border-b border-border bg-background">
       <h3 className="text-sm font-medium text-foreground mb-3">Drag items to calendar</h3>
       
-      <Droppable droppableId="toolbar" direction="horizontal">
+      <Droppable droppableId="toolbar" direction="horizontal" type="TOOLBAR">
         {(provided) => (
           <div
             ref={provided.innerRef}
@@ -37,6 +37,7 @@ const Toolbar: React.FC = () => {
                 key={`toolbar-${item.type}`}
                 draggableId={`toolbar-${item.type}-${index}`}
                 index={index}
+                type="CALENDAR_ITEM"
               >
                 {(provided, snapshot) => (
                   <div
