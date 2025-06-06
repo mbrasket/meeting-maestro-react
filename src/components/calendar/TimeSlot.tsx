@@ -16,6 +16,9 @@ const useStyles = makeStyles({
   regularBorder: {
     borderBottom: `1px solid ${tokens.colorNeutralStroke3}`,
   },
+  noBorder: {
+    borderBottom: 'none',
+  },
   dropZone: {
     backgroundColor: tokens.colorBrandBackground2,
     opacity: '0.3',
@@ -34,6 +37,17 @@ const TimeSlot = ({ day, slot, items, onUpdateItem, onDeleteItem }: TimeSlotProp
   const styles = useStyles();
   const droppableId = `${day.toDateString()}-${slot}`;
   const isHourBoundary = slot % 12 === 0;
+  
+  // Check if this slot has any items that would cover the border
+  const hasItemsInSlot = items.some(item => {
+    const itemStartSlot = Math.floor(new Date(item.startTime).getHours() * 12 + new Date(item.startTime).getMinutes() / 5);
+    return slot === itemStartSlot;
+  });
+
+  const getBorderStyle = () => {
+    if (hasItemsInSlot) return styles.noBorder;
+    return isHourBoundary ? styles.hourBorder : styles.regularBorder;
+  };
 
   return (
     <Droppable droppableId={droppableId}>
@@ -41,7 +55,7 @@ const TimeSlot = ({ day, slot, items, onUpdateItem, onDeleteItem }: TimeSlotProp
         <div 
           ref={provided.innerRef}
           {...provided.droppableProps}
-          className={`${styles.slot} ${isHourBoundary ? styles.hourBorder : styles.regularBorder} ${snapshot.isDraggingOver ? styles.dropZone : ''}`}
+          className={`${styles.slot} ${getBorderStyle()} ${snapshot.isDraggingOver ? styles.dropZone : ''}`}
         >
           {items.map((item, index) => {
             // Only render the item in its starting slot to avoid duplicates

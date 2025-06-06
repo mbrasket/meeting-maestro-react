@@ -117,7 +117,7 @@ const CalendarItemComponent = ({ item, index, onUpdate, onDelete }: CalendarItem
 
     const handleMouseMove = (e: MouseEvent) => {
       const deltaY = e.clientY - startY;
-      const deltaSlots = Math.round(deltaY / 20); // 20px per slot
+      const deltaSlots = Math.round(deltaY / 20); // 20px per 5-minute slot
 
       if (direction === 'top') {
         const newStartTime = new Date(startTime);
