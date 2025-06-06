@@ -11,9 +11,9 @@ export const calculateItemPosition = (column: number, totalColumns: number) => {
   const columnWidth = 100 / totalColumns;
   const left = column * columnWidth;
   return {
-    left: `${left}%`,
-    width: `${columnWidth}%`,
-    paddingLeft: column > 0 ? '2px' : '4px',
-    paddingRight: column < totalColumns - 1 ? '2px' : '4px',
+    left: `calc(${left}% + 4px)`, // Add 4px padding from left edge
+    width: `calc(${columnWidth}% - 8px)`, // Subtract 8px total padding (4px left + 4px right)
+    paddingLeft: column > 0 ? '2px' : '0px',
+    paddingRight: column < totalColumns - 1 ? '2px' : '0px',
   };
 };

@@ -3,7 +3,6 @@ import { Draggable } from '@hello-pangea/dnd';
 import { makeStyles, tokens, Text } from '@fluentui/react-components';
 import { Flag } from 'lucide-react';
 import { CalendarItem } from '../types';
-import { calculateItemPosition } from '../utils/itemCalculations';
 
 const useStyles = makeStyles({
   item: {
@@ -16,12 +15,13 @@ const useStyles = makeStyles({
     zIndex: '10',
   },
   milestone: {
-    height: '2px',
+    height: '4px', // Slightly taller for better visibility
     backgroundColor: tokens.colorPaletteRedBackground2,
     display: 'flex',
     alignItems: 'center',
     paddingLeft: '4px',
     zIndex: '10',
+    border: `1px solid ${tokens.colorPaletteRedBorder1}`,
   },
   selected: {
     '::before': {
@@ -75,6 +75,17 @@ export const MilestoneItem = ({
     onSelect(item.id, e.ctrlKey);
   };
 
+  // Use consistent positioning calculation with padding
+  const getPositionStyle = () => {
+    const columnWidth = 100 / totalColumns;
+    const left = column * columnWidth;
+    return {
+      left: `calc(${left}% + 4px)`, // Add consistent padding
+      width: `calc(${columnWidth}% - 8px)`, // Subtract padding from width
+      height: '6px', // Fixed height for milestones
+    };
+  };
+
   return (
     <Draggable draggableId={item.id} index={index}>
       {(provided, snapshot) => (
@@ -84,8 +95,7 @@ export const MilestoneItem = ({
           {...provided.dragHandleProps}
           className={`${styles.item} ${getItemStyles()} ${snapshot.isDragging ? styles.dragging : ''}`}
           style={{
-            height: '7px',
-            ...calculateItemPosition(column, totalColumns),
+            ...getPositionStyle(),
             ...provided.draggableProps.style,
           }}
           onClick={handleItemClick}

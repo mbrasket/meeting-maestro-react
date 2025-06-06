@@ -10,6 +10,7 @@ const useStyles = makeStyles({
     height: '7px', // Each 5-minute slot is 7px (84px per hour ÷ 12 slots)
     position: 'relative',
     minHeight: '7px',
+    padding: '1px', // Add padding around grid elements
   },
   halfHourBorder: {
     borderBottom: `1px solid ${tokens.colorNeutralStroke2}`,
@@ -24,8 +25,8 @@ const useStyles = makeStyles({
   },
   ghostCard: {
     position: 'absolute',
-    left: '4px',
-    right: '4px',
+    left: '6px', // Increased padding from edges
+    right: '6px',
     height: '28px', // Default height for ghost card (4 slots * 7px = 28px)
     backgroundColor: tokens.colorBrandBackground,
     border: `2px dashed ${tokens.colorBrandStroke1}`,
