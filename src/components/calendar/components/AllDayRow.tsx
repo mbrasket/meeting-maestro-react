@@ -12,6 +12,7 @@ interface AllDayRowProps {
 export const AllDayRow: React.FC<AllDayRowProps> = ({ weekDays, items }) => {
   const allDayItems = items.filter(item => 
     item.startTime.getHours() === 0 && 
+    item.startTime.getMinutes() === 0 &&
     item.endTime.getHours() === 23 &&
     item.endTime.getMinutes() === 59
   );

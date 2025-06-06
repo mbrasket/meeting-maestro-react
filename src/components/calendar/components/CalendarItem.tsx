@@ -44,17 +44,19 @@ export const CalendarItemComponent: React.FC<CalendarItemProps> = ({
 
     if (!position || !column) return {};
 
+    // Calculate width and position with 2px padding between items
     const width = `calc(${100 / column.totalColumns}% - 4px)`;
     const left = `calc(${(column.column * 100) / column.totalColumns}% + 2px)`;
 
     return {
       position: 'absolute' as const,
-      top: `${position.top + 2}px`,
-      height: `${position.height - 4}px`,
+      top: `${position.top}px`,
+      height: `${position.height}px`,
       width,
       left,
       margin: 0,
       padding: '4px 8px',
+      minHeight: '14px', // Ensure minimum visibility
     };
   };
 
@@ -68,17 +70,23 @@ export const CalendarItemComponent: React.FC<CalendarItemProps> = ({
           className={`
             ${getItemColor(item.type)} 
             text-white text-sm rounded 
-            shadow-sm cursor-pointer
-            ${snapshot.isDragging ? 'shadow-lg z-50' : 'z-10'}
+            shadow-sm cursor-pointer select-none
+            ${snapshot.isDragging ? 'shadow-lg z-50 opacity-80' : 'z-10'}
+            hover:shadow-md transition-shadow
           `}
           style={{
             ...getItemStyle(),
             ...provided.draggableProps.style,
           }}
         >
-          <div className="font-medium truncate">{item.title}</div>
+          <div className="font-medium truncate text-xs">{item.title}</div>
           {item.location && (
             <div className="text-xs opacity-90 truncate">{item.location}</div>
+          )}
+          {!isAllDay && (
+            <div className="text-xs opacity-75">
+              {item.startTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            </div>
           )}
         </div>
       )}

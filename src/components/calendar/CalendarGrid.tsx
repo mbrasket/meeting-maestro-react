@@ -15,11 +15,11 @@ export const CalendarGrid: React.FC = () => {
   
   const weekDays = getWeekDays(new Date());
 
-  // Auto-scroll to 8:30 AM (slot 102: 8*12 + 6)
+  // Auto-scroll to 8:30 AM (slot 102: 8*12 + 6) = 714px (102 * 7px per slot)
   useEffect(() => {
     if (scrollRef.current) {
       const targetSlot = 102; // 8:30 AM
-      const scrollTop = targetSlot * 7; // 7px per 5-minute slot (84px/12)
+      const scrollTop = targetSlot * 7; // 7px per 5-minute slot
       scrollRef.current.scrollTop = scrollTop;
     }
   }, []);
@@ -51,7 +51,10 @@ export const CalendarGrid: React.FC = () => {
                   dayIndex={index}
                   items={calendarItems.filter(item => {
                     const itemDay = new Date(item.startTime).toDateString();
-                    return itemDay === day.toDateString();
+                    return itemDay === day.toDateString() && 
+                           !(item.startTime.getHours() === 0 && 
+                             item.endTime.getHours() === 23 &&
+                             item.endTime.getMinutes() === 59);
                   })}
                 />
               ))}

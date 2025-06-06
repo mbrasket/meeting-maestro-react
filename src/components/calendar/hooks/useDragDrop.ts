@@ -1,88 +1,93 @@
 
 import { useState, useCallback, useRef } from 'react';
-import { DropResult } from '@hello-pangea/dnd';
+import { DropResult, DragUpdate } from '@hello-pangea/dnd';
 import { CalendarItem } from '../types';
-import { calculateDropTime, mousePositionToTimeSlot } from '../utils/dropCalculations';
+import { calculateDropTime } from '../utils/dropCalculations';
 
 export const useDragDrop = () => {
   const [calendarItems, setCalendarItems] = useState<CalendarItem[]>([]);
-  const mousePositionRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
+  const dragStateRef = useRef<{
+    mouseX: number;
+    mouseY: number;
+    isDragging: boolean;
+  }>({ mouseX: 0, mouseY: 0, isDragging: false });
 
-  // Track mouse position during drag
-  const updateMousePosition = useCallback((event: MouseEvent) => {
-    mousePositionRef.current = { x: event.clientX, y: event.clientY };
+  const handleDragStart = useCallback(() => {
+    dragStateRef.current.isDragging = true;
+    
+    const handleMouseMove = (e: MouseEvent) => {
+      dragStateRef.current.mouseX = e.clientX;
+      dragStateRef.current.mouseY = e.clientY;
+    };
+
+    document.addEventListener('mousemove', handleMouseMove);
+    
+    // Cleanup function will be called in handleDragEnd
+    dragStateRef.current.cleanup = () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+    };
+  }, []);
+
+  const handleDragUpdate = useCallback((update: DragUpdate) => {
+    // Visual feedback during drag - could be used for preview positioning
+    console.log('Drag update:', update);
   }, []);
 
   const handleDragEnd = useCallback((result: DropResult) => {
     const { destination, source, draggableId } = result;
+    
+    // Cleanup mouse tracking
+    if (dragStateRef.current.cleanup) {
+      dragStateRef.current.cleanup();
+    }
+    dragStateRef.current.isDragging = false;
 
     if (!destination) return;
 
-    // Get the current mouse position
-    const mouseY = mousePositionRef.current.y;
-    
-    // Get the drop target element to calculate relative position
+    // Get the drop target element
     const dropElement = document.querySelector(`[data-rbd-droppable-id="${destination.droppableId}"]`);
-    let mouseOffset = 0;
-    
-    if (dropElement) {
-      const rect = dropElement.getBoundingClientRect();
-      mouseOffset = mouseY - rect.top;
-    }
+    if (!dropElement) return;
 
-    // Handle toolbar item drops
+    const dropTime = calculateDropTime(
+      destination.droppableId, 
+      dragStateRef.current.mouseY, 
+      dropElement
+    );
+
+    if (!dropTime) return;
+
+    // Handle toolbar item drops (creating new items)
     if (source.droppableId === 'toolbar' || draggableId.startsWith('toolbar-')) {
-      const dropTime = calculateDropTime(destination.droppableId, mouseOffset);
+      const [, itemType] = draggableId.split('-');
+      const duration = getDefaultDuration(itemType);
       
-      if (dropTime) {
-        const [, itemType] = draggableId.split('-');
-        const duration = getDefaultDuration(itemType);
-        
-        const newItem: CalendarItem = {
-          id: `item-${Date.now()}`,
-          type: itemType as any,
-          title: `New ${itemType}`,
-          startTime: dropTime,
-          endTime: new Date(dropTime.getTime() + duration * 60000),
-          color: getItemColor(itemType),
-        };
+      const newItem: CalendarItem = {
+        id: `item-${Date.now()}`,
+        type: itemType as any,
+        title: `New ${itemType}`,
+        startTime: dropTime,
+        endTime: new Date(dropTime.getTime() + duration * 60000),
+        color: getItemColor(itemType),
+      };
 
-        setCalendarItems(prev => [...prev, newItem]);
-      }
+      setCalendarItems(prev => [...prev, newItem]);
     }
-    
     // Handle existing item moves
     else {
-      const dropTime = calculateDropTime(destination.droppableId, mouseOffset);
-      if (dropTime) {
-        setCalendarItems(prev => 
-          prev.map(item => {
-            if (item.id === draggableId) {
-              const duration = item.endTime.getTime() - item.startTime.getTime();
-              return {
-                ...item,
-                startTime: dropTime,
-                endTime: new Date(dropTime.getTime() + duration),
-              };
-            }
-            return item;
-          })
-        );
-      }
+      setCalendarItems(prev => 
+        prev.map(item => {
+          if (item.id === draggableId) {
+            const duration = item.endTime.getTime() - item.startTime.getTime();
+            return {
+              ...item,
+              startTime: dropTime,
+              endTime: new Date(dropTime.getTime() + duration),
+            };
+          }
+          return item;
+        })
+      );
     }
-
-    // Remove mouse event listener
-    document.removeEventListener('mousemove', updateMousePosition);
-  }, [updateMousePosition]);
-
-  const handleDragStart = useCallback(() => {
-    // Add mouse event listener when drag starts
-    document.addEventListener('mousemove', updateMousePosition);
-  }, [updateMousePosition]);
-
-  const handleDragUpdate = useCallback((update: any) => {
-    // Track drag updates for visual feedback
-    console.log('Drag update:', update);
   }, []);
 
   return {

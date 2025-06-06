@@ -24,21 +24,36 @@ export const DayColumn: React.FC<DayColumnProps> = ({ day, dayIndex, items }) =>
           className={`relative border-r border-border last:border-r-0 ${
             snapshot.isDraggingOver ? 'bg-primary/5' : ''
           }`}
+          style={{ minHeight: '2016px' }} // 24 hours * 84px
         >
-          {/* Time grid background */}
+          {/* Time grid background with hour and half-hour lines */}
           {hours.map((hour) => (
             <div
               key={hour}
-              className="relative border-b border-border"
+              className="relative"
               style={{ height: '84px' }}
             >
+              {/* Hour line (darker) */}
               <div 
-                className="absolute top-1/2 left-0 right-0 border-t border-border/30"
+                className="absolute top-0 left-0 right-0 border-t border-border"
               />
+              {/* Half-hour line (lighter) */}
+              <div 
+                className="absolute left-0 right-0 border-t border-border/30"
+                style={{ top: '42px' }}
+              />
+              {/* Quarter hour lines (very light) for 5-minute precision guides */}
+              {Array.from({ length: 12 }, (_, i) => (
+                <div
+                  key={i}
+                  className="absolute left-0 right-0 border-t border-border/10"
+                  style={{ top: `${i * 7}px` }}
+                />
+              ))}
             </div>
           ))}
 
-          {/* Calendar items */}
+          {/* Calendar items with 2px padding */}
           {items.map((item, index) => {
             const position = calculateItemPosition(item);
             const column = overlapColumns.get(item.id) || { column: 0, totalColumns: 1 };
@@ -48,7 +63,10 @@ export const DayColumn: React.FC<DayColumnProps> = ({ day, dayIndex, items }) =>
                 key={item.id}
                 item={item}
                 index={index}
-                position={position}
+                position={{
+                  top: position.top + 2,
+                  height: Math.max(14, position.height - 4) // Minimum height with padding
+                }}
                 column={column}
                 isAllDay={false}
               />

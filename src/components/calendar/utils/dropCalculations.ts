@@ -1,5 +1,5 @@
 
-export const calculateDropTime = (droppableId: string, mouseOffset: number): Date | null => {
+export const calculateDropTime = (droppableId: string, mouseY: number, dropElement: Element): Date | null => {
   // Handle all-day drops
   if (droppableId.startsWith('allday-')) {
     const dayIndex = parseInt(droppableId.split('-')[1]);
@@ -17,9 +17,13 @@ export const calculateDropTime = (droppableId: string, mouseOffset: number): Dat
     const targetDate = new Date(today);
     targetDate.setDate(today.getDate() - today.getDay() + dayIndex);
     
-    // Calculate time slot from mouse offset with 5-minute precision
+    // Get mouse position relative to the drop element
+    const rect = dropElement.getBoundingClientRect();
+    const relativeY = mouseY - rect.top;
+    
+    // Calculate time slot from relative position with 5-minute precision
     // Each hour is 84px, so each 5-minute slot is 7px (84/12)
-    const slot = Math.floor(mouseOffset / 7);
+    const slot = Math.floor(relativeY / 7);
     const minutes = slot * 5;
     const hours = Math.floor(minutes / 60);
     const mins = minutes % 60;
@@ -40,11 +44,4 @@ export const mousePositionToTimeSlot = (mouseY: number): number => {
 export const timeSlotToPosition = (slot: number): number => {
   // Convert time slot to Y position
   return slot * 7; // 7px per 5-minute slot
-};
-
-export const getDropPosition = (event: any): { mouseOffset: number } => {
-  // Get the mouse position relative to the drop target
-  const rect = event.target?.getBoundingClientRect();
-  const mouseY = event.clientY - (rect?.top || 0);
-  return { mouseOffset: mouseY };
 };
