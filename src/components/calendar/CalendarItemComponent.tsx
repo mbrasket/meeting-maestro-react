@@ -1,4 +1,3 @@
-
 import { useState, useRef } from 'react';
 import { Draggable } from '@hello-pangea/dnd';
 import {
@@ -44,8 +43,19 @@ const useStyles = makeStyles({
     zIndex: '10', // Ensure milestones appear above grid lines
   },
   selected: {
-    border: `2px solid ${tokens.colorBrandStroke1}`,
-    boxShadow: `0 0 0 2px ${tokens.colorBrandBackground2}`,
+    '::before': {
+      content: '""',
+      position: 'absolute',
+      top: '-4px',
+      left: '-4px',
+      right: '-4px',
+      bottom: '-4px',
+      border: `3px solid ${tokens.colorBrandStroke1}`,
+      borderRadius: '8px',
+      backgroundColor: 'transparent',
+      zIndex: '-1',
+      boxShadow: `0 0 0 1px ${tokens.colorNeutralBackground1}, 0 0 8px ${tokens.colorBrandBackground2}`,
+    },
     zIndex: '15', // Selected items appear above non-selected ones
   },
   resizeHandle: {
