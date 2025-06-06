@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Draggable } from '@hello-pangea/dnd';
 import {
@@ -12,64 +13,64 @@ import { CalendarItem } from './types';
 const useStyles = makeStyles({
   item: {
     position: 'absolute' as const,
-    left: '4px',
-    right: '4px',
-    borderRadius: '4px',
-    padding: '4px 8px',
+    left: '4px' as const,
+    right: '4px' as const,
+    borderRadius: '4px' as const,
+    padding: '4px 8px' as const,
     cursor: 'move' as const,
     userSelect: 'none' as const,
   },
   event: {
     backgroundColor: tokens.colorBrandBackground,
     borderColor: tokens.colorBrandStroke1,
-    borderWidth: '1px',
+    borderWidth: '1px' as const,
     borderStyle: 'solid' as const,
     color: tokens.colorNeutralForegroundOnBrand,
   },
   task: {
     backgroundColor: tokens.colorPaletteGreenBackground1,
     borderColor: tokens.colorPaletteGreenBorder1,
-    borderWidth: '1px',
+    borderWidth: '1px' as const,
     borderStyle: 'solid' as const,
   },
   highlight: {
     backgroundColor: tokens.colorPaletteYellowBackground1,
-    opacity: '0.6',
+    opacity: '0.6' as const,
     borderColor: tokens.colorPaletteYellowBorder1,
-    borderWidth: '1px',
+    borderWidth: '1px' as const,
     borderStyle: 'solid' as const,
   },
   milestone: {
-    height: '2px',
+    height: '2px' as const,
     backgroundColor: tokens.colorPaletteRedBackground2,
     display: 'flex' as const,
     alignItems: 'center' as const,
-    paddingLeft: '4px',
+    paddingLeft: '4px' as const,
   },
   resizeHandle: {
     position: 'absolute' as const,
-    left: '0',
-    right: '0',
-    height: '4px',
+    left: '0' as const,
+    right: '0' as const,
+    height: '4px' as const,
     cursor: 'ns-resize' as const,
-    backgroundColor: 'transparent',
+    backgroundColor: 'transparent' as const,
     ':hover': {
       backgroundColor: tokens.colorNeutralStroke1,
     },
   },
   topHandle: {
-    top: '-2px',
+    top: '-2px' as const,
   },
   bottomHandle: {
-    bottom: '-2px',
+    bottom: '-2px' as const,
   },
   dragging: {
-    opacity: '0.5',
+    opacity: '0.5' as const,
   },
   taskContent: {
     display: 'flex' as const,
     alignItems: 'center' as const,
-    gap: '4px',
+    gap: '4px' as const,
   },
 });
 
