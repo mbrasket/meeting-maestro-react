@@ -16,12 +16,25 @@ const useStyles = makeStyles({
   regularBorder: {
     borderBottom: `1px solid ${tokens.colorNeutralStroke3}`,
   },
-  noBorder: {
-    borderBottom: 'none',
-  },
   dropZone: {
     backgroundColor: tokens.colorBrandBackground2,
     opacity: '0.3',
+  },
+  ghostCard: {
+    position: 'absolute',
+    left: '4px',
+    right: '4px',
+    height: '40px', // Default height for ghost card
+    backgroundColor: tokens.colorBrandBackground,
+    border: `2px dashed ${tokens.colorBrandStroke1}`,
+    borderRadius: '4px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    color: tokens.colorNeutralForegroundOnBrand,
+    fontSize: '12px',
+    zIndex: 5,
+    opacity: '0.7',
   },
 });
 
@@ -38,11 +51,7 @@ const TimeSlot = ({ day, slot, items, onUpdateItem, onDeleteItem }: TimeSlotProp
   const droppableId = `${day.toDateString()}-${slot}`;
   const isHourBoundary = slot % 12 === 0;
   
-  // Check if this slot has any items covering it (items.length > 0 means there are items in this slot)
-  const hasItemsInSlot = items.length > 0;
-
   const getBorderStyle = () => {
-    if (hasItemsInSlot) return styles.noBorder;
     return isHourBoundary ? styles.hourBorder : styles.regularBorder;
   };
 
@@ -54,6 +63,13 @@ const TimeSlot = ({ day, slot, items, onUpdateItem, onDeleteItem }: TimeSlotProp
           {...provided.droppableProps}
           className={`${styles.slot} ${getBorderStyle()} ${snapshot.isDraggingOver ? styles.dropZone : ''}`}
         >
+          {/* Show ghost card when dragging from tools */}
+          {snapshot.isDraggingOver && snapshot.draggingFromThisWith?.startsWith('tool-') && (
+            <div className={styles.ghostCard}>
+              Drop here
+            </div>
+          )}
+          
           {items.map((item, index) => {
             // Only render the item in its starting slot to avoid duplicates
             const itemStartSlot = Math.floor(new Date(item.startTime).getHours() * 12 + new Date(item.startTime).getMinutes() / 5);
