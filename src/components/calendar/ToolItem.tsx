@@ -26,13 +26,13 @@ const useStyles = makeStyles({
     },
   },
   dragging: {
-    opacity: 0.5,
+    opacity: '0.5',
   },
   icon: {
     color: tokens.colorNeutralForeground2,
   },
   content: {
-    flex: 1,
+    flex: '1',
   },
 });
 

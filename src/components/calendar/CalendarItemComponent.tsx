@@ -35,7 +35,7 @@ const useStyles = makeStyles({
   },
   highlight: {
     backgroundColor: tokens.colorPaletteYellowBackground1,
-    opacity: 0.6,
+    opacity: '0.6',
     borderColor: tokens.colorPaletteYellowBorder1,
     borderWidth: '1px',
     borderStyle: 'solid',
@@ -49,8 +49,8 @@ const useStyles = makeStyles({
   },
   resizeHandle: {
     position: 'absolute',
-    left: 0,
-    right: 0,
+    left: '0',
+    right: '0',
     height: '4px',
     cursor: 'ns-resize',
     backgroundColor: 'transparent',
@@ -65,7 +65,7 @@ const useStyles = makeStyles({
     bottom: '-2px',
   },
   dragging: {
-    opacity: 0.5,
+    opacity: '0.5',
   },
   taskContent: {
     display: 'flex',
