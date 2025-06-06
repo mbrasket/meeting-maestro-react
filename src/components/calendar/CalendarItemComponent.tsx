@@ -54,7 +54,7 @@ const useStyles = makeStyles({
     height: '4px',
     cursor: 'ns-resize',
     backgroundColor: 'transparent',
-    '&:hover': {
+    ':hover': {
       backgroundColor: tokens.colorNeutralStroke1,
     },
   },

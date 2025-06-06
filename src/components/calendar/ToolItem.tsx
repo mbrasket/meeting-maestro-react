@@ -21,7 +21,7 @@ const useStyles = makeStyles({
     alignItems: 'center',
     gap: tokens.spacingHorizontalS,
     backgroundColor: tokens.colorNeutralBackground1,
-    '&:hover': {
+    ':hover': {
       backgroundColor: tokens.colorNeutralBackground1Hover,
     },
   },
