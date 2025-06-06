@@ -1,3 +1,4 @@
+
 import { makeStyles, tokens, Text, Checkbox } from '@fluentui/react-components';
 import { DroppableStateSnapshot } from '@hello-pangea/dnd';
 import { Flag } from 'lucide-react';
@@ -15,13 +16,12 @@ const useStyles = makeStyles({
     alignItems: 'center',
     justifyContent: 'flex-start',
     fontSize: '12px',
-    zIndex: '50', // Much higher z-index to appear above everything
-    opacity: '0.8',
+    zIndex: '100',
+    opacity: '0.9',
     padding: '2px 6px',
-    border: `3px dashed ${tokens.colorBrandStroke1}`, // Thicker, more visible border
-    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)', // Add shadow for visibility
+    border: `3px dashed ${tokens.colorBrandStroke1}`,
+    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
   },
-  // Item type styles matching CalendarItemComponent
   event: {
     backgroundColor: tokens.colorBrandBackground,
     color: tokens.colorNeutralForegroundOnBrand,
@@ -41,7 +41,7 @@ const useStyles = makeStyles({
     backgroundColor: tokens.colorPaletteRedBackground2,
     borderColor: tokens.colorPaletteRedBorder1,
     color: tokens.colorNeutralForeground1,
-    height: '16px', // Shorter for milestone
+    height: '16px',
   },
   taskContent: {
     display: 'flex',
@@ -72,7 +72,6 @@ interface ItemPreview {
 export const GhostCard = ({ snapshot, allItems = [] }: GhostCardProps) => {
   const styles = useStyles();
 
-  // Debug logging
   console.log('GhostCard render:', {
     isDraggingOver: snapshot.isDraggingOver,
     draggingFromThisWith: snapshot.draggingFromThisWith
@@ -84,69 +83,80 @@ export const GhostCard = ({ snapshot, allItems = [] }: GhostCardProps) => {
 
   const draggableId = snapshot.draggingFromThisWith;
   
-  // Determine item type and content from draggableId
   const getItemPreview = (): ItemPreview => {
+    // Handle tool items from the panel
     if (draggableId.startsWith('tool-')) {
-      // Handle tool items from the panel
       if (draggableId.includes('milestone')) {
-        return {
+        const preview: ItemPreview = {
           type: 'milestone',
           title: 'New Milestone',
           styleClass: styles.milestone,
         };
-      } else if (draggableId.includes('event')) {
-        return {
+        return preview;
+      }
+      
+      if (draggableId.includes('event')) {
+        const preview: ItemPreview = {
           type: 'event',
           title: 'New Event',
           styleClass: styles.event,
         };
-      } else if (draggableId.includes('task')) {
-        return {
+        return preview;
+      }
+      
+      if (draggableId.includes('task')) {
+        const preview: ItemPreview = {
           type: 'task',
           title: 'New Task',
           styleClass: styles.task,
         };
-      } else if (draggableId.includes('highlight')) {
-        return {
+        return preview;
+      }
+      
+      if (draggableId.includes('highlight')) {
+        const preview: ItemPreview = {
           type: 'highlight',
           title: 'New Time Block',
           styleClass: styles.highlight,
         };
-      }
-    } else {
-      // Handle existing calendar items being moved
-      const existingItem = allItems.find(item => item.id === draggableId);
-      if (existingItem) {
-        const styleClass = (() => {
-          switch (existingItem.type) {
-            case 'event':
-              return styles.event;
-            case 'task':
-              return styles.task;
-            case 'highlight':
-              return styles.highlight;
-            case 'milestone':
-              return styles.milestone;
-            default:
-              return styles.event;
-          }
-        })();
-        
-        return {
-          type: existingItem.type,
-          title: existingItem.title,
-          styleClass,
-          completed: existingItem.completed,
-        };
+        return preview;
       }
     }
     
+    // Handle existing calendar items being moved
+    const existingItem = allItems.find(item => item.id === draggableId);
+    if (existingItem) {
+      const styleClass = (() => {
+        switch (existingItem.type) {
+          case 'event':
+            return styles.event;
+          case 'task':
+            return styles.task;
+          case 'highlight':
+            return styles.highlight;
+          case 'milestone':
+            return styles.milestone;
+          default:
+            return styles.event;
+        }
+      })();
+      
+      const preview: ItemPreview = {
+        type: existingItem.type,
+        title: existingItem.title,
+        styleClass,
+        completed: existingItem.completed,
+      };
+      return preview;
+    }
+    
     // Default fallback
-    return {
+    const defaultPreview: ItemPreview = {
       type: 'event',
       title: 'Moving item...',
       styleClass: styles.event,
     };
+    return defaultPreview;
   };
 
   const itemPreview = getItemPreview();
