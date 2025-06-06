@@ -28,10 +28,16 @@ const useStyles = makeStyles({
     opacity: '0.4',
     cursor: 'not-allowed',
   },
-  selectedRange: {
+  selectedRangeOverlay: {
+    position: 'absolute',
+    left: '0',
+    right: '0',
     backgroundColor: tokens.colorBrandBackground2,
-    opacity: '0.5',
-    border: `1px solid ${tokens.colorBrandStroke1}`,
+    border: `2px solid ${tokens.colorBrandStroke1}`,
+    borderRadius: '4px',
+    opacity: '0.6',
+    pointerEvents: 'none',
+    zIndex: '10',
   },
   collisionWarning: {
     backgroundColor: tokens.colorPaletteRedBackground1,
@@ -198,12 +204,14 @@ const TimeSlot = ({
   // Calculate positions for overlapping items
   const itemsWithPositions = calculateOverlapPositions(allDayItems, slot, resizingItemId);
 
+  // Get selection bounds for continuous overlay
+  const selectionBounds = timeRangeSelection?.getSelectionBounds();
+  const shouldShowSelectionOverlay = selectionBounds && 
+    day.toDateString() === selectionBounds.day.toDateString() && 
+    slot === selectionBounds.startSlot;
+
   const getSlotStyles = () => {
     let slotStyles = `${styles.slot} ${getBorderStyle()}`;
-    
-    if (isInSelectedRange) {
-      slotStyles += ` ${styles.selectedRange}`;
-    }
     
     if (hasCollisionWarning) {
       slotStyles += ` ${styles.collisionWarning}`;
@@ -224,6 +232,17 @@ const TimeSlot = ({
           onMouseEnter={handleSlotMouseEnter}
           onMouseUp={handleSlotMouseUp}
         >
+          {/* Continuous selection overlay - only show at start slot */}
+          {shouldShowSelectionOverlay && (
+            <div 
+              className={styles.selectedRangeOverlay}
+              style={{
+                top: '0px',
+                height: `${selectionBounds.height}px`,
+              }}
+            />
+          )}
+
           {/* Show ghost card when dragging from tools */}
           {snapshot.isDraggingOver && snapshot.draggingFromThisWith?.startsWith('tool-') && (
             <div className={styles.ghostCard}>
@@ -231,6 +250,7 @@ const TimeSlot = ({
             </div>
           )}
           
+          {// ... keep existing code (item rendering logic)}
           {itemsWithPositions.map((itemData, index) => {
             const { item, column, totalColumns, startSlot } = itemData;
             

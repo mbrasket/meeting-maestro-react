@@ -62,6 +62,21 @@ export const useTimeRangeSelection = () => {
     return false;
   }, [selectedRange]);
 
+  const getSelectionBounds = useCallback(() => {
+    if (!selectedRange) return null;
+    
+    const startSlot = Math.min(selectedRange.startSlot, selectedRange.endSlot);
+    const endSlot = Math.max(selectedRange.startSlot, selectedRange.endSlot);
+    
+    return {
+      startSlot,
+      endSlot,
+      day: selectedRange.startDay,
+      height: (endSlot - startSlot + 1) * 7, // 7px per slot
+      top: startSlot * 7,
+    };
+  }, [selectedRange]);
+
   return {
     selectedRange,
     isSelecting,
@@ -70,5 +85,6 @@ export const useTimeRangeSelection = () => {
     endSelection,
     clearSelection,
     isSlotInRange,
+    getSelectionBounds,
   };
 };

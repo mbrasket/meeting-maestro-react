@@ -47,13 +47,32 @@ const CalendarPage = () => {
   const [selectedItemIds, setSelectedItemIds] = useState<Set<string>>(new Set());
   const [copyingItem, setCopyingItem] = useState<CalendarItem | null>(null);
   const [dragCollisions, setDragCollisions] = useState<Set<string>>(new Set());
+  const [debugInfo, setDebugInfo] = useState<string>('');
   
   const keyboardRef = useKeyboardRef();
   const timeRangeSelection = useTimeRangeSelection();
 
+  // Enhanced debug logging for CTRL key
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const ctrlState = keyboardRef.current.ctrlKey;
+      const timestamp = new Date().toLocaleTimeString();
+      setDebugInfo(`[${timestamp}] CTRL: ${ctrlState ? 'PRESSED' : 'released'}`);
+    }, 100);
+
+    return () => clearInterval(interval);
+  }, [keyboardRef]);
+
   // Handle keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
+      console.log('Global KeyDown:', {
+        key: event.key,
+        ctrlKey: event.ctrlKey,
+        refState: keyboardRef.current.ctrlKey,
+        timestamp: new Date().toLocaleTimeString()
+      });
+
       if (event.key === 'Escape') {
         setSelectedItemIds(new Set());
         timeRangeSelection.clearSelection();
@@ -132,7 +151,13 @@ const CalendarPage = () => {
   };
 
   const handleBeforeDragStart = (initial: any) => {
-    console.log('BeforeDragStart - CTRL pressed:', keyboardRef.current.ctrlKey, 'draggableId:', initial.draggableId);
+    const ctrlState = keyboardRef.current.ctrlKey;
+    console.log('BeforeDragStart:', {
+      ctrlPressed: ctrlState,
+      draggableId: initial.draggableId,
+      source: initial.source,
+      timestamp: new Date().toLocaleTimeString()
+    });
   };
 
   const handleDragStart = (initial: any) => {
@@ -140,16 +165,27 @@ const CalendarPage = () => {
     
     // Get the current CTRL state at the moment of drag start
     const isCtrlPressed = keyboardRef.current.ctrlKey;
-    console.log('DragStart - CTRL pressed:', isCtrlPressed, 'draggableId:', draggableId);
+    console.log('DragStart Enhanced Debug:', {
+      ctrlPressed: isCtrlPressed,
+      draggableId: draggableId,
+      sourceDroppableId: source.droppableId,
+      isFromTools: source.droppableId.startsWith('tools-'),
+      shouldClone: isCtrlPressed && !source.droppableId.startsWith('tools-'),
+      timestamp: new Date().toLocaleTimeString()
+    });
     
     // Only handle cloning for existing calendar items (not tools) when CTRL is pressed
     if (isCtrlPressed && !source.droppableId.startsWith('tools-')) {
       const originalItem = calendarItems.find(item => item.id === draggableId);
       if (originalItem) {
-        console.log('Creating clone of item:', originalItem.id);
+        console.log('Creating clone of item:', {
+          originalId: originalItem.id,
+          originalTitle: originalItem.title,
+          timestamp: new Date().toLocaleTimeString()
+        });
         
-        // Create the clone immediately
-        const cloneId = `${Date.now()}-clone`;
+        // Create the clone immediately with a unique ID
+        const cloneId = `clone-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
         const clonedItem: CalendarItem = {
           ...originalItem,
           id: cloneId,
@@ -157,9 +193,17 @@ const CalendarPage = () => {
         };
         
         // Add the clone to the calendar
-        setCalendarItems(prev => [...prev, clonedItem]);
+        setCalendarItems(prev => {
+          console.log('Adding clone to calendar items:', cloneId);
+          return [...prev, clonedItem];
+        });
         setCopyingItem(clonedItem);
-        console.log('Clone created with ID:', cloneId);
+        console.log('Clone created successfully:', {
+          cloneId: cloneId,
+          cloneTitle: clonedItem.title
+        });
+      } else {
+        console.warn('Original item not found for cloning:', draggableId);
       }
     }
   };
@@ -284,11 +328,37 @@ const CalendarPage = () => {
       onDragEnd={handleDragEnd}
     >
       <div className={styles.container}>
+        {/* Enhanced CTRL indicator with debug info */}
         {keyboardRef.current.ctrlKey && (
           <div className={styles.ctrlIndicator}>
             CTRL: Clone Mode Active
+            <div style={{ fontSize: '10px', marginTop: '4px', opacity: 0.8 }}>
+              {debugInfo}
+            </div>
           </div>
         )}
+        
+        {/* Debug panel in development */}
+        {process.env.NODE_ENV === 'development' && (
+          <div style={{
+            position: 'fixed',
+            top: '120px',
+            right: '20px',
+            backgroundColor: '#000',
+            color: '#fff',
+            padding: '8px',
+            borderRadius: '4px',
+            fontSize: '11px',
+            maxWidth: '200px',
+            zIndex: 999
+          }}>
+            <div>Debug Info:</div>
+            <div>{debugInfo}</div>
+            <div>Items: {calendarItems.length}</div>
+            <div>Copying: {copyingItem?.id || 'none'}</div>
+          </div>
+        )}
+
         <div className={styles.mainContent} data-calendar-grid>
           <CalendarGrid
             items={calendarItems}
