@@ -1,22 +1,38 @@
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { DropResult } from '@hello-pangea/dnd';
 import { CalendarItem } from '../types';
-import { calculateDropTime, getDropPosition } from '../utils/dropCalculations';
+import { calculateDropTime, mousePositionToTimeSlot } from '../utils/dropCalculations';
 
 export const useDragDrop = () => {
   const [calendarItems, setCalendarItems] = useState<CalendarItem[]>([]);
+  const mousePositionRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
+
+  // Track mouse position during drag
+  const updateMousePosition = useCallback((event: MouseEvent) => {
+    mousePositionRef.current = { x: event.clientX, y: event.clientY };
+  }, []);
 
   const handleDragEnd = useCallback((result: DropResult) => {
     const { destination, source, draggableId } = result;
 
     if (!destination) return;
 
+    // Get the current mouse position
+    const mouseY = mousePositionRef.current.y;
+    
+    // Get the drop target element to calculate relative position
+    const dropElement = document.querySelector(`[data-rbd-droppable-id="${destination.droppableId}"]`);
+    let mouseOffset = 0;
+    
+    if (dropElement) {
+      const rect = dropElement.getBoundingClientRect();
+      mouseOffset = mouseY - rect.top;
+    }
+
     // Handle toolbar item drops
     if (source.droppableId === 'toolbar' || draggableId.startsWith('toolbar-')) {
-      // For now, we'll use a default position at the start of the slot
-      // In a real implementation, you'd need to capture the actual mouse position
-      const dropTime = calculateDropTime(destination.droppableId, 0);
+      const dropTime = calculateDropTime(destination.droppableId, mouseOffset);
       
       if (dropTime) {
         const [, itemType] = draggableId.split('-');
@@ -37,7 +53,7 @@ export const useDragDrop = () => {
     
     // Handle existing item moves
     else {
-      const dropTime = calculateDropTime(destination.droppableId, 0);
+      const dropTime = calculateDropTime(destination.droppableId, mouseOffset);
       if (dropTime) {
         setCalendarItems(prev => 
           prev.map(item => {
@@ -54,16 +70,25 @@ export const useDragDrop = () => {
         );
       }
     }
-  }, []);
+
+    // Remove mouse event listener
+    document.removeEventListener('mousemove', updateMousePosition);
+  }, [updateMousePosition]);
+
+  const handleDragStart = useCallback(() => {
+    // Add mouse event listener when drag starts
+    document.addEventListener('mousemove', updateMousePosition);
+  }, [updateMousePosition]);
 
   const handleDragUpdate = useCallback((update: any) => {
-    // This can be used to show visual feedback during drag
+    // Track drag updates for visual feedback
     console.log('Drag update:', update);
   }, []);
 
   return {
     calendarItems,
     handleDragEnd,
+    handleDragStart,
     handleDragUpdate,
     setCalendarItems,
   };
