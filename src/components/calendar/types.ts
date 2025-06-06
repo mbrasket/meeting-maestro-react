@@ -24,3 +24,10 @@ export interface DragItem {
   template?: Partial<CalendarItem>;
   existingItem?: CalendarItem;
 }
+
+export interface CalendarItemTemplate {
+  type: CalendarItemType;
+  title: string;
+  duration: number;
+  color?: string;
+}

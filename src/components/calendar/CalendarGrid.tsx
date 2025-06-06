@@ -1,6 +1,4 @@
-
 import { useState } from 'react';
-import { useDrop } from 'react-dnd';
 import {
   makeStyles,
   tokens,
@@ -9,9 +7,8 @@ import {
 } from '@fluentui/react-components';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { format, addWeeks, subWeeks } from 'date-fns';
-import { CalendarItem, DragItem } from './types';
+import { CalendarItem } from './types';
 import { getWeekDays, slotToTime } from './utils/timeUtils';
-import CalendarItemComponent from './CalendarItemComponent';
 import TimeSlot from './TimeSlot';
 
 const useStyles = makeStyles({
@@ -91,21 +88,6 @@ const CalendarGrid = ({
   const styles = useStyles();
   const weekDays = getWeekDays(currentWeek);
 
-  const [{ isOver }, drop] = useDrop(() => ({
-    accept: 'calendar-item',
-    drop: (item: DragItem, monitor) => {
-      const offset = monitor.getClientOffset();
-      if (!offset) return;
-
-      // Calculate which time slot was dropped on
-      // This would need more precise calculation based on grid positioning
-      console.log('Dropped item:', item, 'at offset:', offset);
-    },
-    collect: (monitor) => ({
-      isOver: monitor.isOver(),
-    }),
-  }));
-
   const handlePreviousWeek = () => {
     onWeekChange(subWeeks(currentWeek, 1));
   };
@@ -137,7 +119,7 @@ const CalendarGrid = ({
         </div>
       </div>
       
-      <div ref={drop} className={styles.grid} style={{ gridTemplateRows: '40px repeat(24, 60px)' }}>
+      <div className={styles.grid} style={{ gridTemplateRows: '40px repeat(24, 60px)' }}>
         {/* Time column header */}
         <div className={styles.timeColumn}></div>
         

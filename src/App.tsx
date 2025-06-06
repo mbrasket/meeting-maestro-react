@@ -1,16 +1,20 @@
 
 import { FluentProvider, teamsLightTheme } from '@fluentui/react-components';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { DndProvider } from 'react-dnd';
-import { HTML5Backend } from 'react-dnd-html5-backend';
+import { DragDropContext } from '@hello-pangea/dnd';
 import Navigation from './components/navigation/Navigation';
 import MeetingPage from './pages/MeetingPage';
 import CalendarPage from './pages/CalendarPage';
 
 function App() {
+  const handleDragEnd = (result: any) => {
+    // This will be handled by the CalendarPage component
+    console.log('Drag ended:', result);
+  };
+
   return (
     <FluentProvider theme={teamsLightTheme}>
-      <DndProvider backend={HTML5Backend}>
+      <DragDropContext onDragEnd={handleDragEnd}>
         <Router>
           <Navigation />
           <Routes>
@@ -18,7 +22,7 @@ function App() {
             <Route path="/calendar" element={<CalendarPage />} />
           </Routes>
         </Router>
-      </DndProvider>
+      </DragDropContext>
     </FluentProvider>
   );
 }

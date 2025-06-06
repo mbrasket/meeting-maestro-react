@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { useDrag } from 'react-dnd';
+import { Draggable } from '@hello-pangea/dnd';
 import {
   makeStyles,
   tokens,
@@ -8,7 +8,7 @@ import {
   Checkbox,
 } from '@fluentui/react-components';
 import { Flag } from 'lucide-react';
-import { CalendarItem, DragItem } from './types';
+import { CalendarItem } from './types';
 
 const useStyles = makeStyles({
   item: {
@@ -76,24 +76,14 @@ const useStyles = makeStyles({
 
 interface CalendarItemComponentProps {
   item: CalendarItem;
+  index: number;
   onUpdate: (updates: Partial<CalendarItem>) => void;
   onDelete: () => void;
 }
 
-const CalendarItemComponent = ({ item, onUpdate, onDelete }: CalendarItemComponentProps) => {
+const CalendarItemComponent = ({ item, index, onUpdate, onDelete }: CalendarItemComponentProps) => {
   const styles = useStyles();
   const [isResizing, setIsResizing] = useState(false);
-
-  const [{ isDragging }, drag] = useDrag(() => ({
-    type: 'calendar-item',
-    item: (): DragItem => ({
-      type: item.type,
-      existingItem: item,
-    }),
-    collect: (monitor) => ({
-      isDragging: monitor.isDragging(),
-    }),
-  }));
 
   const getItemStyles = () => {
     switch (item.type) {
@@ -116,42 +106,60 @@ const CalendarItemComponent = ({ item, onUpdate, onDelete }: CalendarItemCompone
 
   if (item.type === 'milestone') {
     return (
-      <div ref={drag} className={`${styles.item} ${styles.milestone} ${isDragging ? styles.dragging : ''}`}>
-        <Flag size={12} />
-        <Text size={200} style={{ marginLeft: '4px' }}>
-          {item.title}
-        </Text>
-      </div>
+      <Draggable draggableId={item.id} index={index}>
+        {(provided, snapshot) => (
+          <div
+            ref={provided.innerRef}
+            {...provided.draggableProps}
+            {...provided.dragHandleProps}
+            className={`${styles.item} ${styles.milestone} ${snapshot.isDragging ? styles.dragging : ''}`}
+          >
+            <Flag size={12} />
+            <Text size={200} style={{ marginLeft: '4px' }}>
+              {item.title}
+            </Text>
+          </div>
+        )}
+      </Draggable>
     );
   }
 
   return (
-    <div ref={drag} className={`${styles.item} ${getItemStyles()} ${isDragging ? styles.dragging : ''}`}>
-      {/* Resize handles */}
-      {!isResizing && (
-        <>
-          <div className={`${styles.resizeHandle} ${styles.topHandle}`} />
-          <div className={`${styles.resizeHandle} ${styles.bottomHandle}`} />
-        </>
-      )}
-      
-      {/* Content */}
-      {item.type === 'task' ? (
-        <div className={styles.taskContent}>
-          <Checkbox 
-            checked={item.completed || false}
-            onChange={handleTaskToggle}
-          />
-          <Text size={200} style={{ textDecoration: item.completed ? 'line-through' : 'none' }}>
-            {item.title}
-          </Text>
+    <Draggable draggableId={item.id} index={index}>
+      {(provided, snapshot) => (
+        <div
+          ref={provided.innerRef}
+          {...provided.draggableProps}
+          {...provided.dragHandleProps}
+          className={`${styles.item} ${getItemStyles()} ${snapshot.isDragging ? styles.dragging : ''}`}
+        >
+          {/* Resize handles */}
+          {!isResizing && (
+            <>
+              <div className={`${styles.resizeHandle} ${styles.topHandle}`} />
+              <div className={`${styles.resizeHandle} ${styles.bottomHandle}`} />
+            </>
+          )}
+          
+          {/* Content */}
+          {item.type === 'task' ? (
+            <div className={styles.taskContent}>
+              <Checkbox 
+                checked={item.completed || false}
+                onChange={handleTaskToggle}
+              />
+              <Text size={200} style={{ textDecoration: item.completed ? 'line-through' : 'none' }}>
+                {item.title}
+              </Text>
+            </div>
+          ) : (
+            <Text size={200} weight="medium">
+              {item.title}
+            </Text>
+          )}
         </div>
-      ) : (
-        <Text size={200} weight="medium">
-          {item.title}
-        </Text>
       )}
-    </div>
+    </Draggable>
   );
 };
 

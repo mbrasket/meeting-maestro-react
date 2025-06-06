@@ -1,5 +1,5 @@
 
-import { useDrag } from 'react-dnd';
+import { Draggable } from '@hello-pangea/dnd';
 import {
   makeStyles,
   tokens,
@@ -7,7 +7,7 @@ import {
   Card,
 } from '@fluentui/react-components';
 import { Flag, Clock, CheckSquare, Calendar } from 'lucide-react';
-import { CalendarItemType, DragItem } from './types';
+import { CalendarItemTemplate } from './types';
 
 const useStyles = makeStyles({
   toolItem: {
@@ -37,34 +37,12 @@ const useStyles = makeStyles({
 });
 
 interface ToolItemProps {
-  template: {
-    type: CalendarItemType;
-    title: string;
-    duration: number;
-    color?: string;
-  };
+  template: CalendarItemTemplate;
+  index: number;
 }
 
-const ToolItem = ({ template }: ToolItemProps) => {
+const ToolItem = ({ template, index }: ToolItemProps) => {
   const styles = useStyles();
-
-  const [{ isDragging }, drag] = useDrag(() => ({
-    type: 'calendar-item',
-    item: (): DragItem => ({
-      type: template.type,
-      template: {
-        type: template.type,
-        title: template.title,
-        startTime: new Date(), // Will be set when dropped
-        endTime: new Date(), // Will be calculated when dropped
-        color: template.color,
-        completed: false,
-      },
-    }),
-    collect: (monitor) => ({
-      isDragging: monitor.isDragging(),
-    }),
-  }));
 
   const getIcon = () => {
     switch (template.type) {
@@ -81,21 +59,29 @@ const ToolItem = ({ template }: ToolItemProps) => {
     }
   };
 
+  const draggableId = `tool-${template.type}-${template.title}-${index}`;
+
   return (
-    <Card
-      ref={drag}
-      className={`${styles.toolItem} ${isDragging ? styles.dragging : ''}`}
-    >
-      {getIcon()}
-      <div className={styles.content}>
-        <Text size={300}>{template.title}</Text>
-        {template.duration > 0 && (
-          <Text size={200} style={{ color: tokens.colorNeutralForeground2 }}>
-            {template.duration}min
-          </Text>
-        )}
-      </div>
-    </Card>
+    <Draggable draggableId={draggableId} index={index}>
+      {(provided, snapshot) => (
+        <Card
+          ref={provided.innerRef}
+          {...provided.draggableProps}
+          {...provided.dragHandleProps}
+          className={`${styles.toolItem} ${snapshot.isDragging ? styles.dragging : ''}`}
+        >
+          {getIcon()}
+          <div className={styles.content}>
+            <Text size={300}>{template.title}</Text>
+            {template.duration > 0 && (
+              <Text size={200} style={{ color: tokens.colorNeutralForeground2 }}>
+                {template.duration}min
+              </Text>
+            )}
+          </div>
+        </Card>
+      )}
+    </Draggable>
   );
 };
 

@@ -1,5 +1,6 @@
 
 import { useState } from 'react';
+import { DragDropContext, DropResult } from '@hello-pangea/dnd';
 import {
   makeStyles,
   tokens,
@@ -7,6 +8,7 @@ import {
 import CalendarGrid from '../components/calendar/CalendarGrid';
 import ToolsPanel from '../components/calendar/ToolsPanel';
 import { CalendarItem } from '../components/calendar/types';
+import { snapToGrid } from '../components/calendar/utils/timeUtils';
 
 const useStyles = makeStyles({
   container: {
@@ -42,19 +44,71 @@ const CalendarPage = () => {
     setCalendarItems(prev => prev.filter(item => item.id !== itemId));
   };
 
+  const handleDragEnd = (result: DropResult) => {
+    const { destination, source, draggableId } = result;
+
+    if (!destination) return;
+
+    // Handle dragging from tools panel to calendar
+    if (source.droppableId.startsWith('tools-') && destination.droppableId.includes('-')) {
+      const [dateStr, hourStr] = destination.droppableId.split('-');
+      const targetDate = new Date(dateStr);
+      const targetHour = parseInt(hourStr);
+      
+      targetDate.setHours(targetHour, 0, 0, 0);
+      
+      // Create new item from tool template
+      const newItem: CalendarItem = {
+        id: Date.now().toString(),
+        type: draggableId.includes('event') ? 'event' : 
+              draggableId.includes('task') ? 'task' :
+              draggableId.includes('highlight') ? 'highlight' : 'milestone',
+        title: 'New Item',
+        startTime: snapToGrid(targetDate),
+        endTime: snapToGrid(new Date(targetDate.getTime() + 30 * 60 * 1000)),
+        completed: false,
+      };
+      
+      handleAddItem(newItem);
+    }
+    
+    // Handle moving existing calendar items
+    if (!source.droppableId.startsWith('tools-') && !destination.droppableId.startsWith('tools-')) {
+      const item = calendarItems.find(item => item.id === draggableId);
+      if (item) {
+        const [dateStr, hourStr] = destination.droppableId.split('-');
+        const targetDate = new Date(dateStr);
+        const targetHour = parseInt(hourStr);
+        
+        targetDate.setHours(targetHour, 0, 0, 0);
+        
+        const duration = item.endTime.getTime() - item.startTime.getTime();
+        const newStartTime = snapToGrid(targetDate);
+        const newEndTime = new Date(newStartTime.getTime() + duration);
+        
+        handleUpdateItem(item.id, {
+          startTime: newStartTime,
+          endTime: newEndTime,
+        });
+      }
+    }
+  };
+
   return (
-    <div className={styles.container}>
-      <div className={styles.mainContent}>
-        <CalendarGrid
-          items={calendarItems}
-          currentWeek={currentWeek}
-          onUpdateItem={handleUpdateItem}
-          onDeleteItem={handleDeleteItem}
-          onWeekChange={setCurrentWeek}
-        />
+    <DragDropContext onDragEnd={handleDragEnd}>
+      <div className={styles.container}>
+        <div className={styles.mainContent}>
+          <CalendarGrid
+            items={calendarItems}
+            currentWeek={currentWeek}
+            onUpdateItem={handleUpdateItem}
+            onDeleteItem={handleDeleteItem}
+            onWeekChange={setCurrentWeek}
+          />
+        </div>
+        <ToolsPanel onAddItem={handleAddItem} />
       </div>
-      <ToolsPanel onAddItem={handleAddItem} />
-    </div>
+    </DragDropContext>
   );
 };
 

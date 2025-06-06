@@ -1,8 +1,7 @@
 
-import { useDrop } from 'react-dnd';
+import { Droppable } from '@hello-pangea/dnd';
 import { makeStyles, tokens } from '@fluentui/react-components';
-import { CalendarItem, DragItem } from './types';
-import { snapToGrid } from './utils/timeUtils';
+import { CalendarItem } from './types';
 import CalendarItemComponent from './CalendarItemComponent';
 
 const useStyles = makeStyles({
@@ -29,52 +28,29 @@ interface TimeSlotProps {
 
 const TimeSlot = ({ day, hour, items, onUpdateItem, onDeleteItem }: TimeSlotProps) => {
   const styles = useStyles();
-
-  const [{ isOver }, drop] = useDrop(() => ({
-    accept: 'calendar-item',
-    drop: (dragItem: DragItem) => {
-      const startTime = new Date(day);
-      startTime.setHours(hour, 0, 0, 0);
-      
-      if (dragItem.template) {
-        // Create new item from template
-        const newItem: Partial<CalendarItem> = {
-          ...dragItem.template,
-          startTime: snapToGrid(startTime),
-          endTime: snapToGrid(new Date(startTime.getTime() + 30 * 60 * 1000)), // Default 30 min
-        };
-        console.log('Creating new item:', newItem);
-      } else if (dragItem.existingItem) {
-        // Move existing item
-        const timeDiff = dragItem.existingItem.endTime.getTime() - dragItem.existingItem.startTime.getTime();
-        const newStartTime = snapToGrid(startTime);
-        const newEndTime = new Date(newStartTime.getTime() + timeDiff);
-        
-        onUpdateItem(dragItem.existingItem.id, {
-          startTime: newStartTime,
-          endTime: newEndTime,
-        });
-      }
-    },
-    collect: (monitor) => ({
-      isOver: monitor.isOver(),
-    }),
-  }));
+  const droppableId = `${day.toDateString()}-${hour}`;
 
   return (
-    <div 
-      ref={drop} 
-      className={`${styles.slot} ${isOver ? styles.dropZone : ''}`}
-    >
-      {items.map((item) => (
-        <CalendarItemComponent
-          key={item.id}
-          item={item}
-          onUpdate={(updates) => onUpdateItem(item.id, updates)}
-          onDelete={() => onDeleteItem(item.id)}
-        />
-      ))}
-    </div>
+    <Droppable droppableId={droppableId}>
+      {(provided, snapshot) => (
+        <div 
+          ref={provided.innerRef}
+          {...provided.droppableProps}
+          className={`${styles.slot} ${snapshot.isDraggingOver ? styles.dropZone : ''}`}
+        >
+          {items.map((item, index) => (
+            <CalendarItemComponent
+              key={item.id}
+              item={item}
+              index={index}
+              onUpdate={(updates) => onUpdateItem(item.id, updates)}
+              onDelete={() => onDeleteItem(item.id)}
+            />
+          ))}
+          {provided.placeholder}
+        </div>
+      )}
+    </Droppable>
   );
 };
 
