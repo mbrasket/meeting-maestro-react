@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { DragDropContext, DropResult } from '@hello-pangea/dnd';
 import {
@@ -117,10 +116,11 @@ const CalendarPage = () => {
       const minutes = (targetSlot % 12) * 5;
       targetDate.setHours(hours, minutes, 0, 0);
       
-      // Determine type from draggableId
-      const type = draggableId.includes('event') ? 'event' : 
+      // Determine type from draggableId - fix the milestone detection
+      const type = draggableId.includes('milestone') ? 'milestone' :
+                   draggableId.includes('event') ? 'event' : 
                    draggableId.includes('task') ? 'task' :
-                   draggableId.includes('highlight') ? 'highlight' : 'milestone';
+                   draggableId.includes('highlight') ? 'highlight' : 'event';
       
       // Create new item from tool template
       const duration = type === 'milestone' ? 0 : 60; // Default 1 hour, 0 for milestones
