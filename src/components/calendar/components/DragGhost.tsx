@@ -1,5 +1,5 @@
 
-import { memo } from 'react';
+import { memo, useEffect, useState } from 'react';
 import { Text, Checkbox } from '@fluentui/react-components';
 import { Flag } from 'lucide-react';
 import { CalendarItem } from '../types';
@@ -40,24 +40,45 @@ const itemStyles = {
   },
 };
 
+interface DragState {
+  isDragging: boolean;
+  draggedItemId: string | null;
+  draggedItemType: string | null;
+  sourceType: 'tools' | 'calendar';
+  targetDay: Date | null;
+  targetSlot: number | null;
+  isValidDrop: boolean;
+}
+
 interface DragGhostProps {
-  dragState: {
-    isDragging: boolean;
-    draggedItemId: string | null;
-    draggedItemType: string | null;
-    currentCoordinates: { x: number; y: number } | null;
-  };
+  dragState: DragState;
   allItems: CalendarItem[];
 }
 
 export const DragGhost = memo(({ dragState, allItems }: DragGhostProps) => {
-  if (!dragState.isDragging || !dragState.currentCoordinates) {
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      setMousePosition({ x: e.clientX, y: e.clientY });
+    };
+
+    if (dragState.isDragging) {
+      document.addEventListener('mousemove', handleMouseMove);
+    }
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+    };
+  }, [dragState.isDragging]);
+
+  if (!dragState.isDragging) {
     return null;
   }
 
   const getItemPreview = () => {
     // Handle tool items from the panel
-    if (dragState.draggedItemId?.startsWith('tool-')) {
+    if (dragState.sourceType === 'tools') {
       const type = dragState.draggedItemType || 'event';
       return {
         type,
@@ -121,8 +142,9 @@ export const DragGhost = memo(({ dragState, allItems }: DragGhostProps) => {
       style={{
         ...ghostStyles,
         ...itemPreview.style,
-        left: dragState.currentCoordinates.x,
-        top: dragState.currentCoordinates.y,
+        left: mousePosition.x,
+        top: mousePosition.y,
+        borderColor: dragState.isValidDrop ? '#107c10' : '#d13438',
       }}
     >
       {renderContent()}

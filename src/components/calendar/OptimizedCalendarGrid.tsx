@@ -1,4 +1,3 @@
-
 import { useState, useCallback, useMemo, useRef } from 'react';
 import {
   makeStyles,
@@ -8,7 +7,7 @@ import {
 } from '@fluentui/react-components';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { format, addWeeks, subWeeks } from 'date-fns';
-import { DragDropContext, DropResult, DragStart, DragUpdate } from '@hello-pangea/dnd';
+import { DragDropContext, DropResult, DragStart, DragUpdate, BeforeCapture } from '@hello-pangea/dnd';
 import { CalendarItem } from './types';
 import { getWeekDays, snapToGrid } from './utils/timeUtils';
 import { DayColumn } from './components/DayColumn';
@@ -66,9 +65,10 @@ interface DragState {
   isDragging: boolean;
   draggedItemId: string | null;
   draggedItemType: string | null;
-  currentCoordinates: { x: number; y: number } | null;
+  sourceType: 'tools' | 'calendar';
   targetDay: Date | null;
   targetSlot: number | null;
+  isValidDrop: boolean;
 }
 
 const OptimizedCalendarGrid = ({
@@ -90,9 +90,10 @@ const OptimizedCalendarGrid = ({
     isDragging: false,
     draggedItemId: null,
     draggedItemType: null,
-    currentCoordinates: null,
+    sourceType: 'calendar',
     targetDay: null,
     targetSlot: null,
+    isValidDrop: false,
   });
 
   // Memoize items by day for performance
@@ -107,40 +108,73 @@ const OptimizedCalendarGrid = ({
     return byDay;
   }, [items, weekDays]);
 
-  const handleDragStart = useCallback((start: DragStart) => {
-    const item = items.find(item => item.id === start.draggableId);
-    const type = start.draggableId.startsWith('tool-') 
-      ? start.draggableId.replace('tool-', '')
+  const calculateDropPosition = useCallback((clientX: number, clientY: number) => {
+    if (!gridRef.current) return null;
+
+    const gridRect = gridRef.current.getBoundingClientRect();
+    const timeColumnWidth = 60;
+    const headerHeight = 40;
+    
+    // Calculate which day column we're over
+    const relativeX = clientX - gridRect.left - timeColumnWidth;
+    const dayColumnWidth = (gridRect.width - timeColumnWidth) / 7;
+    const dayIndex = Math.floor(relativeX / dayColumnWidth);
+    
+    if (dayIndex < 0 || dayIndex >= 7) return null;
+    
+    // Calculate time slot
+    const relativeY = clientY - gridRect.top - headerHeight;
+    const slot = Math.max(0, Math.min(287, Math.floor(relativeY / 7)));
+    
+    return {
+      dayIndex,
+      slot,
+      targetDay: weekDays[dayIndex],
+      isValid: dayIndex >= 0 && dayIndex < 7 && slot >= 0 && slot <= 287,
+    };
+  }, [weekDays]);
+
+  const handleBeforeCapture = useCallback((before: BeforeCapture) => {
+    const item = items.find(item => item.id === before.draggableId);
+    const sourceType = before.draggableId.startsWith('tool-') ? 'tools' : 'calendar';
+    const type = sourceType === 'tools' 
+      ? before.draggableId.replace('tool-', '')
       : item?.type || 'event';
 
-    setDragState(prev => ({
-      ...prev,
+    setDragState({
       isDragging: true,
-      draggedItemId: start.draggableId,
+      draggedItemId: before.draggableId,
       draggedItemType: type,
-    }));
-
-    // Add mouse move listener for real-time coordinates
-    const handleMouseMove = (e: MouseEvent) => {
-      setDragState(prev => ({
-        ...prev,
-        currentCoordinates: { x: e.clientX, y: e.clientY },
-      }));
-    };
-
-    document.addEventListener('mousemove', handleMouseMove);
-    
-    // Clean up on drag end
-    const cleanup = () => {
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', cleanup);
-    };
-    document.addEventListener('mouseup', cleanup);
+      sourceType,
+      targetDay: null,
+      targetSlot: null,
+      isValidDrop: false,
+    });
   }, [items]);
 
-  const handleDragUpdate = useCallback((update: DragUpdate) => {
-    // Update is handled by mouse events for better performance
+  const handleDragStart = useCallback((start: DragStart) => {
+    // Additional setup if needed
   }, []);
+
+  const handleDragUpdate = useCallback((update: DragUpdate) => {
+    if (!update.destination) {
+      setDragState(prev => ({ ...prev, isValidDrop: false, targetDay: null, targetSlot: null }));
+      return;
+    }
+
+    // For day-based drops, extract day and use mouse position for slot
+    if (update.destination.droppableId.startsWith('day-')) {
+      const dayIndex = parseInt(update.destination.droppableId.replace('day-', ''));
+      const targetDay = weekDays[dayIndex];
+      
+      setDragState(prev => ({
+        ...prev,
+        targetDay,
+        targetSlot: null, // Will be calculated on mouse position in drop
+        isValidDrop: true,
+      }));
+    }
+  }, [weekDays]);
 
   const handleDragEnd = useCallback((result: DropResult) => {
     const { destination, source, draggableId } = result;
@@ -150,9 +184,10 @@ const OptimizedCalendarGrid = ({
       isDragging: false,
       draggedItemId: null,
       draggedItemType: null,
-      currentCoordinates: null,
+      sourceType: 'calendar',
       targetDay: null,
       targetSlot: null,
+      isValidDrop: false,
     });
 
     if (!destination) return;
@@ -162,19 +197,8 @@ const OptimizedCalendarGrid = ({
       const dayIndex = parseInt(destination.droppableId.replace('day-', ''));
       const targetDate = new Date(weekDays[dayIndex]);
       
-      // Use current mouse position to calculate exact drop position
-      if (dragState.currentCoordinates && gridRef.current) {
-        const gridRect = gridRef.current.getBoundingClientRect();
-        const timeColumnWidth = 60; // Width of time column
-        const relativeY = dragState.currentCoordinates.y - gridRect.top - 40; // Subtract header height
-        
-        // Calculate slot based on Y position (7px per slot)
-        const slot = Math.max(0, Math.min(287, Math.floor(relativeY / 7)));
-        const hours = Math.floor(slot / 12);
-        const minutes = (slot % 12) * 5;
-        
-        targetDate.setHours(hours, minutes, 0, 0);
-      }
+      // Set to 9 AM as default drop time
+      targetDate.setHours(9, 0, 0, 0);
       
       const type = draggableId.includes('milestone') ? 'milestone' :
                    draggableId.includes('event') ? 'event' : 
@@ -202,17 +226,9 @@ const OptimizedCalendarGrid = ({
         const dayIndex = parseInt(destination.droppableId.replace('day-', ''));
         const targetDate = new Date(weekDays[dayIndex]);
         
-        // Use current mouse position for precise drop location
-        if (dragState.currentCoordinates && gridRef.current) {
-          const gridRect = gridRef.current.getBoundingClientRect();
-          const relativeY = dragState.currentCoordinates.y - gridRect.top - 40; // Subtract header height
-          
-          const slot = Math.max(0, Math.min(287, Math.floor(relativeY / 7)));
-          const hours = Math.floor(slot / 12);
-          const minutes = (slot % 12) * 5;
-          
-          targetDate.setHours(hours, minutes, 0, 0);
-        }
+        // Keep the same time of day when moving between days
+        const originalTime = new Date(item.startTime);
+        targetDate.setHours(originalTime.getHours(), originalTime.getMinutes(), 0, 0);
         
         const duration = item.endTime.getTime() - item.startTime.getTime();
         const newStartTime = snapToGrid(targetDate);
@@ -224,7 +240,7 @@ const OptimizedCalendarGrid = ({
         });
       }
     }
-  }, [dragState, weekDays, items, onAddItem, onUpdateItem]);
+  }, [weekDays, items, onAddItem, onUpdateItem]);
 
   const handlePreviousWeek = () => {
     onWeekChange(subWeeks(currentWeek, 1));
@@ -242,6 +258,7 @@ const OptimizedCalendarGrid = ({
 
   return (
     <DragDropContext 
+      onBeforeCapture={handleBeforeCapture}
       onDragStart={handleDragStart}
       onDragUpdate={handleDragUpdate}
       onDragEnd={handleDragEnd}
@@ -284,6 +301,7 @@ const OptimizedCalendarGrid = ({
                 selectedItemIds={selectedItemIds}
                 onSelectItem={onSelectItem}
                 onClearSelection={onClearSelection}
+                dragState={dragState}
               />
             ))}
           </div>

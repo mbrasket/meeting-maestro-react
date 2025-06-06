@@ -34,6 +34,15 @@ const useStyles = makeStyles({
     position: 'relative',
     minHeight: '2016px',
   },
+  dropZoneActive: {
+    backgroundColor: 'rgba(0, 120, 212, 0.05)',
+  },
+  dropZoneValid: {
+    backgroundColor: 'rgba(16, 124, 16, 0.05)',
+    borderColor: tokens.colorPaletteGreenBorder1,
+    borderWidth: '2px',
+    borderStyle: 'dashed',
+  },
   timeSlotGrid: {
     position: 'absolute',
     top: 0,
@@ -51,7 +60,27 @@ const useStyles = makeStyles({
     `,
     pointerEvents: 'none',
   },
+  dropIndicator: {
+    position: 'absolute',
+    left: '4px',
+    right: '4px',
+    height: '2px',
+    backgroundColor: tokens.colorBrandBackground,
+    borderRadius: '1px',
+    zIndex: 20,
+    transition: 'all 0.2s ease',
+  },
 });
+
+interface DragState {
+  isDragging: boolean;
+  draggedItemId: string | null;
+  draggedItemType: string | null;
+  sourceType: 'tools' | 'calendar';
+  targetDay: Date | null;
+  targetSlot: number | null;
+  isValidDrop: boolean;
+}
 
 interface DayColumnProps {
   day: Date;
@@ -63,6 +92,7 @@ interface DayColumnProps {
   selectedItemIds: Set<string>;
   onSelectItem: (itemId: string, ctrlKey: boolean) => void;
   onClearSelection: () => void;
+  dragState: DragState;
 }
 
 export const DayColumn = memo(({
@@ -75,11 +105,28 @@ export const DayColumn = memo(({
   selectedItemIds,
   onSelectItem,
   onClearSelection,
+  dragState,
 }: DayColumnProps) => {
   const styles = useStyles();
 
   // Calculate positions for all items in this day
   const itemsWithPositions = calculateOverlapPositions(items, 0);
+
+  const isTargetDay = dragState.isDragging && 
+    dragState.targetDay?.toDateString() === day.toDateString();
+
+  const getDropZoneClass = (snapshot: any) => {
+    let className = styles.dropZone;
+    
+    if (snapshot.isDraggingOver) {
+      className += ` ${styles.dropZoneActive}`;
+      if (dragState.isValidDrop) {
+        className += ` ${styles.dropZoneValid}`;
+      }
+    }
+    
+    return className;
+  };
 
   const handleItemRender = (item: CalendarItem, position: any) => {
     const startSlot = Math.floor(
@@ -129,20 +176,28 @@ export const DayColumn = memo(({
         </Text>
       </div>
       
-      <Droppable droppableId={`day-${dayIndex}`}>
+      <Droppable 
+        droppableId={`day-${dayIndex}`}
+        isDropDisabled={dragState.isDragging && !dragState.isValidDrop}
+      >
         {(provided, snapshot) => (
           <div
             ref={provided.innerRef}
             {...provided.droppableProps}
-            className={styles.dropZone}
-            style={{
-              backgroundColor: snapshot.isDraggingOver 
-                ? 'rgba(0, 120, 212, 0.1)' 
-                : 'transparent',
-            }}
+            className={getDropZoneClass(snapshot)}
           >
             {/* Background grid lines */}
             <div className={styles.timeSlotGrid} />
+            
+            {/* Drop indicator for target position */}
+            {isTargetDay && dragState.targetSlot !== null && (
+              <div 
+                className={styles.dropIndicator}
+                style={{
+                  top: `${dragState.targetSlot * 7}px`,
+                }}
+              />
+            )}
             
             {/* Render all items for this day */}
             {itemsWithPositions.map((itemData) => 

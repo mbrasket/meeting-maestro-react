@@ -133,14 +133,18 @@ const CalendarItemComponent = ({
     : calculateItemPosition(column, totalColumns);
 
   return (
-    <Draggable draggableId={item.id} index={index} isDragDisabled={isResizing}>
+    <Draggable 
+      draggableId={item.id} 
+      index={index} 
+      isDragDisabled={isResizing || isResizeActive}
+    >
       {(provided, snapshot) => (
         <div
           ref={provided.innerRef}
           {...provided.draggableProps}
           className={`${styles.item} ${getItemStyles()} ${snapshot.isDragging ? styles.dragging : ''}`}
           style={{
-            height: `${calculateItemHeight(item) - 2}px`, // Subtract 2px for slot padding
+            height: `${calculateItemHeight(item) - 2}px`,
             ...positionStyle,
             ...provided.draggableProps.style,
           }}
