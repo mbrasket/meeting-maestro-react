@@ -38,11 +38,8 @@ const TimeSlot = ({ day, slot, items, onUpdateItem, onDeleteItem }: TimeSlotProp
   const droppableId = `${day.toDateString()}-${slot}`;
   const isHourBoundary = slot % 12 === 0;
   
-  // Check if this slot has any items that would cover the border
-  const hasItemsInSlot = items.some(item => {
-    const itemStartSlot = Math.floor(new Date(item.startTime).getHours() * 12 + new Date(item.startTime).getMinutes() / 5);
-    return slot === itemStartSlot;
-  });
+  // Check if this slot has any items covering it (items.length > 0 means there are items in this slot)
+  const hasItemsInSlot = items.length > 0;
 
   const getBorderStyle = () => {
     if (hasItemsInSlot) return styles.noBorder;
