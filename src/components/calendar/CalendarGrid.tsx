@@ -86,6 +86,9 @@ interface CalendarGridProps {
   onUpdateItem: (itemId: string, updates: Partial<CalendarItem>) => void;
   onDeleteItem: (itemId: string) => void;
   onWeekChange: (date: Date) => void;
+  selectedItemIds: Set<string>;
+  onSelectItem: (itemId: string, ctrlKey: boolean) => void;
+  onClearSelection: () => void;
 }
 
 const CalendarGrid = ({
@@ -94,6 +97,9 @@ const CalendarGrid = ({
   onUpdateItem,
   onDeleteItem,
   onWeekChange,
+  selectedItemIds,
+  onSelectItem,
+  onClearSelection,
 }: CalendarGridProps) => {
   const styles = useStyles();
   const weekDays = getWeekDays(currentWeek);
@@ -166,6 +172,8 @@ const CalendarGrid = ({
                   })}
                   onUpdateItem={onUpdateItem}
                   onDeleteItem={onDeleteItem}
+                  selectedItemIds={selectedItemIds}
+                  onSelectItem={onSelectItem}
                 />
               </div>
             ))}

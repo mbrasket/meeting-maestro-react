@@ -45,9 +45,11 @@ interface TimeSlotProps {
   items: CalendarItem[];
   onUpdateItem: (itemId: string, updates: Partial<CalendarItem>) => void;
   onDeleteItem: (itemId: string) => void;
+  selectedItemIds: Set<string>;
+  onSelectItem: (itemId: string, ctrlKey: boolean) => void;
 }
 
-const TimeSlot = ({ day, slot, items, onUpdateItem, onDeleteItem }: TimeSlotProps) => {
+const TimeSlot = ({ day, slot, items, onUpdateItem, onDeleteItem, selectedItemIds, onSelectItem }: TimeSlotProps) => {
   const styles = useStyles();
   const droppableId = `${day.toDateString()}-${slot}`;
   const isHourBoundary = slot % 12 === 0;
@@ -82,6 +84,8 @@ const TimeSlot = ({ day, slot, items, onUpdateItem, onDeleteItem }: TimeSlotProp
                   index={index}
                   onUpdate={(updates) => onUpdateItem(item.id, updates)}
                   onDelete={() => onDeleteItem(item.id)}
+                  isSelected={selectedItemIds.has(item.id)}
+                  onSelect={onSelectItem}
                 />
               );
             }

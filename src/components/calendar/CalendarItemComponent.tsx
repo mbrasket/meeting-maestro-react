@@ -43,6 +43,11 @@ const useStyles = makeStyles({
     paddingLeft: '4px',
     zIndex: '10', // Ensure milestones appear above grid lines
   },
+  selected: {
+    border: `2px solid ${tokens.colorBrandStroke1}`,
+    boxShadow: `0 0 0 2px ${tokens.colorBrandBackground2}`,
+    zIndex: '15', // Selected items appear above non-selected ones
+  },
   resizeHandle: {
     position: 'absolute',
     left: '0',
@@ -77,30 +82,42 @@ interface CalendarItemComponentProps {
   index: number;
   onUpdate: (updates: Partial<CalendarItem>) => void;
   onDelete: () => void;
+  isSelected: boolean;
+  onSelect: (itemId: string, ctrlKey: boolean) => void;
 }
 
-const CalendarItemComponent = ({ item, index, onUpdate, onDelete }: CalendarItemComponentProps) => {
+const CalendarItemComponent = ({ item, index, onUpdate, onDelete, isSelected, onSelect }: CalendarItemComponentProps) => {
   const styles = useStyles();
   const [isResizing, setIsResizing] = useState(false);
   const itemRef = useRef<HTMLDivElement>(null);
 
   const getItemStyles = () => {
-    switch (item.type) {
-      case 'event':
-        return styles.event;
-      case 'task':
-        return styles.task;
-      case 'highlight':
-        return styles.highlight;
-      case 'milestone':
-        return styles.milestone;
-      default:
-        return styles.event;
-    }
+    const baseStyle = (() => {
+      switch (item.type) {
+        case 'event':
+          return styles.event;
+        case 'task':
+          return styles.task;
+        case 'highlight':
+          return styles.highlight;
+        case 'milestone':
+          return styles.milestone;
+        default:
+          return styles.event;
+      }
+    })();
+    
+    return isSelected ? `${baseStyle} ${styles.selected}` : baseStyle;
   };
 
   const handleTaskToggle = () => {
     onUpdate({ completed: !item.completed });
+  };
+
+  const handleItemClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onSelect(item.id, e.ctrlKey);
   };
 
   const calculateHeight = () => {
@@ -155,11 +172,12 @@ const CalendarItemComponent = ({ item, index, onUpdate, onDelete }: CalendarItem
             ref={provided.innerRef}
             {...provided.draggableProps}
             {...provided.dragHandleProps}
-            className={`${styles.item} ${styles.milestone} ${snapshot.isDragging ? styles.dragging : ''}`}
+            className={`${styles.item} ${getItemStyles()} ${snapshot.isDragging ? styles.dragging : ''}`}
             style={{
               height: '20px',
               ...provided.draggableProps.style,
             }}
+            onClick={handleItemClick}
           >
             <Flag size={12} />
             <Text size={200} style={{ marginLeft: '4px' }}>
@@ -182,6 +200,7 @@ const CalendarItemComponent = ({ item, index, onUpdate, onDelete }: CalendarItem
             height: `${calculateHeight()}px`,
             ...provided.draggableProps.style,
           }}
+          onClick={handleItemClick}
         >
           {/* Drag handle - only the content area, not resize handles */}
           <div {...provided.dragHandleProps} style={{ height: '100%', width: '100%', position: 'relative' }}>
