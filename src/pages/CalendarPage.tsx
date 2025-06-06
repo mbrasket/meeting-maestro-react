@@ -1,86 +1,74 @@
-import { useState, useEffect } from 'react';
-import {
-  makeStyles,
-  tokens,
+
+import { useState } from 'react';
+import { 
+  makeStyles, 
+  tokens, 
+  Text, 
+  Button 
 } from '@fluentui/react-components';
-import CalendarGrid from '../components/calendar/CalendarGrid';
-import ToolsPanel from '../components/calendar/ToolsPanel';
+import { ChevronLeft, ChevronRight, Plus } from 'lucide-react';
+import { format, addWeeks, subWeeks, startOfWeek, addDays } from 'date-fns';
 import { CalendarItem } from '../components/calendar/types';
-import { useKeyboardRef } from '../hooks/useKeyboardRef';
-import { useTimeRangeSelection } from '../hooks/useTimeRangeSelection';
-import { DragDropProvider } from '../contexts/DragDropContext';
-import { useDragAndDrop } from '../hooks/useDragAndDrop';
+import CalendarGrid from '../components/calendar/CalendarGrid';
 
 const useStyles = makeStyles({
   container: {
     display: 'flex',
+    flexDirection: 'column',
     height: '100vh',
-    paddingTop: '60px', // Space for navigation
+    paddingTop: '60px',
     backgroundColor: tokens.colorNeutralBackground1,
   },
-  mainContent: {
+  header: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: tokens.spacingVerticalM,
+    borderBottomColor: tokens.colorNeutralStroke1,
+    borderBottomWidth: '1px',
+    borderBottomStyle: 'solid',
+  },
+  weekNavigation: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: tokens.spacingHorizontalM,
+  },
+  content: {
     flex: 1,
     overflow: 'hidden',
-    minWidth: 0, // Prevent flex item from growing beyond container
-  },
-  ctrlIndicator: {
-    position: 'fixed',
-    top: '70px',
-    right: '20px',
-    backgroundColor: tokens.colorBrandBackground,
-    color: tokens.colorNeutralForegroundOnBrand,
-    padding: '8px 12px',
-    borderRadius: '4px',
-    fontSize: '12px',
-    fontWeight: tokens.fontWeightSemibold,
-    zIndex: 1000,
-    opacity: '0.9',
   },
 });
 
-// Inner component that uses the drag context
-const CalendarContent = () => {
+const CalendarPage = () => {
   const styles = useStyles();
-  const [calendarItems, setCalendarItems] = useState<CalendarItem[]>([]);
   const [currentWeek, setCurrentWeek] = useState(new Date());
-  const [selectedItemIds, setSelectedItemIds] = useState<Set<string>>(new Set());
-  const [dragCollisions, setDragCollisions] = useState<Set<string>>(new Set());
-  
-  const keyboardRef = useKeyboardRef();
-  const timeRangeSelection = useTimeRangeSelection();
+  const [items, setItems] = useState<CalendarItem[]>([]);
 
-  // Initialize drag and drop handlers
-  const { handleDragStart, handleDragEnd } = useDragAndDrop({
-    items: calendarItems,
-    onUpdateItem: handleUpdateItem,
-    onAddItem: handleAddItem,
-    onDeleteItem: handleDeleteItem,
-    setCalendarItems,
-  });
+  // Get week days
+  const weekStart = startOfWeek(currentWeek, { weekStartsOn: 0 });
+  const weekDays = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
 
-  // Handle keyboard shortcuts
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        setSelectedItemIds(new Set());
-        timeRangeSelection.clearSelection();
-      } else if (event.key === 'Delete' && selectedItemIds.size > 0) {
-        handleDeleteSelected();
-      }
+  const handlePreviousWeek = () => {
+    setCurrentWeek(subWeeks(currentWeek, 1));
+  };
+
+  const handleNextWeek = () => {
+    setCurrentWeek(addWeeks(currentWeek, 1));
+  };
+
+  const handleAddItem = () => {
+    const newItem: CalendarItem = {
+      id: Date.now().toString(),
+      type: 'event',
+      title: 'New Event',
+      startTime: new Date(),
+      endTime: new Date(Date.now() + 60 * 60 * 1000), // 1 hour later
     };
-
-    document.addEventListener('keydown', handleKeyDown);
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [selectedItemIds, timeRangeSelection]);
-
-  const handleAddItem = (item: CalendarItem) => {
-    setCalendarItems(prev => [...prev, { ...item, id: Date.now().toString() }]);
+    setItems(prev => [...prev, newItem]);
   };
 
   const handleUpdateItem = (itemId: string, updates: Partial<CalendarItem>) => {
-    setCalendarItems(prev => 
+    setItems(prev => 
       prev.map(item => 
         item.id === itemId ? { ...item, ...updates } : item
       )
@@ -88,92 +76,45 @@ const CalendarContent = () => {
   };
 
   const handleDeleteItem = (itemId: string) => {
-    setCalendarItems(prev => prev.filter(item => item.id !== itemId));
-    setSelectedItemIds(prev => {
-      const newSet = new Set(prev);
-      newSet.delete(itemId);
-      return newSet;
-    });
-  };
-
-  const handleSelectItem = (itemId: string, ctrlKey: boolean) => {
-    setSelectedItemIds(prev => {
-      const newSet = new Set(prev);
-      
-      if (ctrlKey) {
-        // Multi-select: toggle the item
-        if (newSet.has(itemId)) {
-          newSet.delete(itemId);
-        } else {
-          newSet.add(itemId);
-        }
-      } else {
-        // Single select: clear others and select this one
-        if (newSet.has(itemId) && newSet.size === 1) {
-          // If only this item is selected, deselect it
-          newSet.clear();
-        } else {
-          // Select only this item
-          newSet.clear();
-          newSet.add(itemId);
-        }
-      }
-      
-      return newSet;
-    });
-  };
-
-  const handleClearSelection = () => {
-    setSelectedItemIds(new Set());
-    timeRangeSelection.clearSelection();
-  };
-
-  const handleDeleteSelected = () => {
-    setCalendarItems(prev => prev.filter(item => !selectedItemIds.has(item.id)));
-    setSelectedItemIds(new Set());
-  };
-
-  const handleCopyItem = (item: CalendarItem) => {
-    console.log('Copy item requested:', item.id);
+    setItems(prev => prev.filter(item => item.id !== itemId));
   };
 
   return (
     <div className={styles.container}>
-      {/* CTRL indicator */}
-      {keyboardRef.current.ctrlKey && (
-        <div className={styles.ctrlIndicator}>
-          CTRL: Clone Mode Active
+      <div className={styles.header}>
+        <div className={styles.weekNavigation}>
+          <Button 
+            appearance="subtle" 
+            icon={<ChevronLeft />} 
+            onClick={handlePreviousWeek}
+          />
+          <Text size={500} weight="semibold">
+            {format(weekDays[0], 'MMM d')} - {format(weekDays[6], 'MMM d, yyyy')}
+          </Text>
+          <Button 
+            appearance="subtle" 
+            icon={<ChevronRight />} 
+            onClick={handleNextWeek}
+          />
         </div>
-      )}
+        <Button 
+          appearance="primary" 
+          icon={<Plus />} 
+          onClick={handleAddItem}
+        >
+          Add Event
+        </Button>
+      </div>
       
-      <div className={styles.mainContent} data-calendar-grid>
+      <div className={styles.content}>
         <CalendarGrid
-          items={calendarItems}
-          currentWeek={currentWeek}
+          items={items}
+          weekDays={weekDays}
           onUpdateItem={handleUpdateItem}
           onDeleteItem={handleDeleteItem}
-          onWeekChange={setCurrentWeek}
-          selectedItemIds={selectedItemIds}
-          onSelectItem={handleSelectItem}
-          onClearSelection={handleClearSelection}
-          onAddItem={handleAddItem}
-          onCopyItem={handleCopyItem}
-          isCtrlPressed={keyboardRef.current.ctrlKey}
-          timeRangeSelection={timeRangeSelection}
-          dragCollisions={dragCollisions}
-          setCalendarItems={setCalendarItems}
         />
       </div>
-      <ToolsPanel onAddItem={handleAddItem} />
     </div>
-  );
-};
-
-const CalendarPage = () => {
-  return (
-    <DragDropProvider>
-      <CalendarContent />
-    </DragDropProvider>
   );
 };
 
