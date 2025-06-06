@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { DragDropContext, DropResult } from '@hello-pangea/dnd';
 import {
@@ -29,7 +28,7 @@ const CalendarPage = () => {
   const [calendarItems, setCalendarItems] = useState<CalendarItem[]>([]);
   const [currentWeek, setCurrentWeek] = useState(new Date());
   const [selectedItemIds, setSelectedItemIds] = useState<Set<string>>(new Set());
-  const [isCtrlPressed, setIsCtrlPressed] = useState(false);
+  const [copyingItem, setCopyingItem] = useState<CalendarItem | null>(null);
 
   // Handle keyboard shortcuts and CTRL key tracking
   useEffect(() => {
@@ -114,10 +113,18 @@ const CalendarPage = () => {
     setSelectedItemIds(new Set());
   };
 
+  const handleCopyItem = (item: CalendarItem) => {
+    setCopyingItem(item);
+  };
+
   const handleDragEnd = (result: DropResult) => {
     const { destination, source, draggableId } = result;
 
-    if (!destination) return;
+    if (!destination) {
+      // Clear copying state if drag was cancelled
+      setCopyingItem(null);
+      return;
+    }
 
     // Handle dragging from tools panel to calendar
     if (source.droppableId === 'tools-items' && destination.droppableId.includes('-')) {
@@ -168,8 +175,8 @@ const CalendarPage = () => {
         const newStartTime = snapToGrid(targetDate);
         const newEndTime = new Date(newStartTime.getTime() + duration);
         
-        // Check if this was a copy operation (CTRL was pressed during drag start)
-        if (isCtrlPressed) {
+        // Check if this was a copy operation (copyingItem is set)
+        if (copyingItem && copyingItem.id === item.id) {
           // Create a copy of the item
           const copiedItem: CalendarItem = {
             ...item,
@@ -188,7 +195,12 @@ const CalendarPage = () => {
         }
       }
     }
+
+    // Clear copying state after drag operation
+    setCopyingItem(null);
   };
+
+  const [isCtrlPressed, setIsCtrlPressed] = useState(false);
 
   return (
     <DragDropContext onDragEnd={handleDragEnd}>
@@ -204,6 +216,7 @@ const CalendarPage = () => {
             onSelectItem={handleSelectItem}
             onClearSelection={handleClearSelection}
             onAddItem={handleAddItem}
+            onCopyItem={handleCopyItem}
           />
         </div>
         <ToolsPanel onAddItem={handleAddItem} />

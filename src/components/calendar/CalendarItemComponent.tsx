@@ -173,17 +173,28 @@ const CalendarItemComponent = ({
         <div
           ref={provided.innerRef}
           {...provided.draggableProps}
-          className={`${styles.item} ${getItemStyles()} ${snapshot.isDragging ? styles.dragging : ''}`}
+          className={`${styles.item} ${getItemStyles()} ${snapshot.isDragging ? styles.dragging : ''} ${isCopying ? styles.copying : ''}`}
           style={{
             height: `${calculateItemHeight(item)}px`,
             ...positionStyle,
             ...provided.draggableProps.style,
           }}
           onClick={handleItemClick}
-          onDragStart={handleDragStart}
-          onDragEnd={handleDragEnd}
         >
-          <div {...provided.dragHandleProps} style={{ height: '100%', width: '100%', position: 'relative' }}>
+          <div 
+            {...provided.dragHandleProps} 
+            style={{ height: '100%', width: '100%', position: 'relative' }}
+            onDragStart={(e) => {
+              // Check if CTRL key is pressed at the start of drag
+              if (e.ctrlKey && onCopyItem) {
+                setIsCopying(true);
+                onCopyItem(item);
+              }
+            }}
+            onDragEnd={() => {
+              setIsCopying(false);
+            }}
+          >
             <ItemContent item={item} onTaskToggle={handleTaskToggle} />
           </div>
 
