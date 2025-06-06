@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { DragDropContext, DropResult } from '@hello-pangea/dnd';
 import {
@@ -8,6 +9,9 @@ import CalendarGrid from '../components/calendar/CalendarGrid';
 import ToolsPanel from '../components/calendar/ToolsPanel';
 import { CalendarItem } from '../components/calendar/types';
 import { snapToGrid } from '../components/calendar/utils/timeUtils';
+import { useKeyboardState } from '../hooks/useKeyboardState';
+import { useTimeRangeSelection } from '../hooks/useTimeRangeSelection';
+import { detectCollisions } from '../utils/collisionDetection';
 
 const useStyles = makeStyles({
   container: {
@@ -21,6 +25,19 @@ const useStyles = makeStyles({
     overflow: 'hidden',
     minWidth: 0, // Prevent flex item from growing beyond container
   },
+  ctrlIndicator: {
+    position: 'fixed',
+    top: '70px',
+    right: '20px',
+    backgroundColor: tokens.colorBrandBackground,
+    color: tokens.colorNeutralForegroundOnBrand,
+    padding: '8px 12px',
+    borderRadius: '4px',
+    fontSize: '12px',
+    fontWeight: tokens.fontWeightSemibold,
+    zIndex: 1000,
+    opacity: '0.9',
+  },
 });
 
 const CalendarPage = () => {
@@ -29,12 +46,17 @@ const CalendarPage = () => {
   const [currentWeek, setCurrentWeek] = useState(new Date());
   const [selectedItemIds, setSelectedItemIds] = useState<Set<string>>(new Set());
   const [copyingItem, setCopyingItem] = useState<CalendarItem | null>(null);
+  const [dragCollisions, setDragCollisions] = useState<Set<string>>(new Set());
+  
+  const keyboardState = useKeyboardState();
+  const timeRangeSelection = useTimeRangeSelection();
 
   // Handle keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         setSelectedItemIds(new Set());
+        timeRangeSelection.clearSelection();
       } else if (event.key === 'Delete' && selectedItemIds.size > 0) {
         handleDeleteSelected();
       }
@@ -44,16 +66,7 @@ const CalendarPage = () => {
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [selectedItemIds]);
-
-  // Helper function to check if CTRL key is pressed
-  const isCtrlKeyPressed = (): boolean => {
-    const event = window.event;
-    if (event && ('ctrlKey' in event)) {
-      return (event as KeyboardEvent | MouseEvent).ctrlKey;
-    }
-    return false;
-  };
+  }, [selectedItemIds, timeRangeSelection]);
 
   const handleAddItem = (item: CalendarItem) => {
     setCalendarItems(prev => [...prev, { ...item, id: Date.now().toString() }]);
@@ -105,6 +118,7 @@ const CalendarPage = () => {
 
   const handleClearSelection = () => {
     setSelectedItemIds(new Set());
+    timeRangeSelection.clearSelection();
   };
 
   const handleDeleteSelected = () => {
@@ -118,18 +132,16 @@ const CalendarPage = () => {
   };
 
   const handleBeforeDragStart = (initial: any) => {
-    const isCtrlPressed = isCtrlKeyPressed();
-    console.log('BeforeDragStart - CTRL pressed:', isCtrlPressed, 'draggableId:', initial.draggableId);
+    console.log('BeforeDragStart - CTRL pressed:', keyboardState.ctrlKey, 'draggableId:', initial.draggableId);
   };
 
   const handleDragStart = (initial: any) => {
     const { draggableId, source } = initial;
     
-    const isCtrlPressed = isCtrlKeyPressed();
-    console.log('DragStart - CTRL pressed:', isCtrlPressed, 'draggableId:', draggableId);
+    console.log('DragStart - CTRL pressed:', keyboardState.ctrlKey, 'draggableId:', draggableId);
     
-    // Only handle cloning for existing calendar items (not tools)
-    if (isCtrlPressed && !source.droppableId.startsWith('tools-')) {
+    // Only handle cloning for existing calendar items (not tools) when CTRL is pressed
+    if (keyboardState.ctrlKey && !source.droppableId.startsWith('tools-')) {
       const originalItem = calendarItems.find(item => item.id === draggableId);
       if (originalItem) {
         console.log('Creating clone of item:', originalItem.id);
@@ -150,8 +162,44 @@ const CalendarPage = () => {
     }
   };
 
+  const handleDragUpdate = (update: any) => {
+    const { destination, draggableId } = update;
+    
+    if (destination && !destination.droppableId.startsWith('tools-')) {
+      const [dateStr, slotStr] = destination.droppableId.split('-');
+      const targetDate = new Date(dateStr);
+      const targetSlot = parseInt(slotStr);
+      
+      // Convert slot to actual time
+      const hours = Math.floor(targetSlot / 12);
+      const minutes = (targetSlot % 12) * 5;
+      targetDate.setHours(hours, minutes, 0, 0);
+      
+      const draggedItem = calendarItems.find(item => item.id === draggableId);
+      if (draggedItem) {
+        const duration = draggedItem.endTime.getTime() - draggedItem.startTime.getTime();
+        const newStartTime = snapToGrid(targetDate);
+        const newEndTime = new Date(newStartTime.getTime() + duration);
+        
+        // Check for collisions
+        const collision = detectCollisions(draggedItem, calendarItems, newStartTime, newEndTime);
+        
+        if (collision.hasCollision) {
+          setDragCollisions(new Set(collision.conflictingItems.map(item => item.id)));
+        } else {
+          setDragCollisions(new Set());
+        }
+      }
+    } else {
+      setDragCollisions(new Set());
+    }
+  };
+
   const handleDragEnd = (result: DropResult) => {
     const { destination, source, draggableId } = result;
+    
+    // Clear collision indicators
+    setDragCollisions(new Set());
 
     if (!destination) {
       // If drag was cancelled and we have a copying item (clone), remove it
@@ -230,10 +278,16 @@ const CalendarPage = () => {
     <DragDropContext 
       onBeforeDragStart={handleBeforeDragStart}
       onDragStart={handleDragStart}
+      onDragUpdate={handleDragUpdate}
       onDragEnd={handleDragEnd}
     >
       <div className={styles.container}>
-        <div className={styles.mainContent}>
+        {keyboardState.ctrlKey && (
+          <div className={styles.ctrlIndicator}>
+            CTRL: Clone Mode Active
+          </div>
+        )}
+        <div className={styles.mainContent} data-calendar-grid>
           <CalendarGrid
             items={calendarItems}
             currentWeek={currentWeek}
@@ -245,7 +299,9 @@ const CalendarPage = () => {
             onClearSelection={handleClearSelection}
             onAddItem={handleAddItem}
             onCopyItem={handleCopyItem}
-            isCtrlPressed={false}
+            isCtrlPressed={keyboardState.ctrlKey}
+            timeRangeSelection={timeRangeSelection}
+            dragCollisions={dragCollisions}
           />
         </div>
         <ToolsPanel onAddItem={handleAddItem} />

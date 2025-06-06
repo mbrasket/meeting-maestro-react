@@ -98,6 +98,8 @@ interface CalendarGridProps {
   onAddItem: (item: CalendarItem) => void;
   onCopyItem: (item: CalendarItem) => void;
   isCtrlPressed?: boolean;
+  timeRangeSelection?: any;
+  dragCollisions?: Set<string>;
 }
 
 const CalendarGrid = ({
@@ -112,6 +114,8 @@ const CalendarGrid = ({
   onAddItem,
   onCopyItem,
   isCtrlPressed = false,
+  timeRangeSelection,
+  dragCollisions = new Set(),
 }: CalendarGridProps) => {
   const styles = useStyles();
   const weekDays = getWeekDays(currentWeek);
@@ -216,6 +220,8 @@ const CalendarGrid = ({
                     onClearSelection={onClearSelection}
                     onCopyItem={onCopyItem}
                     isCtrlPressed={isCtrlPressed}
+                    timeRangeSelection={timeRangeSelection}
+                    dragCollisions={dragCollisions}
                   />
                 </div>
               );

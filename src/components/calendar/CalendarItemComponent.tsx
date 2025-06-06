@@ -1,3 +1,4 @@
+
 import { useRef, useState } from 'react';
 import { Draggable } from '@hello-pangea/dnd';
 import { makeStyles, tokens } from '@fluentui/react-components';
@@ -60,6 +61,26 @@ const useStyles = makeStyles({
     border: `2px dashed ${tokens.colorBrandStroke1}`,
     zIndex: '20',
   },
+  collisionWarning: {
+    border: `2px solid ${tokens.colorPaletteRedBorder1}`,
+    backgroundColor: tokens.colorPaletteRedBackground1,
+    '::after': {
+      content: '"⚠"',
+      position: 'absolute',
+      top: '-8px',
+      right: '-8px',
+      width: '16px',
+      height: '16px',
+      backgroundColor: tokens.colorPaletteRedBackground2,
+      color: tokens.colorNeutralForegroundOnBrand,
+      borderRadius: '50%',
+      fontSize: '10px',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      zIndex: '1',
+    },
+  },
 });
 
 interface CalendarItemComponentProps {
@@ -76,6 +97,7 @@ interface CalendarItemComponentProps {
   onResizeEnd?: () => void;
   onCopyItem?: (item: CalendarItem) => void;
   isCtrlPressed?: boolean;
+  hasCollisionWarning?: boolean;
 }
 
 const CalendarItemComponent = ({ 
@@ -91,7 +113,8 @@ const CalendarItemComponent = ({
   onResizeStart,
   onResizeEnd,
   onCopyItem,
-  isCtrlPressed = false
+  isCtrlPressed = false,
+  hasCollisionWarning = false
 }: CalendarItemComponentProps) => {
   const styles = useStyles();
   const itemRef = useRef<HTMLDivElement>(null);
@@ -117,8 +140,13 @@ const CalendarItemComponent = ({
     })();
     
     let combinedStyle = isSelected ? `${baseStyle} ${styles.selected}` : baseStyle;
+    
     if (isResizing || isResizeActive) {
       combinedStyle += ` ${styles.resizing}`;
+    }
+    
+    if (hasCollisionWarning) {
+      combinedStyle += ` ${styles.collisionWarning}`;
     }
     
     return combinedStyle;

@@ -10,6 +10,7 @@ const useStyles = makeStyles({
     height: '7px', // Each 5-minute slot is 7px (84px per hour ÷ 12 slots)
     position: 'relative',
     minHeight: '7px',
+    cursor: 'pointer',
   },
   halfHourBorder: {
     borderBottom: `1px solid ${tokens.colorNeutralStroke2}`,
@@ -21,6 +22,21 @@ const useStyles = makeStyles({
     backgroundColor: tokens.colorBrandBackground2,
     opacity: '0.3',
     zIndex: '5', // Drop zone indication below items
+  },
+  invalidDropZone: {
+    backgroundColor: tokens.colorPaletteRedBackground1,
+    opacity: '0.4',
+    cursor: 'not-allowed',
+  },
+  selectedRange: {
+    backgroundColor: tokens.colorBrandBackground2,
+    opacity: '0.5',
+    border: `1px solid ${tokens.colorBrandStroke1}`,
+  },
+  collisionWarning: {
+    backgroundColor: tokens.colorPaletteRedBackground1,
+    opacity: '0.6',
+    border: `1px solid ${tokens.colorPaletteRedBorder1}`,
   },
   ghostCard: {
     position: 'absolute',
@@ -52,6 +68,8 @@ interface TimeSlotProps {
   onClearSelection: () => void;
   onCopyItem: (item: CalendarItem) => void;
   isCtrlPressed?: boolean;
+  timeRangeSelection?: any;
+  dragCollisions?: Set<string>;
 }
 
 // Helper function to calculate overlapping items and their positions
@@ -119,7 +137,9 @@ const TimeSlot = ({
   onSelectItem, 
   onClearSelection,
   onCopyItem,
-  isCtrlPressed = false
+  isCtrlPressed = false,
+  timeRangeSelection,
+  dragCollisions = new Set()
 }: TimeSlotProps) => {
   const styles = useStyles();
   const [resizingItemId, setResizingItemId] = useState<string | null>(null);
@@ -134,8 +154,30 @@ const TimeSlot = ({
 
   const handleSlotClick = (e: React.MouseEvent) => {
     // Clear selection when clicking on empty time slot
-    if (e.target === e.currentTarget) {
+    if (e.target === e.currentTarget && !timeRangeSelection?.isSelecting) {
       onClearSelection();
+    }
+  };
+
+  const handleSlotMouseDown = (e: React.MouseEvent) => {
+    // Start time range selection on empty slots
+    if (e.target === e.currentTarget && items.length === 0 && timeRangeSelection) {
+      e.preventDefault();
+      timeRangeSelection.startSelection(day, slot);
+    }
+  };
+
+  const handleSlotMouseEnter = () => {
+    // Update time range selection
+    if (timeRangeSelection?.isSelecting) {
+      timeRangeSelection.updateSelection(day, slot);
+    }
+  };
+
+  const handleSlotMouseUp = () => {
+    // End time range selection
+    if (timeRangeSelection?.isSelecting) {
+      timeRangeSelection.endSelection();
     }
   };
 
@@ -147,8 +189,28 @@ const TimeSlot = ({
     setResizingItemId(null);
   };
 
+  // Check if this slot is in the selected time range
+  const isInSelectedRange = timeRangeSelection?.isSlotInRange(day, slot) || false;
+  
+  // Check if any items in this slot have collision warnings
+  const hasCollisionWarning = items.some(item => dragCollisions.has(item.id));
+
   // Calculate positions for overlapping items
   const itemsWithPositions = calculateOverlapPositions(allDayItems, slot, resizingItemId);
+
+  const getSlotStyles = () => {
+    let slotStyles = `${styles.slot} ${getBorderStyle()}`;
+    
+    if (isInSelectedRange) {
+      slotStyles += ` ${styles.selectedRange}`;
+    }
+    
+    if (hasCollisionWarning) {
+      slotStyles += ` ${styles.collisionWarning}`;
+    }
+    
+    return slotStyles;
+  };
 
   return (
     <Droppable droppableId={droppableId}>
@@ -156,8 +218,11 @@ const TimeSlot = ({
         <div 
           ref={provided.innerRef}
           {...provided.droppableProps}
-          className={`${styles.slot} ${getBorderStyle()} ${snapshot.isDraggingOver ? styles.dropZone : ''}`}
+          className={`${getSlotStyles()} ${snapshot.isDraggingOver ? styles.dropZone : ''}`}
           onClick={handleSlotClick}
+          onMouseDown={handleSlotMouseDown}
+          onMouseEnter={handleSlotMouseEnter}
+          onMouseUp={handleSlotMouseUp}
         >
           {/* Show ghost card when dragging from tools */}
           {snapshot.isDraggingOver && snapshot.draggingFromThisWith?.startsWith('tool-') && (
@@ -187,6 +252,7 @@ const TimeSlot = ({
                   onResizeEnd={handleResizeEnd}
                   onCopyItem={onCopyItem}
                   isCtrlPressed={isCtrlPressed}
+                  hasCollisionWarning={dragCollisions.has(item.id)}
                 />
               );
             }
@@ -217,6 +283,7 @@ const TimeSlot = ({
                   onResizeEnd={handleResizeEnd}
                   onCopyItem={onCopyItem}
                   isCtrlPressed={isCtrlPressed}
+                  hasCollisionWarning={dragCollisions.has(resizingItem.id)}
                 />
               );
             }
