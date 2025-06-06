@@ -2,7 +2,7 @@
 import { useState, useCallback } from 'react';
 import { DropResult } from '@hello-pangea/dnd';
 import { CalendarItem } from '../types';
-import { calculateDropTime } from '../utils/dropCalculations';
+import { calculateDropTime, getDropPosition } from '../utils/dropCalculations';
 
 export const useDragDrop = () => {
   const [calendarItems, setCalendarItems] = useState<CalendarItem[]>([]);
@@ -14,7 +14,9 @@ export const useDragDrop = () => {
 
     // Handle toolbar item drops
     if (source.droppableId === 'toolbar' || draggableId.startsWith('toolbar-')) {
-      const dropTime = calculateDropTime(destination.droppableId, 0); // Default to start of slot
+      // For now, we'll use a default position at the start of the slot
+      // In a real implementation, you'd need to capture the actual mouse position
+      const dropTime = calculateDropTime(destination.droppableId, 0);
       
       if (dropTime) {
         const [, itemType] = draggableId.split('-');
@@ -54,9 +56,15 @@ export const useDragDrop = () => {
     }
   }, []);
 
+  const handleDragUpdate = useCallback((update: any) => {
+    // This can be used to show visual feedback during drag
+    console.log('Drag update:', update);
+  }, []);
+
   return {
     calendarItems,
     handleDragEnd,
+    handleDragUpdate,
     setCalendarItems,
   };
 };

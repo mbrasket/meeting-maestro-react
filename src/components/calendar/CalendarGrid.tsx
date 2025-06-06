@@ -11,7 +11,7 @@ import { getWeekDays } from './utils/timeUtils';
 
 export const CalendarGrid: React.FC = () => {
   const scrollRef = useRef<HTMLDivElement>(null);
-  const { calendarItems, handleDragEnd } = useDragDrop();
+  const { calendarItems, handleDragEnd, handleDragUpdate } = useDragDrop();
   
   const weekDays = getWeekDays(new Date());
 
@@ -25,8 +25,8 @@ export const CalendarGrid: React.FC = () => {
   }, []);
 
   return (
-    <DragDropContext onDragEnd={handleDragEnd}>
-      <div className="flex h-full bg-background">
+    <div className="flex h-full bg-background">
+      <DragDropContext onDragEnd={handleDragEnd} onDragUpdate={handleDragUpdate}>
         <Toolbar />
         
         <div className="flex-1 flex flex-col">
@@ -54,7 +54,7 @@ export const CalendarGrid: React.FC = () => {
             </div>
           </div>
         </div>
-      </div>
-    </DragDropContext>
+      </DragDropContext>
+    </div>
   );
 };
