@@ -28,7 +28,7 @@ export const AllDayRow: React.FC<AllDayRowProps> = ({ weekDays, items }) => {
               ref={provided.innerRef}
               {...provided.droppableProps}
               className={`flex-1 p-1 border-r border-border last:border-r-0 min-h-[60px] ${
-                snapshot.isDraggedOver ? 'bg-primary/10' : ''
+                snapshot.isDraggingOver ? 'bg-primary/10' : ''
               }`}
             >
               {allDayItems

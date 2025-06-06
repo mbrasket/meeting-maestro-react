@@ -22,7 +22,7 @@ export const DayColumn: React.FC<DayColumnProps> = ({ day, dayIndex, items }) =>
           ref={provided.innerRef}
           {...provided.droppableProps}
           className={`relative border-r border-border last:border-r-0 ${
-            snapshot.isDraggedOver ? 'bg-primary/5' : ''
+            snapshot.isDraggingOver ? 'bg-primary/5' : ''
           }`}
         >
           {/* Time grid background */}
