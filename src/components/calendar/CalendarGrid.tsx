@@ -1,4 +1,3 @@
-
 import { useState, useRef } from 'react';
 import {
   makeStyles,
@@ -11,6 +10,7 @@ import { format, addWeeks, subWeeks } from 'date-fns';
 import { CalendarItem } from './types';
 import { getWeekDays, slotToTime } from './utils/timeUtils';
 import TimeSlot from './TimeSlot';
+import { useDragAndDrop } from '../../hooks/useDragAndDrop';
 
 const useStyles = makeStyles({
   container: {
@@ -100,6 +100,7 @@ interface CalendarGridProps {
   isCtrlPressed?: boolean;
   timeRangeSelection?: any;
   dragCollisions?: Set<string>;
+  setCalendarItems: React.Dispatch<React.SetStateAction<CalendarItem[]>>;
 }
 
 const CalendarGrid = ({
@@ -116,9 +117,19 @@ const CalendarGrid = ({
   isCtrlPressed = false,
   timeRangeSelection,
   dragCollisions = new Set(),
+  setCalendarItems,
 }: CalendarGridProps) => {
   const styles = useStyles();
   const weekDays = getWeekDays(currentWeek);
+
+  // Initialize drag and drop within the context
+  const { handleDragStart, handleDragEnd } = useDragAndDrop({
+    items,
+    onUpdateItem,
+    onAddItem,
+    onDeleteItem,
+    setCalendarItems,
+  });
 
   const handlePreviousWeek = () => {
     onWeekChange(subWeeks(currentWeek, 1));

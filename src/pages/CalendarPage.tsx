@@ -9,7 +9,6 @@ import ToolsPanel from '../components/calendar/ToolsPanel';
 import { CalendarItem } from '../components/calendar/types';
 import { useKeyboardRef } from '../hooks/useKeyboardRef';
 import { useTimeRangeSelection } from '../hooks/useTimeRangeSelection';
-import { useDragAndDrop } from '../hooks/useDragAndDrop';
 import { DragDropProvider } from '../contexts/DragDropContext';
 
 const useStyles = makeStyles({
@@ -39,7 +38,8 @@ const useStyles = makeStyles({
   },
 });
 
-const CalendarPage = () => {
+// Inner component that uses the drag context
+const CalendarContent = () => {
   const styles = useStyles();
   const [calendarItems, setCalendarItems] = useState<CalendarItem[]>([]);
   const [currentWeek, setCurrentWeek] = useState(new Date());
@@ -128,46 +128,42 @@ const CalendarPage = () => {
     console.log('Copy item requested:', item.id);
   };
 
-  const { handleDragStart, handleDragEnd } = useDragAndDrop({
-    items: calendarItems,
-    onUpdateItem: handleUpdateItem,
-    onAddItem: handleAddItem,
-    onDeleteItem: handleDeleteItem,
-    setCalendarItems,
-  });
-
   return (
-    <DragDropProvider
-      onDragStart={handleDragStart}
-      onDragEnd={handleDragEnd}
-    >
-      <div className={styles.container}>
-        {/* CTRL indicator */}
-        {keyboardRef.current.ctrlKey && (
-          <div className={styles.ctrlIndicator}>
-            CTRL: Clone Mode Active
-          </div>
-        )}
-        
-        <div className={styles.mainContent} data-calendar-grid>
-          <CalendarGrid
-            items={calendarItems}
-            currentWeek={currentWeek}
-            onUpdateItem={handleUpdateItem}
-            onDeleteItem={handleDeleteItem}
-            onWeekChange={setCurrentWeek}
-            selectedItemIds={selectedItemIds}
-            onSelectItem={handleSelectItem}
-            onClearSelection={handleClearSelection}
-            onAddItem={handleAddItem}
-            onCopyItem={handleCopyItem}
-            isCtrlPressed={keyboardRef.current.ctrlKey}
-            timeRangeSelection={timeRangeSelection}
-            dragCollisions={dragCollisions}
-          />
+    <div className={styles.container}>
+      {/* CTRL indicator */}
+      {keyboardRef.current.ctrlKey && (
+        <div className={styles.ctrlIndicator}>
+          CTRL: Clone Mode Active
         </div>
-        <ToolsPanel onAddItem={handleAddItem} />
+      )}
+      
+      <div className={styles.mainContent} data-calendar-grid>
+        <CalendarGrid
+          items={calendarItems}
+          currentWeek={currentWeek}
+          onUpdateItem={handleUpdateItem}
+          onDeleteItem={handleDeleteItem}
+          onWeekChange={setCurrentWeek}
+          selectedItemIds={selectedItemIds}
+          onSelectItem={handleSelectItem}
+          onClearSelection={handleClearSelection}
+          onAddItem={handleAddItem}
+          onCopyItem={handleCopyItem}
+          isCtrlPressed={keyboardRef.current.ctrlKey}
+          timeRangeSelection={timeRangeSelection}
+          dragCollisions={dragCollisions}
+          setCalendarItems={setCalendarItems}
+        />
       </div>
+      <ToolsPanel onAddItem={handleAddItem} />
+    </div>
+  );
+};
+
+const CalendarPage = () => {
+  return (
+    <DragDropProvider>
+      <CalendarContent />
     </DragDropProvider>
   );
 };
