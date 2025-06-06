@@ -4,21 +4,21 @@ import {
   makeStyles,
   tokens,
 } from '@fluentui/react-components';
-import OptimizedCalendarGrid from '../components/calendar/OptimizedCalendarGrid';
-import ToolsPanel from '../components/calendar/ToolsPanel';
+import CleanCalendarGrid from '../components/calendar/CleanCalendarGrid';
+import CleanToolsPanel from '../components/calendar/CleanToolsPanel';
 import { CalendarItem } from '../components/calendar/types';
 
 const useStyles = makeStyles({
   container: {
     display: 'flex',
     height: '100vh',
-    paddingTop: '60px', // Space for navigation
+    paddingTop: '60px',
     backgroundColor: tokens.colorNeutralBackground1,
   },
   mainContent: {
     flex: 1,
     overflow: 'hidden',
-    minWidth: 0, // Prevent flex item from growing beyond container
+    minWidth: 0,
   },
 });
 
@@ -28,7 +28,6 @@ const CalendarPage = () => {
   const [currentWeek, setCurrentWeek] = useState(new Date());
   const [selectedItemIds, setSelectedItemIds] = useState<Set<string>>(new Set());
 
-  // Handle keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
@@ -43,6 +42,7 @@ const CalendarPage = () => {
   }, [selectedItemIds]);
 
   const handleAddItem = (item: CalendarItem) => {
+    console.log('Adding item to calendar:', item);
     setCalendarItems(prev => [...prev, { ...item, id: Date.now().toString() }]);
   };
 
@@ -68,19 +68,15 @@ const CalendarPage = () => {
       const newSet = new Set(prev);
       
       if (ctrlKey) {
-        // Multi-select: toggle the item
         if (newSet.has(itemId)) {
           newSet.delete(itemId);
         } else {
           newSet.add(itemId);
         }
       } else {
-        // Single select: clear others and select this one
         if (newSet.has(itemId) && newSet.size === 1) {
-          // If only this item is selected, deselect it
           newSet.clear();
         } else {
-          // Select only this item
           newSet.clear();
           newSet.add(itemId);
         }
@@ -102,7 +98,7 @@ const CalendarPage = () => {
   return (
     <div className={styles.container}>
       <div className={styles.mainContent}>
-        <OptimizedCalendarGrid
+        <CleanCalendarGrid
           items={calendarItems}
           currentWeek={currentWeek}
           onUpdateItem={handleUpdateItem}
@@ -114,7 +110,7 @@ const CalendarPage = () => {
           onAddItem={handleAddItem}
         />
       </div>
-      <ToolsPanel onAddItem={handleAddItem} />
+      <CleanToolsPanel onAddItem={handleAddItem} />
     </div>
   );
 };
