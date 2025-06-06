@@ -23,55 +23,65 @@ const CalendarGrid: React.FC = () => {
     }
   }, []);
 
-  const calculateDropTime = (dropResult: DropResult, event?: any): string => {
-    if (!timeAreaRef.current || !scrollContainerRef.current) return '09:00';
-    
-    // Get the mouse position relative to the time area
-    const timeAreaRect = timeAreaRef.current.getBoundingClientRect();
-    const scrollTop = scrollContainerRef.current.scrollTop;
-    
-    // Estimate drop position (this is a simplified approach)
-    // In a real implementation, you'd want to capture mouse coordinates during drag
-    const estimatedY = scrollTop + 200; // Fallback estimation
-    
-    const roundedPixels = roundToNearestSlot(estimatedY);
-    return pixelsToTime(roundedPixels);
-  };
-
   const handleDragEnd = (result: DropResult) => {
     const { destination, source, draggableId } = result;
     
     if (!destination) return;
 
+    console.log('Drag ended:', { destination, source, draggableId });
+
     // Handle drag from toolbar
-    if (source.droppableId === 'toolbar' || draggableId.startsWith('toolbar-')) {
-      const itemType = draggableId.includes('event') ? 'event' :
-                      draggableId.includes('task') ? 'task' :
-                      draggableId.includes('reminder') ? 'reminder' : 'milestone';
+    if (source.droppableId === 'toolbar' && draggableId.startsWith('toolbar-')) {
+      console.log('Creating new item from toolbar');
       
-      const newItem = createNewItem(destination, itemType, result);
+      // Extract item type from draggableId
+      let itemType: CalendarItem['type'] = 'event';
+      if (draggableId.includes('event')) itemType = 'event';
+      else if (draggableId.includes('task')) itemType = 'task';
+      else if (draggableId.includes('reminder')) itemType = 'reminder';
+      else if (draggableId.includes('milestone')) itemType = 'milestone';
+      
+      const newItem = createNewItem(destination, itemType);
       setCalendarItems(prev => [...prev, newItem]);
       return;
     }
 
     // Handle moving existing items
-    const itemId = draggableId;
-    setCalendarItems(prev => 
-      prev.map(item => 
-        item.id === itemId 
-          ? updateItemPosition(item, destination, result)
-          : item
-      )
-    );
+    if (source.droppableId !== destination.droppableId || source.index !== destination.index) {
+      const itemId = draggableId;
+      setCalendarItems(prev => 
+        prev.map(item => 
+          item.id === itemId 
+            ? updateItemPosition(item, destination)
+            : item
+        )
+      );
+    }
   };
 
-  const createNewItem = (destination: any, type: CalendarItem['type'], dropResult: DropResult): CalendarItem => {
+  const createNewItem = (destination: any, type: CalendarItem['type']): CalendarItem => {
     const weekDates = getWeekDates(currentWeek);
-    const dayIndex = parseInt(destination.droppableId.replace('day-', '').replace('all-day-', ''));
-    const date = weekDates[dayIndex].toISOString().split('T')[0];
     
+    // Parse day index from destination droppableId
+    let dayIndex = 0;
+    if (destination.droppableId.startsWith('day-')) {
+      dayIndex = parseInt(destination.droppableId.replace('day-', ''));
+    } else if (destination.droppableId.startsWith('all-day-')) {
+      dayIndex = parseInt(destination.droppableId.replace('all-day-', ''));
+    }
+    
+    const date = weekDates[dayIndex].toISOString().split('T')[0];
     const isAllDay = destination.droppableId.includes('all-day');
-    const startTime = isAllDay ? '00:00' : calculateDropTime(dropResult);
+    
+    // For time slots, use the slot data to determine time
+    let startTime = '09:00';
+    if (!isAllDay && destination.droppableId.startsWith('day-')) {
+      // Get the time from the slot index - each slot represents 5 minutes
+      const slotMinutes = destination.index * 5;
+      const hours = Math.floor(slotMinutes / 60);
+      const minutes = slotMinutes % 60;
+      startTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+    }
     
     // Calculate end time based on item type
     let endTime: string | undefined;
@@ -80,6 +90,8 @@ const CalendarGrid: React.FC = () => {
       const endHour = hours + 1; // Default 1-hour duration
       endTime = `${endHour.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
     }
+    
+    console.log('Creating new item:', { type, startTime, endTime, date, isAllDay, dayIndex });
     
     return {
       id: `${type}-${Date.now()}`,
@@ -92,13 +104,28 @@ const CalendarGrid: React.FC = () => {
     };
   };
 
-  const updateItemPosition = (item: CalendarItem, destination: any, dropResult: DropResult): CalendarItem => {
+  const updateItemPosition = (item: CalendarItem, destination: any): CalendarItem => {
     const weekDates = getWeekDates(currentWeek);
-    const dayIndex = parseInt(destination.droppableId.replace('day-', '').replace('all-day-', ''));
+    
+    // Parse day index from destination droppableId
+    let dayIndex = 0;
+    if (destination.droppableId.startsWith('day-')) {
+      dayIndex = parseInt(destination.droppableId.replace('day-', ''));
+    } else if (destination.droppableId.startsWith('all-day-')) {
+      dayIndex = parseInt(destination.droppableId.replace('all-day-', ''));
+    }
+    
     const date = weekDates[dayIndex].toISOString().split('T')[0];
     const isAllDay = destination.droppableId.includes('all-day');
     
-    const newStartTime = isAllDay ? '00:00' : calculateDropTime(dropResult);
+    let newStartTime = item.startTime;
+    if (!isAllDay && destination.droppableId.startsWith('day-')) {
+      // Get the time from the slot index - each slot represents 5 minutes
+      const slotMinutes = destination.index * 5;
+      const hours = Math.floor(slotMinutes / 60);
+      const minutes = slotMinutes % 60;
+      newStartTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+    }
     
     // Maintain duration for events
     let newEndTime = item.endTime;
