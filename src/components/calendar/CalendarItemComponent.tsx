@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Draggable } from '@hello-pangea/dnd';
 import {
@@ -22,23 +21,17 @@ const useStyles = makeStyles({
   },
   event: {
     backgroundColor: tokens.colorBrandBackground,
-    borderColor: tokens.colorBrandStroke1,
-    borderWidth: '1px' as const,
-    borderStyle: 'solid' as const,
+    border: `1px solid ${tokens.colorBrandStroke1}`,
     color: tokens.colorNeutralForegroundOnBrand,
   },
   task: {
     backgroundColor: tokens.colorPaletteGreenBackground1,
-    borderColor: tokens.colorPaletteGreenBorder1,
-    borderWidth: '1px' as const,
-    borderStyle: 'solid' as const,
+    border: `1px solid ${tokens.colorPaletteGreenBorder1}`,
   },
   highlight: {
     backgroundColor: tokens.colorPaletteYellowBackground1,
     opacity: '0.6' as const,
-    borderColor: tokens.colorPaletteYellowBorder1,
-    borderWidth: '1px' as const,
-    borderStyle: 'solid' as const,
+    border: `1px solid ${tokens.colorPaletteYellowBorder1}`,
   },
   milestone: {
     height: '2px' as const,

@@ -1,4 +1,3 @@
-
 import { Draggable } from '@hello-pangea/dnd';
 import {
   makeStyles,
@@ -14,9 +13,7 @@ const useStyles = makeStyles({
     padding: tokens.spacingVerticalS,
     cursor: 'grab' as const,
     borderRadius: '4px' as const,
-    borderColor: tokens.colorNeutralStroke1,
-    borderWidth: '1px' as const,
-    borderStyle: 'solid' as const,
+    border: `1px solid ${tokens.colorNeutralStroke1}`,
     display: 'flex' as const,
     alignItems: 'center' as const,
     gap: tokens.spacingHorizontalS,
