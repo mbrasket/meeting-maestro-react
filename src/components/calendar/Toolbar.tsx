@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Draggable } from '@hello-pangea/dnd';
+import { Droppable, Draggable } from '@hello-pangea/dnd';
 import { CalendarItem } from './types';
 
 const Toolbar: React.FC = () => {
@@ -24,31 +24,41 @@ const Toolbar: React.FC = () => {
   return (
     <div className="p-4 border-b border-border bg-background">
       <h3 className="text-sm font-medium text-foreground mb-3">Drag items to calendar</h3>
-      <div className="flex gap-2 flex-wrap">
-        {toolbarItems.map((item, index) => (
-          <Draggable
-            key={`toolbar-${item.type}`}
-            draggableId={`toolbar-${item.type}-${index}`}
-            index={index}
+      
+      <Droppable droppableId="toolbar" direction="horizontal">
+        {(provided) => (
+          <div
+            ref={provided.innerRef}
+            {...provided.droppableProps}
+            className="flex gap-2 flex-wrap"
           >
-            {(provided, snapshot) => (
-              <div
-                ref={provided.innerRef}
-                {...provided.draggableProps}
-                {...provided.dragHandleProps}
-                className={`
-                  ${getItemColor(item.type)} text-white text-xs px-3 py-2 rounded
-                  cursor-grab active:cursor-grabbing transition-colors
-                  ${snapshot.isDragging ? 'opacity-80 shadow-lg' : ''}
-                `}
-                style={provided.draggableProps.style}
+            {toolbarItems.map((item, index) => (
+              <Draggable
+                key={`toolbar-${item.type}`}
+                draggableId={`toolbar-${item.type}-${index}`}
+                index={index}
               >
-                {item.title}
-              </div>
-            )}
-          </Draggable>
-        ))}
-      </div>
+                {(provided, snapshot) => (
+                  <div
+                    ref={provided.innerRef}
+                    {...provided.draggableProps}
+                    {...provided.dragHandleProps}
+                    className={`
+                      ${getItemColor(item.type)} text-white text-xs px-3 py-2 rounded
+                      cursor-grab active:cursor-grabbing transition-colors
+                      ${snapshot.isDragging ? 'opacity-80 shadow-lg' : ''}
+                    `}
+                    style={provided.draggableProps.style}
+                  >
+                    {item.title}
+                  </div>
+                )}
+              </Draggable>
+            ))}
+            {provided.placeholder}
+          </div>
+        )}
+      </Droppable>
     </div>
   );
 };
