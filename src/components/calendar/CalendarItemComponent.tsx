@@ -128,7 +128,7 @@ const CalendarItemComponent = ({ item, onUpdate, onDelete }: CalendarItemCompone
   return (
     <div ref={drag} className={`${styles.item} ${getItemStyles()} ${isDragging ? styles.dragging : ''}`}>
       {/* Resize handles */}
-      {!isResizing && item.type !== 'milestone' && (
+      {!isResizing && (
         <>
           <div className={`${styles.resizeHandle} ${styles.topHandle}`} />
           <div className={`${styles.resizeHandle} ${styles.bottomHandle}`} />
