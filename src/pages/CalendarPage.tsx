@@ -9,7 +9,7 @@ import CalendarGrid from '../components/calendar/CalendarGrid';
 import ToolsPanel from '../components/calendar/ToolsPanel';
 import { CalendarItem } from '../components/calendar/types';
 import { snapToGrid } from '../components/calendar/utils/timeUtils';
-import { useKeyboardState } from '../hooks/useKeyboardState';
+import { useKeyboardRef } from '../hooks/useKeyboardRef';
 import { useTimeRangeSelection } from '../hooks/useTimeRangeSelection';
 import { detectCollisions } from '../utils/collisionDetection';
 
@@ -48,7 +48,7 @@ const CalendarPage = () => {
   const [copyingItem, setCopyingItem] = useState<CalendarItem | null>(null);
   const [dragCollisions, setDragCollisions] = useState<Set<string>>(new Set());
   
-  const keyboardState = useKeyboardState();
+  const keyboardRef = useKeyboardRef();
   const timeRangeSelection = useTimeRangeSelection();
 
   // Handle keyboard shortcuts
@@ -132,16 +132,16 @@ const CalendarPage = () => {
   };
 
   const handleBeforeDragStart = (initial: any) => {
-    console.log('BeforeDragStart - CTRL pressed:', keyboardState.ctrlKey, 'draggableId:', initial.draggableId);
+    console.log('BeforeDragStart - CTRL pressed:', keyboardRef.current.ctrlKey, 'draggableId:', initial.draggableId);
   };
 
   const handleDragStart = (initial: any) => {
     const { draggableId, source } = initial;
     
-    console.log('DragStart - CTRL pressed:', keyboardState.ctrlKey, 'draggableId:', draggableId);
+    console.log('DragStart - CTRL pressed:', keyboardRef.current.ctrlKey, 'draggableId:', draggableId);
     
     // Only handle cloning for existing calendar items (not tools) when CTRL is pressed
-    if (keyboardState.ctrlKey && !source.droppableId.startsWith('tools-')) {
+    if (keyboardRef.current.ctrlKey && !source.droppableId.startsWith('tools-')) {
       const originalItem = calendarItems.find(item => item.id === draggableId);
       if (originalItem) {
         console.log('Creating clone of item:', originalItem.id);
@@ -282,7 +282,7 @@ const CalendarPage = () => {
       onDragEnd={handleDragEnd}
     >
       <div className={styles.container}>
-        {keyboardState.ctrlKey && (
+        {keyboardRef.current.ctrlKey && (
           <div className={styles.ctrlIndicator}>
             CTRL: Clone Mode Active
           </div>
@@ -299,7 +299,7 @@ const CalendarPage = () => {
             onClearSelection={handleClearSelection}
             onAddItem={handleAddItem}
             onCopyItem={handleCopyItem}
-            isCtrlPressed={keyboardState.ctrlKey}
+            isCtrlPressed={keyboardRef.current.ctrlKey}
             timeRangeSelection={timeRangeSelection}
             dragCollisions={dragCollisions}
           />
