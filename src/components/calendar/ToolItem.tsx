@@ -1,4 +1,3 @@
-
 import { Draggable } from '@hello-pangea/dnd';
 import {
   makeStyles,
@@ -12,13 +11,13 @@ import { CalendarItemTemplate } from './types';
 const useStyles = makeStyles({
   toolItem: {
     padding: tokens.spacingVerticalS,
-    cursor: 'grab',
+    cursor: 'grab' as const,
     borderRadius: '4px',
     borderColor: tokens.colorNeutralStroke1,
     borderWidth: '1px',
-    borderStyle: 'solid',
-    display: 'flex',
-    alignItems: 'center',
+    borderStyle: 'solid' as const,
+    display: 'flex' as const,
+    alignItems: 'center' as const,
     gap: tokens.spacingHorizontalS,
     backgroundColor: tokens.colorNeutralBackground1,
     ':hover': {

@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Draggable } from '@hello-pangea/dnd';
 import {
@@ -12,47 +11,47 @@ import { CalendarItem } from './types';
 
 const useStyles = makeStyles({
   item: {
-    position: 'absolute',
+    position: 'absolute' as const,
     left: '4px',
     right: '4px',
     borderRadius: '4px',
     padding: '4px 8px',
-    cursor: 'move',
-    userSelect: 'none',
+    cursor: 'move' as const,
+    userSelect: 'none' as const,
   },
   event: {
     backgroundColor: tokens.colorBrandBackground,
     borderColor: tokens.colorBrandStroke1,
     borderWidth: '1px',
-    borderStyle: 'solid',
+    borderStyle: 'solid' as const,
     color: tokens.colorNeutralForegroundOnBrand,
   },
   task: {
     backgroundColor: tokens.colorPaletteGreenBackground1,
     borderColor: tokens.colorPaletteGreenBorder1,
     borderWidth: '1px',
-    borderStyle: 'solid',
+    borderStyle: 'solid' as const,
   },
   highlight: {
     backgroundColor: tokens.colorPaletteYellowBackground1,
     opacity: '0.6',
     borderColor: tokens.colorPaletteYellowBorder1,
     borderWidth: '1px',
-    borderStyle: 'solid',
+    borderStyle: 'solid' as const,
   },
   milestone: {
     height: '2px',
     backgroundColor: tokens.colorPaletteRedBackground2,
-    display: 'flex',
-    alignItems: 'center',
+    display: 'flex' as const,
+    alignItems: 'center' as const,
     paddingLeft: '4px',
   },
   resizeHandle: {
-    position: 'absolute',
+    position: 'absolute' as const,
     left: '0',
     right: '0',
     height: '4px',
-    cursor: 'ns-resize',
+    cursor: 'ns-resize' as const,
     backgroundColor: 'transparent',
     ':hover': {
       backgroundColor: tokens.colorNeutralStroke1,
@@ -68,8 +67,8 @@ const useStyles = makeStyles({
     opacity: '0.5',
   },
   taskContent: {
-    display: 'flex',
-    alignItems: 'center',
+    display: 'flex' as const,
+    alignItems: 'center' as const,
     gap: '4px',
   },
 });
