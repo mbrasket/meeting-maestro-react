@@ -1,3 +1,4 @@
+
 import { makeStyles, tokens, Text, Checkbox } from '@fluentui/react-components';
 import { DroppableStateSnapshot } from '@hello-pangea/dnd';
 import { Flag } from 'lucide-react';
@@ -15,27 +16,32 @@ const useStyles = makeStyles({
     alignItems: 'center',
     justifyContent: 'flex-start',
     fontSize: '12px',
-    zIndex: '15',
-    opacity: '0.7',
+    zIndex: '50', // Much higher z-index to appear above everything
+    opacity: '0.8',
     padding: '2px 6px',
-    border: `2px dashed ${tokens.colorBrandStroke1}`,
+    border: `3px dashed ${tokens.colorBrandStroke1}`, // Thicker, more visible border
+    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)', // Add shadow for visibility
   },
   // Item type styles matching CalendarItemComponent
   event: {
     backgroundColor: tokens.colorBrandBackground,
     color: tokens.colorNeutralForegroundOnBrand,
+    borderColor: tokens.colorBrandStroke1,
   },
   task: {
     backgroundColor: tokens.colorPaletteGreenBackground1,
-    border: `2px dashed ${tokens.colorPaletteGreenBorder1}`,
+    borderColor: tokens.colorPaletteGreenBorder1,
+    color: tokens.colorNeutralForeground1,
   },
   highlight: {
     backgroundColor: tokens.colorPaletteYellowBackground1,
-    border: `2px dashed ${tokens.colorPaletteYellowBorder1}`,
+    borderColor: tokens.colorPaletteYellowBorder1,
+    color: tokens.colorNeutralForeground1,
   },
   milestone: {
     backgroundColor: tokens.colorPaletteRedBackground2,
-    border: `2px dashed ${tokens.colorPaletteRedBorder1}`,
+    borderColor: tokens.colorPaletteRedBorder1,
+    color: tokens.colorNeutralForeground1,
     height: '16px', // Shorter for milestone
   },
   taskContent: {
@@ -59,6 +65,12 @@ interface GhostCardProps {
 
 export const GhostCard = ({ snapshot, allItems = [] }: GhostCardProps) => {
   const styles = useStyles();
+
+  // Debug logging
+  console.log('GhostCard render:', {
+    isDraggingOver: snapshot.isDraggingOver,
+    draggingFromThisWith: snapshot.draggingFromThisWith
+  });
 
   if (!snapshot.isDraggingOver || !snapshot.draggingFromThisWith) {
     return null;
@@ -163,7 +175,10 @@ export const GhostCard = ({ snapshot, allItems = [] }: GhostCardProps) => {
   };
 
   return (
-    <div className={`${styles.ghostCard} ${itemPreview.styleClass}`}>
+    <div 
+      className={`${styles.ghostCard} ${itemPreview.styleClass}`}
+      style={{ borderColor: 'inherit' }}
+    >
       {renderContent()}
     </div>
   );

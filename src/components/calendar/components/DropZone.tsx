@@ -18,8 +18,8 @@ const useStyles = makeStyles({
   },
   dropZone: {
     backgroundColor: tokens.colorBrandBackground2,
-    opacity: '0.3',
-    zIndex: '5',
+    opacity: '0.2', // Reduced opacity so it doesn't interfere with ghost card
+    zIndex: '1', // Lower z-index than ghost card
   },
 });
 
@@ -43,6 +43,14 @@ export const DropZone = ({
   const getBorderStyle = () => {
     return isHalfHourBoundary ? styles.halfHourBorder : styles.noBorder;
   };
+
+  // Debug logging for drag state
+  if (snapshot.isDraggingOver) {
+    console.log('DropZone isDraggingOver:', {
+      isDraggingOver: snapshot.isDraggingOver,
+      draggingFromThisWith: snapshot.draggingFromThisWith
+    });
+  }
 
   return (
     <div 

@@ -59,22 +59,6 @@ const useStyles = makeStyles({
   dragging: {
     opacity: '0.5',
   },
-  dragPreview: {
-    position: 'fixed',
-    left: '4px',
-    right: '4px',
-    padding: '4px 8px',
-    borderRadius: '4px',
-    cursor: 'move',
-    userSelect: 'none',
-    minHeight: '40px',
-    display: 'flex',
-    alignItems: 'center',
-    gap: tokens.spacingHorizontalS,
-    zIndex: 1000,
-    pointerEvents: 'none',
-    width: '200px',
-  },
 });
 
 interface ToolItemProps {
@@ -98,10 +82,6 @@ const ToolItem = ({ template, index }: ToolItemProps) => {
       default:
         return styles.event;
     }
-  };
-
-  const getDragPreviewStyle = () => {
-    return getItemStyles(); // Use same styles for drag preview
   };
 
   const renderContent = () => {
@@ -138,28 +118,14 @@ const ToolItem = ({ template, index }: ToolItemProps) => {
   return (
     <Draggable draggableId={draggableId} index={index}>
       {(provided, snapshot) => (
-        <>
-          <div
-            ref={provided.innerRef}
-            {...provided.draggableProps}
-            {...provided.dragHandleProps}
-            className={`${styles.toolItem} ${getItemStyles()} ${snapshot.isDragging ? styles.dragging : ''}`}
-          >
-            {renderContent()}
-          </div>
-          
-          {/* Render drag preview */}
-          {snapshot.isDragging && (
-            <div 
-              className={`${styles.dragPreview} ${getDragPreviewStyle()}`}
-              style={{
-                transform: provided.draggableProps.style?.transform,
-              }}
-            >
-              {renderContent()}
-            </div>
-          )}
-        </>
+        <div
+          ref={provided.innerRef}
+          {...provided.draggableProps}
+          {...provided.dragHandleProps}
+          className={`${styles.toolItem} ${getItemStyles()} ${snapshot.isDragging ? styles.dragging : ''}`}
+        >
+          {renderContent()}
+        </div>
       )}
     </Draggable>
   );
