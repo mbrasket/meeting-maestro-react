@@ -112,6 +112,13 @@ const CalendarGrid = ({
     onWeekChange(addWeeks(currentWeek, 1));
   };
 
+  const handleGridClick = (e: React.MouseEvent) => {
+    // Only clear selection if clicking directly on the grid, not on items or their containers
+    if (e.target === e.currentTarget) {
+      onClearSelection();
+    }
+  };
+
   // Generate time slots for every 5 minutes (288 slots in 24 hours)
   const timeSlots = Array.from({ length: 288 }, (_, i) => i);
   // Only show hourly labels
@@ -137,7 +144,11 @@ const CalendarGrid = ({
         </div>
       </div>
       
-      <div className={styles.grid} style={{ gridTemplateRows: '40px repeat(288, 20px)' }}>
+      <div 
+        className={styles.grid} 
+        style={{ gridTemplateRows: '40px repeat(288, 20px)' }}
+        onClick={handleGridClick}
+      >
         {/* Time column header */}
         <div className={styles.timeColumn}></div>
         
@@ -174,6 +185,7 @@ const CalendarGrid = ({
                   onDeleteItem={onDeleteItem}
                   selectedItemIds={selectedItemIds}
                   onSelectItem={onSelectItem}
+                  onClearSelection={onClearSelection}
                 />
               </div>
             ))}

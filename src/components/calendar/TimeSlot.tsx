@@ -47,15 +47,23 @@ interface TimeSlotProps {
   onDeleteItem: (itemId: string) => void;
   selectedItemIds: Set<string>;
   onSelectItem: (itemId: string, ctrlKey: boolean) => void;
+  onClearSelection: () => void;
 }
 
-const TimeSlot = ({ day, slot, items, onUpdateItem, onDeleteItem, selectedItemIds, onSelectItem }: TimeSlotProps) => {
+const TimeSlot = ({ day, slot, items, onUpdateItem, onDeleteItem, selectedItemIds, onSelectItem, onClearSelection }: TimeSlotProps) => {
   const styles = useStyles();
   const droppableId = `${day.toDateString()}-${slot}`;
   const isHourBoundary = slot % 12 === 0;
   
   const getBorderStyle = () => {
     return isHourBoundary ? styles.hourBorder : styles.regularBorder;
+  };
+
+  const handleSlotClick = (e: React.MouseEvent) => {
+    // Clear selection when clicking on empty time slot
+    if (e.target === e.currentTarget) {
+      onClearSelection();
+    }
   };
 
   return (
@@ -65,6 +73,7 @@ const TimeSlot = ({ day, slot, items, onUpdateItem, onDeleteItem, selectedItemId
           ref={provided.innerRef}
           {...provided.droppableProps}
           className={`${styles.slot} ${getBorderStyle()} ${snapshot.isDraggingOver ? styles.dropZone : ''}`}
+          onClick={handleSlotClick}
         >
           {/* Show ghost card when dragging from tools */}
           {snapshot.isDraggingOver && snapshot.draggingFromThisWith?.startsWith('tool-') && (
