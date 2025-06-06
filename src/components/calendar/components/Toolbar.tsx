@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { Droppable } from '@hello-pangea/dnd';
 import { DraggableItem } from './DraggableItem';
 import { CalendarItemTemplate } from '../types';
 
@@ -34,15 +35,24 @@ export const Toolbar: React.FC = () => {
   return (
     <div className="w-48 border-r border-border bg-muted/30 p-4">
       <h3 className="text-sm font-medium mb-4">Calendar Items</h3>
-      <div className="space-y-2">
-        {toolbarItems.map((template, index) => (
-          <DraggableItem
-            key={`${template.type}-${index}`}
-            template={template}
-            index={index}
-          />
-        ))}
-      </div>
+      <Droppable droppableId="toolbar" isDropDisabled={true}>
+        {(provided) => (
+          <div 
+            ref={provided.innerRef}
+            {...provided.droppableProps}
+            className="space-y-2"
+          >
+            {toolbarItems.map((template, index) => (
+              <DraggableItem
+                key={`${template.type}-${index}`}
+                template={template}
+                index={index}
+              />
+            ))}
+            {provided.placeholder}
+          </div>
+        )}
+      </Droppable>
     </div>
   );
 };
