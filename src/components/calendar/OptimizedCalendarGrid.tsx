@@ -1,5 +1,5 @@
 
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useRef } from 'react';
 import {
   makeStyles,
   tokens,
@@ -10,7 +10,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { format, addWeeks, subWeeks } from 'date-fns';
 import { DragDropContext, DropResult, DragStart, DragUpdate } from '@hello-pangea/dnd';
 import { CalendarItem } from './types';
-import { getWeekDays, slotToTime, snapToGrid } from './utils/timeUtils';
+import { getWeekDays, snapToGrid } from './utils/timeUtils';
 import { DayColumn } from './components/DayColumn';
 import { TimeColumn } from './components/TimeColumn';
 import { DragGhost } from './components/DragGhost';
@@ -84,6 +84,7 @@ const OptimizedCalendarGrid = ({
 }: OptimizedCalendarGridProps) => {
   const styles = useStyles();
   const weekDays = getWeekDays(currentWeek);
+  const gridRef = useRef<HTMLDivElement>(null);
   
   const [dragState, setDragState] = useState<DragState>({
     isDragging: false,
@@ -106,34 +107,6 @@ const OptimizedCalendarGrid = ({
     return byDay;
   }, [items, weekDays]);
 
-  // Calculate drop position from coordinates
-  const calculateDropPosition = useCallback((clientX: number, clientY: number) => {
-    const gridElement = document.querySelector('[data-grid-container]') as HTMLElement;
-    if (!gridElement) return null;
-
-    const rect = gridElement.getBoundingClientRect();
-    const relativeX = clientX - rect.left;
-    const relativeY = clientY - rect.top;
-
-    // Account for header height (40px)
-    const adjustedY = relativeY - 40;
-    
-    // Calculate day (0-6)
-    const dayIndex = Math.floor((relativeX / rect.width) * 7);
-    
-    // Calculate slot (0-287) - each slot is 7px
-    const slot = Math.floor(adjustedY / 7);
-    
-    if (dayIndex >= 0 && dayIndex < 7 && slot >= 0 && slot < 288) {
-      return {
-        day: weekDays[dayIndex],
-        slot: Math.max(0, Math.min(287, slot)),
-      };
-    }
-    
-    return null;
-  }, [weekDays]);
-
   const handleDragStart = useCallback((start: DragStart) => {
     const item = items.find(item => item.id === start.draggableId);
     const type = start.draggableId.startsWith('tool-') 
@@ -146,25 +119,33 @@ const OptimizedCalendarGrid = ({
       draggedItemId: start.draggableId,
       draggedItemType: type,
     }));
+
+    // Add mouse move listener for real-time coordinates
+    const handleMouseMove = (e: MouseEvent) => {
+      setDragState(prev => ({
+        ...prev,
+        currentCoordinates: { x: e.clientX, y: e.clientY },
+      }));
+    };
+
+    document.addEventListener('mousemove', handleMouseMove);
+    
+    // Clean up on drag end
+    const cleanup = () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', cleanup);
+    };
+    document.addEventListener('mouseup', cleanup);
   }, [items]);
 
   const handleDragUpdate = useCallback((update: DragUpdate) => {
-    if (!update.destination) return;
-
-    const coordinates = update.destination.index ? { x: 0, y: 0 } : null;
-    const position = coordinates ? calculateDropPosition(coordinates.x, coordinates.y) : null;
-
-    setDragState(prev => ({
-      ...prev,
-      currentCoordinates: coordinates,
-      targetDay: position?.day || null,
-      targetSlot: position?.slot || null,
-    }));
-  }, [calculateDropPosition]);
+    // Update is handled by mouse events for better performance
+  }, []);
 
   const handleDragEnd = useCallback((result: DropResult) => {
     const { destination, source, draggableId } = result;
 
+    // Clear drag state
     setDragState({
       isDragging: false,
       draggedItemId: null,
@@ -179,13 +160,19 @@ const OptimizedCalendarGrid = ({
     // Handle dragging from tools panel to calendar
     if (source.droppableId === 'tools-items' && destination.droppableId.startsWith('day-')) {
       const dayIndex = parseInt(destination.droppableId.replace('day-', ''));
-      const targetDate = weekDays[dayIndex];
+      const targetDate = new Date(weekDays[dayIndex]);
       
-      // Use the coordinates to calculate exact slot
-      if (dragState.targetSlot !== null) {
-        const targetSlot = dragState.targetSlot;
-        const hours = Math.floor(targetSlot / 12);
-        const minutes = (targetSlot % 12) * 5;
+      // Use current mouse position to calculate exact drop position
+      if (dragState.currentCoordinates && gridRef.current) {
+        const gridRect = gridRef.current.getBoundingClientRect();
+        const timeColumnWidth = 60; // Width of time column
+        const relativeY = dragState.currentCoordinates.y - gridRect.top - 40; // Subtract header height
+        
+        // Calculate slot based on Y position (7px per slot)
+        const slot = Math.max(0, Math.min(287, Math.floor(relativeY / 7)));
+        const hours = Math.floor(slot / 12);
+        const minutes = (slot % 12) * 5;
+        
         targetDate.setHours(hours, minutes, 0, 0);
       }
       
@@ -211,13 +198,21 @@ const OptimizedCalendarGrid = ({
     // Handle moving existing calendar items
     if (!source.droppableId.startsWith('tools-') && !destination.droppableId.startsWith('tools-')) {
       const item = items.find(item => item.id === draggableId);
-      if (item && dragState.targetDay && dragState.targetSlot !== null) {
-        const targetDate = new Date(dragState.targetDay);
-        const targetSlot = dragState.targetSlot;
+      if (item && destination.droppableId.startsWith('day-')) {
+        const dayIndex = parseInt(destination.droppableId.replace('day-', ''));
+        const targetDate = new Date(weekDays[dayIndex]);
         
-        const hours = Math.floor(targetSlot / 12);
-        const minutes = (targetSlot % 12) * 5;
-        targetDate.setHours(hours, minutes, 0, 0);
+        // Use current mouse position for precise drop location
+        if (dragState.currentCoordinates && gridRef.current) {
+          const gridRect = gridRef.current.getBoundingClientRect();
+          const relativeY = dragState.currentCoordinates.y - gridRect.top - 40; // Subtract header height
+          
+          const slot = Math.max(0, Math.min(287, Math.floor(relativeY / 7)));
+          const hours = Math.floor(slot / 12);
+          const minutes = (slot % 12) * 5;
+          
+          targetDate.setHours(hours, minutes, 0, 0);
+        }
         
         const duration = item.endTime.getTime() - item.startTime.getTime();
         const newStartTime = snapToGrid(targetDate);
@@ -270,12 +265,11 @@ const OptimizedCalendarGrid = ({
           </div>
         </div>
         
-        <div className={styles.gridContainer}>
+        <div className={styles.gridContainer} ref={gridRef}>
           <TimeColumn />
           
           <div 
             className={styles.grid}
-            data-grid-container
             onClick={handleGridClick}
           >
             {weekDays.map((day, dayIndex) => (

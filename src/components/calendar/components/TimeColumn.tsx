@@ -26,45 +26,31 @@ const useStyles = makeStyles({
   timeLabel: {
     height: '84px', // Each hour is 84px (12 slots * 7px)
     display: 'flex',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     justifyContent: 'center',
     fontSize: '12px',
     fontWeight: tokens.fontWeightMedium,
     color: tokens.colorNeutralForeground2,
-    borderBottomColor: tokens.colorNeutralStroke2,
-    borderBottomWidth: '1px',
-    borderBottomStyle: 'solid',
     flexShrink: 0,
-  },
-  emptyTimeSlot: {
-    height: '7px',
-    flexShrink: 0,
+    paddingTop: '4px',
   },
 });
 
 export const TimeColumn = memo(() => {
   const styles = useStyles();
   
-  // Generate time slots for every 5 minutes (288 slots in 24 hours)
-  const timeSlots = Array.from({ length: 288 }, (_, i) => i);
-  // Generate hourly slots (every 12 slots = 1 hour)
-  const hourlySlots = Array.from({ length: 24 }, (_, i) => i * 12);
+  // Generate hourly time labels
+  const hours = Array.from({ length: 24 }, (_, i) => i);
 
   return (
     <div className={styles.timeColumn}>
       {/* Header space */}
       <div className={styles.timeColumnHeader}></div>
       
-      {/* Time labels */}
-      {timeSlots.map((slot) => (
-        <div key={`time-${slot}`}>
-          {hourlySlots.includes(slot) ? (
-            <div className={styles.timeLabel}>
-              {slotToTime(slot)}
-            </div>
-          ) : (
-            <div className={styles.emptyTimeSlot}></div>
-          )}
+      {/* Time labels - one per hour */}
+      {hours.map((hour) => (
+        <div key={`time-${hour}`} className={styles.timeLabel}>
+          {slotToTime(hour * 12)}
         </div>
       ))}
     </div>

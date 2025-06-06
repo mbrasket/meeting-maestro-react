@@ -30,7 +30,7 @@ const useStyles = makeStyles({
     zIndex: 2,
   },
   dropZone: {
-    height: 'calc(288 * 7px)', // 288 slots * 7px each
+    height: 'calc(24 * 84px)', // 24 hours * 84px each
     position: 'relative',
     minHeight: '2016px',
   },
@@ -44,13 +44,9 @@ const useStyles = makeStyles({
       repeating-linear-gradient(
         to bottom,
         transparent 0px,
-        transparent 29px,
-        ${tokens.colorNeutralStroke2} 29px,
-        ${tokens.colorNeutralStroke2} 30px,
-        transparent 30px,
-        transparent 41px,
-        ${tokens.colorNeutralStroke1} 41px,
-        ${tokens.colorNeutralStroke1} 42px
+        transparent 83px,
+        ${tokens.colorNeutralStroke2} 83px,
+        ${tokens.colorNeutralStroke2} 84px
       )
     `,
     pointerEvents: 'none',
@@ -141,7 +137,7 @@ export const DayColumn = memo(({
             className={styles.dropZone}
             style={{
               backgroundColor: snapshot.isDraggingOver 
-                ? 'rgba(0, 120, 212, 0.05)' 
+                ? 'rgba(0, 120, 212, 0.1)' 
                 : 'transparent',
             }}
           >
