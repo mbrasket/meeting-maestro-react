@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import {
   makeStyles,
@@ -49,13 +50,19 @@ const useStyles = makeStyles({
     zIndex: 1,
   },
   timeLabel: {
-    height: '7px', // Each 5-minute slot is 7px (84px per hour ÷ 12 slots)
+    height: '84px', // Each hour is 84px (12 slots * 7px)
     display: 'flex',
-    alignItems: 'flex-start',
+    alignItems: 'center',
     justifyContent: 'center',
-    paddingTop: '2px',
-    fontSize: '11px',
+    fontSize: '12px',
+    fontWeight: tokens.fontWeightMedium,
     color: tokens.colorNeutralForeground2,
+    borderBottomColor: tokens.colorNeutralStroke2,
+    borderBottomWidth: '1px',
+    borderBottomStyle: 'solid',
+  },
+  emptyTimeSlot: {
+    height: '7px', // Regular 5-minute slot
   },
   dayColumn: {
     position: 'relative',
@@ -120,8 +127,8 @@ const CalendarGrid = ({
 
   // Generate time slots for every 5 minutes (288 slots in 24 hours)
   const timeSlots = Array.from({ length: 288 }, (_, i) => i);
-  // Show time labels only at half-hour increments (every 6 slots = 30 minutes)
-  const halfHourSlots = Array.from({ length: 48 }, (_, i) => i * 6);
+  // Generate hourly slots (every 12 slots = 1 hour)
+  const hourlySlots = Array.from({ length: 24 }, (_, i) => i * 12);
 
   return (
     <div className={styles.container}>
@@ -164,9 +171,13 @@ const CalendarGrid = ({
         {timeSlots.map((slot) => (
           <>
             <div key={`time-${slot}`} className={styles.timeColumn}>
-              <div className={styles.timeLabel}>
-                {halfHourSlots.includes(slot) ? slotToTime(slot) : ''}
-              </div>
+              {hourlySlots.includes(slot) ? (
+                <div className={styles.timeLabel}>
+                  {slotToTime(slot)}
+                </div>
+              ) : (
+                <div className={styles.emptyTimeSlot}></div>
+              )}
             </div>
             {weekDays.map((day, dayIndex) => {
               // Get all items for this day for overlap calculation
