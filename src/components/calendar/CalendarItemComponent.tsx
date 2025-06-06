@@ -1,5 +1,5 @@
 
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { Draggable } from '@hello-pangea/dnd';
 import { makeStyles, tokens } from '@fluentui/react-components';
 import { CalendarItem } from './types';
@@ -53,6 +53,9 @@ const useStyles = makeStyles({
     opacity: '0.5',
     zIndex: '20',
   },
+  resizing: {
+    zIndex: '25', // Highest z-index during resize
+  },
 });
 
 interface CalendarItemComponentProps {
@@ -64,6 +67,9 @@ interface CalendarItemComponentProps {
   onSelect: (itemId: string, ctrlKey: boolean) => void;
   column?: number;
   totalColumns?: number;
+  isResizeActive?: boolean;
+  onResizeStart?: () => void;
+  onResizeEnd?: () => void;
 }
 
 const CalendarItemComponent = ({ 
@@ -74,11 +80,19 @@ const CalendarItemComponent = ({
   isSelected, 
   onSelect,
   column = 0,
-  totalColumns = 1
+  totalColumns = 1,
+  isResizeActive = false,
+  onResizeStart,
+  onResizeEnd
 }: CalendarItemComponentProps) => {
   const styles = useStyles();
   const itemRef = useRef<HTMLDivElement>(null);
-  const { isResizing, handleResizeMouseDown } = useItemResize(item, onUpdate);
+  const { isResizing, handleResizeMouseDown } = useItemResize(
+    item, 
+    onUpdate, 
+    onResizeStart, 
+    onResizeEnd
+  );
 
   const getItemStyles = () => {
     const baseStyle = (() => {
@@ -94,7 +108,12 @@ const CalendarItemComponent = ({
       }
     })();
     
-    return isSelected ? `${baseStyle} ${styles.selected}` : baseStyle;
+    let combinedStyle = isSelected ? `${baseStyle} ${styles.selected}` : baseStyle;
+    if (isResizing || isResizeActive) {
+      combinedStyle += ` ${styles.resizing}`;
+    }
+    
+    return combinedStyle;
   };
 
   const handleTaskToggle = () => {
@@ -120,6 +139,11 @@ const CalendarItemComponent = ({
     );
   }
 
+  // During resize, use full width to avoid layout jumps
+  const positionStyle = isResizing || isResizeActive 
+    ? { left: '4px', width: 'calc(100% - 8px)', paddingLeft: '4px', paddingRight: '4px' }
+    : calculateItemPosition(column, totalColumns);
+
   return (
     <Draggable draggableId={item.id} index={index} isDragDisabled={isResizing}>
       {(provided, snapshot) => (
@@ -129,7 +153,7 @@ const CalendarItemComponent = ({
           className={`${styles.item} ${getItemStyles()} ${snapshot.isDragging ? styles.dragging : ''}`}
           style={{
             height: `${calculateItemHeight(item)}px`,
-            ...calculateItemPosition(column, totalColumns),
+            ...positionStyle,
             ...provided.draggableProps.style,
           }}
           onClick={handleItemClick}

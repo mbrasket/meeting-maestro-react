@@ -1,4 +1,5 @@
 
+import { useState } from 'react';
 import { Droppable } from '@hello-pangea/dnd';
 import { makeStyles, tokens } from '@fluentui/react-components';
 import { CalendarItem } from './types';
@@ -52,7 +53,7 @@ interface TimeSlotProps {
 }
 
 // Helper function to calculate overlapping items and their positions
-const calculateOverlapPositions = (items: CalendarItem[], currentSlot: number) => {
+const calculateOverlapPositions = (items: CalendarItem[], currentSlot: number, resizingItemId?: string) => {
   const itemsWithPositions: Array<{
     item: CalendarItem;
     column: number;
@@ -61,8 +62,13 @@ const calculateOverlapPositions = (items: CalendarItem[], currentSlot: number) =
     endSlot: number;
   }> = [];
 
+  // If an item is being resized, calculate positions without that item to prevent layout jumps
+  const itemsToProcess = resizingItemId 
+    ? items.filter(item => item.id !== resizingItemId)
+    : items;
+
   // Convert items to slot ranges
-  const itemRanges = items.map(item => {
+  const itemRanges = itemsToProcess.map(item => {
     const startSlot = Math.floor(new Date(item.startTime).getHours() * 12 + new Date(item.startTime).getMinutes() / 5);
     const endSlot = Math.floor(new Date(item.endTime).getHours() * 12 + new Date(item.endTime).getMinutes() / 5);
     return { item, startSlot, endSlot };
@@ -112,6 +118,7 @@ const TimeSlot = ({
   onClearSelection 
 }: TimeSlotProps) => {
   const styles = useStyles();
+  const [resizingItemId, setResizingItemId] = useState<string | null>(null);
   const droppableId = `${day.toDateString()}-${slot}`;
   
   // Show border only at half-hour increments (every 6 slots = 30 minutes)
@@ -128,8 +135,16 @@ const TimeSlot = ({
     }
   };
 
+  const handleResizeStart = (itemId: string) => {
+    setResizingItemId(itemId);
+  };
+
+  const handleResizeEnd = () => {
+    setResizingItemId(null);
+  };
+
   // Calculate positions for overlapping items
-  const itemsWithPositions = calculateOverlapPositions(allDayItems, slot);
+  const itemsWithPositions = calculateOverlapPositions(allDayItems, slot, resizingItemId);
 
   return (
     <Droppable droppableId={droppableId}>
@@ -163,11 +178,43 @@ const TimeSlot = ({
                   onSelect={onSelectItem}
                   column={column}
                   totalColumns={totalColumns}
+                  isResizeActive={resizingItemId !== null && resizingItemId !== item.id}
+                  onResizeStart={() => handleResizeStart(item.id)}
+                  onResizeEnd={handleResizeEnd}
                 />
               );
             }
             return null;
           })}
+          
+          {/* Render resizing item separately to avoid column constraints */}
+          {resizingItemId && allDayItems.some(item => item.id === resizingItemId) && (() => {
+            const resizingItem = allDayItems.find(item => item.id === resizingItemId);
+            if (!resizingItem) return null;
+            
+            const startSlot = Math.floor(new Date(resizingItem.startTime).getHours() * 12 + new Date(resizingItem.startTime).getMinutes() / 5);
+            
+            if (slot === startSlot) {
+              return (
+                <CalendarItemComponent
+                  key={`resizing-${resizingItem.id}`}
+                  item={resizingItem}
+                  index={999} // High index to render on top
+                  onUpdate={(updates) => onUpdateItem(resizingItem.id, updates)}
+                  onDelete={() => onDeleteItem(resizingItem.id)}
+                  isSelected={selectedItemIds.has(resizingItem.id)}
+                  onSelect={onSelectItem}
+                  column={0}
+                  totalColumns={1}
+                  isResizeActive={false}
+                  onResizeStart={() => handleResizeStart(resizingItem.id)}
+                  onResizeEnd={handleResizeEnd}
+                />
+              );
+            }
+            return null;
+          })()}
+          
           {provided.placeholder}
         </div>
       )}

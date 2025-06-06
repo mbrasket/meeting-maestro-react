@@ -4,7 +4,9 @@ import { CalendarItem } from '../types';
 
 export const useItemResize = (
   item: CalendarItem,
-  onUpdate: (updates: Partial<CalendarItem>) => void
+  onUpdate: (updates: Partial<CalendarItem>) => void,
+  onResizeStart?: () => void,
+  onResizeEnd?: () => void
 ) => {
   const [isResizing, setIsResizing] = useState(false);
 
@@ -12,6 +14,7 @@ export const useItemResize = (
     e.preventDefault();
     e.stopPropagation();
     setIsResizing(true);
+    onResizeStart?.();
 
     const startY = e.clientY;
     const startTime = new Date(item.startTime);
@@ -38,6 +41,7 @@ export const useItemResize = (
 
     const handleMouseUp = () => {
       setIsResizing(false);
+      onResizeEnd?.();
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
     };
