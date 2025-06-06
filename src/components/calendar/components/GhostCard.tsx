@@ -4,9 +4,8 @@ import { DroppableStateSnapshot } from '@hello-pangea/dnd';
 import { Flag } from 'lucide-react';
 import { CalendarItem } from '../types';
 
-// Simple CSS classes to avoid TypeScript issues with makeStyles
-const ghostCardStyles = {
-  position: 'absolute' as const,
+const ghostCardStyles: React.CSSProperties = {
+  position: 'absolute',
   left: '2px',
   right: '2px',
   top: '1px',
@@ -42,7 +41,7 @@ const itemStyles = {
   },
 };
 
-const contentStyles = {
+const contentStyles: React.CSSProperties = {
   display: 'flex',
   alignItems: 'center',
   gap: '4px',
@@ -62,11 +61,6 @@ interface ItemPreview {
 }
 
 export const GhostCard = ({ snapshot, allItems = [] }: GhostCardProps) => {
-  console.log('GhostCard render:', {
-    isDraggingOver: snapshot.isDraggingOver,
-    draggingFromThisWith: snapshot.draggingFromThisWith
-  });
-
   if (!snapshot.isDraggingOver || !snapshot.draggingFromThisWith) {
     return null;
   }

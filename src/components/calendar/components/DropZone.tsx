@@ -2,7 +2,6 @@
 import { ReactNode } from 'react';
 import { DroppableProvided, DroppableStateSnapshot } from '@hello-pangea/dnd';
 
-// Simple CSS styles to avoid makeStyles complexity
 const slotStyles: React.CSSProperties = {
   height: '7px',
   position: 'relative',
@@ -49,14 +48,6 @@ export const DropZone = ({
     
     return baseStyle;
   };
-
-  // Debug logging for drag state
-  if (snapshot.isDraggingOver) {
-    console.log('DropZone isDraggingOver:', {
-      isDraggingOver: snapshot.isDraggingOver,
-      draggingFromThisWith: snapshot.draggingFromThisWith
-    });
-  }
 
   return (
     <div 
