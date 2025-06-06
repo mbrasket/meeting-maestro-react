@@ -19,6 +19,7 @@ const useStyles = makeStyles({
     padding: '4px 8px',
     cursor: 'move',
     userSelect: 'none',
+    zIndex: '10', // Ensure items appear above grid lines
   },
   event: {
     backgroundColor: tokens.colorBrandBackground,
@@ -40,6 +41,7 @@ const useStyles = makeStyles({
     display: 'flex',
     alignItems: 'center',
     paddingLeft: '4px',
+    zIndex: '10', // Ensure milestones appear above grid lines
   },
   resizeHandle: {
     position: 'absolute',
@@ -48,7 +50,7 @@ const useStyles = makeStyles({
     height: '4px',
     cursor: 'ns-resize',
     backgroundColor: 'transparent',
-    zIndex: 10,
+    zIndex: 15, // Resize handles above items
     ':hover': {
       backgroundColor: tokens.colorNeutralStroke1,
     },
@@ -61,6 +63,7 @@ const useStyles = makeStyles({
   },
   dragging: {
     opacity: '0.5',
+    zIndex: '20', // Dragging items appear above everything
   },
   taskContent: {
     display: 'flex',

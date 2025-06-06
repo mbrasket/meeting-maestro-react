@@ -19,6 +19,7 @@ const useStyles = makeStyles({
   dropZone: {
     backgroundColor: tokens.colorBrandBackground2,
     opacity: '0.3',
+    zIndex: '5', // Drop zone indication below items
   },
   ghostCard: {
     position: 'absolute',
@@ -33,7 +34,7 @@ const useStyles = makeStyles({
     justifyContent: 'center',
     color: tokens.colorNeutralForegroundOnBrand,
     fontSize: '12px',
-    zIndex: 5,
+    zIndex: '15', // Ghost card above grid lines but below dragging items
     opacity: '0.7',
   },
 });
