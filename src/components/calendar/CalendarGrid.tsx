@@ -32,22 +32,30 @@ const useStyles = makeStyles({
     alignItems: 'center',
     gap: tokens.spacingHorizontalM,
   },
-  grid: {
+  gridContainer: {
     flex: 1,
-    display: 'grid',
-    gridTemplateColumns: '60px repeat(7, 1fr)',
+    display: 'flex',
     overflow: 'auto',
-    position: 'relative',
     minWidth: '800px',
   },
   timeColumn: {
+    width: '60px',
     borderRightColor: tokens.colorNeutralStroke1,
     borderRightWidth: '1px',
     borderRightStyle: 'solid',
+    backgroundColor: tokens.colorNeutralBackground1,
     position: 'sticky',
     left: 0,
-    backgroundColor: tokens.colorNeutralBackground1,
     zIndex: 1,
+    display: 'flex',
+    flexDirection: 'column',
+  },
+  timeColumnHeader: {
+    height: '40px',
+    borderBottomColor: tokens.colorNeutralStroke1,
+    borderBottomWidth: '1px',
+    borderBottomStyle: 'solid',
+    backgroundColor: tokens.colorNeutralBackground2,
   },
   timeLabel: {
     height: '84px', // Each hour is 84px (12 slots * 7px)
@@ -60,9 +68,17 @@ const useStyles = makeStyles({
     borderBottomColor: tokens.colorNeutralStroke2,
     borderBottomWidth: '1px',
     borderBottomStyle: 'solid',
+    flexShrink: 0,
   },
   emptyTimeSlot: {
     height: '7px', // Regular 5-minute slot
+    flexShrink: 0,
+  },
+  grid: {
+    flex: 1,
+    display: 'grid',
+    gridTemplateColumns: 'repeat(7, 1fr)',
+    position: 'relative',
   },
   dayColumn: {
     position: 'relative',
@@ -150,27 +166,15 @@ const CalendarGrid = ({
         </div>
       </div>
       
-      <div 
-        className={styles.grid} 
-        style={{ gridTemplateRows: '40px repeat(288, 7px)' }}
-        onClick={handleGridClick}
-      >
-        {/* Time column header */}
-        <div className={styles.timeColumn}></div>
-        
-        {/* Day headers */}
-        {weekDays.map((day, index) => (
-          <div key={index} className={styles.dayHeader}>
-            <Text size={300} weight="semibold">
-              {format(day, 'EEE d')}
-            </Text>
-          </div>
-        ))}
-        
-        {/* Time labels and day columns */}
-        {timeSlots.map((slot) => (
-          <>
-            <div key={`time-${slot}`} className={styles.timeColumn}>
+      <div className={styles.gridContainer}>
+        {/* Time column */}
+        <div className={styles.timeColumn}>
+          {/* Header space */}
+          <div className={styles.timeColumnHeader}></div>
+          
+          {/* Time labels */}
+          {timeSlots.map((slot) => (
+            <div key={`time-${slot}`}>
               {hourlySlots.includes(slot) ? (
                 <div className={styles.timeLabel}>
                   {slotToTime(slot)}
@@ -179,7 +183,27 @@ const CalendarGrid = ({
                 <div className={styles.emptyTimeSlot}></div>
               )}
             </div>
-            {weekDays.map((day, dayIndex) => {
+          ))}
+        </div>
+
+        {/* Calendar grid */}
+        <div 
+          className={styles.grid} 
+          style={{ gridTemplateRows: '40px repeat(288, 7px)' }}
+          onClick={handleGridClick}
+        >
+          {/* Day headers */}
+          {weekDays.map((day, index) => (
+            <div key={index} className={styles.dayHeader}>
+              <Text size={300} weight="semibold">
+                {format(day, 'EEE d')}
+              </Text>
+            </div>
+          ))}
+          
+          {/* Day columns with time slots */}
+          {timeSlots.map((slot) => (
+            weekDays.map((day, dayIndex) => {
               // Get all items for this day for overlap calculation
               const allDayItems = items.filter(item => {
                 const itemDay = new Date(item.startTime).toDateString();
@@ -211,9 +235,9 @@ const CalendarGrid = ({
                   />
                 </div>
               );
-            })}
-          </>
-        ))}
+            })
+          ))}
+        </div>
       </div>
     </div>
   );
