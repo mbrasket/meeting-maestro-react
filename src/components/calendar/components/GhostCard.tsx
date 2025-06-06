@@ -1,4 +1,3 @@
-
 import { makeStyles, tokens, Text, Checkbox } from '@fluentui/react-components';
 import { DroppableStateSnapshot } from '@hello-pangea/dnd';
 import { Flag } from 'lucide-react';
@@ -111,7 +110,7 @@ export const GhostCard = ({ snapshot }: GhostCardProps) => {
       case 'task':
         return (
           <div className={styles.taskContent}>
-            <Checkbox checked={false} disabled size="small" />
+            <Checkbox checked={false} disabled />
             <Text size={200} weight="medium">
               {itemPreview.title}
             </Text>
