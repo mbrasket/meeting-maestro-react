@@ -7,7 +7,8 @@ const useStyles = makeStyles({
     position: 'absolute',
     left: '2px', // Reduced from 6px
     right: '2px', // Reduced from 6px
-    height: '28px',
+    top: '1px', // Account for slot padding
+    height: '26px', // Reduced to fit within padded slot
     backgroundColor: tokens.colorBrandBackground,
     border: `2px dashed ${tokens.colorBrandStroke1}`,
     borderRadius: '4px',

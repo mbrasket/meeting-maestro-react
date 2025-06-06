@@ -12,7 +12,7 @@ import { ItemContent } from './components/ItemContent';
 const useStyles = makeStyles({
   item: {
     position: 'absolute',
-    top: '0',
+    top: '1px', // Offset for slot padding
     borderRadius: '4px',
     padding: '4px 8px',
     cursor: 'move',
@@ -152,7 +152,7 @@ const CalendarItemComponent = ({
           {...provided.draggableProps}
           className={`${styles.item} ${getItemStyles()} ${snapshot.isDragging ? styles.dragging : ''}`}
           style={{
-            height: `${calculateItemHeight(item)}px`,
+            height: `${calculateItemHeight(item) - 2}px`, // Subtract 2px for slot padding
             ...positionStyle,
             ...provided.draggableProps.style,
           }}

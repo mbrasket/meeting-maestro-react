@@ -82,7 +82,8 @@ export const MilestoneItem = ({
     return {
       left: `calc(${left}% + 2px)`, // Reduced from 4px
       width: `calc(${columnWidth}% - 4px)`, // Reduced from 8px (2px left + 2px right)
-      height: '6px', // Fixed height for milestones
+      height: '4px', // Reduced height to account for slot padding
+      top: '1.5px', // Center vertically within the padded slot
     };
   };
 
