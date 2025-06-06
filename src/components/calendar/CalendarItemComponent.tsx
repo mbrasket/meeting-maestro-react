@@ -1,6 +1,6 @@
 
 import { useRef, useState } from 'react';
-import { Draggable } from '@hello-pangea/dnd';
+import { useDraggable } from '@dnd-kit/core';
 import { makeStyles, tokens } from '@fluentui/react-components';
 import { CalendarItem } from './types';
 import { useItemResize } from './hooks/useItemResize';
@@ -125,6 +125,17 @@ const CalendarItemComponent = ({
     onResizeEnd
   );
 
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    isDragging,
+  } = useDraggable({
+    id: item.id,
+    disabled: isResizing,
+  });
+
   const getItemStyles = () => {
     const baseStyle = (() => {
       switch (item.type) {
@@ -143,6 +154,10 @@ const CalendarItemComponent = ({
     
     if (isResizing || isResizeActive) {
       combinedStyle += ` ${styles.resizing}`;
+    }
+    
+    if (isDragging) {
+      combinedStyle += ` ${styles.dragging}`;
     }
     
     if (hasCollisionWarning) {
@@ -180,36 +195,30 @@ const CalendarItemComponent = ({
     ? { left: '4px', width: 'calc(100% - 8px)', paddingLeft: '4px', paddingRight: '4px' }
     : calculateItemPosition(column, totalColumns);
 
-  return (
-    <Draggable 
-      draggableId={item.id} 
-      index={index} 
-      isDragDisabled={isResizing}
-    >
-      {(provided, snapshot) => {
-        return (
-          <div
-            ref={provided.innerRef}
-            {...provided.draggableProps}
-            {...provided.dragHandleProps}
-            className={`${styles.item} ${getItemStyles()} ${snapshot.isDragging ? styles.dragging : ''}`}
-            style={{
-              height: `${calculateItemHeight(item)}px`,
-              ...positionStyle,
-              ...provided.draggableProps.style,
-            }}
-            onClick={handleItemClick}
-          >
-            <ItemContent item={item} onTaskToggle={handleTaskToggle} />
+  const dragTransform = transform ? {
+    transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
+  } : {};
 
-            <ResizeHandles 
-              onResizeMouseDown={handleResizeMouseDown} 
-              isDragging={snapshot.isDragging}
-            />
-          </div>
-        );
+  return (
+    <div
+      ref={setNodeRef}
+      {...attributes}
+      {...listeners}
+      className={`${styles.item} ${getItemStyles()}`}
+      style={{
+        height: `${calculateItemHeight(item)}px`,
+        ...positionStyle,
+        ...dragTransform,
       }}
-    </Draggable>
+      onClick={handleItemClick}
+    >
+      <ItemContent item={item} onTaskToggle={handleTaskToggle} />
+
+      <ResizeHandles 
+        onResizeMouseDown={handleResizeMouseDown} 
+        isDragging={isDragging}
+      />
+    </div>
   );
 };
 

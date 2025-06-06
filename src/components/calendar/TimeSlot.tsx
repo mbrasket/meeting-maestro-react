@@ -1,6 +1,5 @@
-
 import { useState } from 'react';
-import { Droppable } from '@hello-pangea/dnd';
+import { useDroppable } from '@dnd-kit/core';
 import { makeStyles, tokens } from '@fluentui/react-components';
 import { CalendarItem } from './types';
 import CalendarItemComponent from './CalendarItemComponent';
@@ -151,6 +150,13 @@ const TimeSlot = ({
   const [resizingItemId, setResizingItemId] = useState<string | null>(null);
   const droppableId = `${day.toDateString()}-${slot}`;
   
+  const {
+    isOver,
+    setNodeRef,
+  } = useDroppable({
+    id: droppableId,
+  });
+
   // Show border only at half-hour increments (every 6 slots = 30 minutes)
   const isHalfHourBoundary = slot % 6 === 0;
   
@@ -213,6 +219,10 @@ const TimeSlot = ({
   const getSlotStyles = () => {
     let slotStyles = `${styles.slot} ${getBorderStyle()}`;
     
+    if (isOver) {
+      slotStyles += ` ${styles.dropZone}`;
+    }
+    
     if (hasCollisionWarning) {
       slotStyles += ` ${styles.collisionWarning}`;
     }
@@ -221,99 +231,92 @@ const TimeSlot = ({
   };
 
   return (
-    <Droppable droppableId={droppableId}>
-      {(provided, snapshot) => (
+    <div 
+      ref={setNodeRef}
+      className={getSlotStyles()}
+      onClick={handleSlotClick}
+      onMouseDown={handleSlotMouseDown}
+      onMouseEnter={handleSlotMouseEnter}
+      onMouseUp={handleSlotMouseUp}
+    >
+      {/* Continuous selection overlay - only show at start slot */}
+      {shouldShowSelectionOverlay && (
         <div 
-          ref={provided.innerRef}
-          {...provided.droppableProps}
-          className={`${getSlotStyles()} ${snapshot.isDraggingOver ? styles.dropZone : ''}`}
-          onClick={handleSlotClick}
-          onMouseDown={handleSlotMouseDown}
-          onMouseEnter={handleSlotMouseEnter}
-          onMouseUp={handleSlotMouseUp}
-        >
-          {/* Continuous selection overlay - only show at start slot */}
-          {shouldShowSelectionOverlay && (
-            <div 
-              className={styles.selectedRangeOverlay}
-              style={{
-                top: '0px',
-                height: `${selectionBounds.height}px`,
-              }}
-            />
-          )}
+          className={styles.selectedRangeOverlay}
+          style={{
+            top: '0px',
+            height: `${selectionBounds.height}px`,
+          }}
+        />
+      )}
 
-          {/* Show ghost card when dragging from tools */}
-          {snapshot.isDraggingOver && snapshot.draggingFromThisWith?.startsWith('tool-') && (
-            <div className={styles.ghostCard}>
-              Drop here
-            </div>
-          )}
-          
-          {/* Render calendar items */}
-          {itemsWithPositions.map((itemData, index) => {
-            const { item, column, totalColumns, startSlot } = itemData;
-            
-            // Only render the item in its starting slot to avoid duplicates
-            if (slot === startSlot) {
-              return (
-                <CalendarItemComponent
-                  key={item.id}
-                  item={item}
-                  index={index}
-                  onUpdate={(updates) => onUpdateItem(item.id, updates)}
-                  onDelete={() => onDeleteItem(item.id)}
-                  isSelected={selectedItemIds.has(item.id)}
-                  onSelect={onSelectItem}
-                  column={column}
-                  totalColumns={totalColumns}
-                  isResizeActive={resizingItemId !== null && resizingItemId !== item.id}
-                  onResizeStart={() => handleResizeStart(item.id)}
-                  onResizeEnd={handleResizeEnd}
-                  onCopyItem={onCopyItem}
-                  isCtrlPressed={isCtrlPressed}
-                  hasCollisionWarning={dragCollisions.has(item.id)}
-                />
-              );
-            }
-            return null;
-          })}
-          
-          {/* Render resizing item separately to avoid column constraints */}
-          {resizingItemId && allDayItems.some(item => item.id === resizingItemId) && (() => {
-            const resizingItem = allDayItems.find(item => item.id === resizingItemId);
-            if (!resizingItem) return null;
-            
-            const startSlot = Math.floor(new Date(resizingItem.startTime).getHours() * 12 + new Date(resizingItem.startTime).getMinutes() / 5);
-            
-            if (slot === startSlot) {
-              return (
-                <CalendarItemComponent
-                  key={`resizing-${resizingItem.id}`}
-                  item={resizingItem}
-                  index={999} // High index to render on top
-                  onUpdate={(updates) => onUpdateItem(resizingItem.id, updates)}
-                  onDelete={() => onDeleteItem(resizingItem.id)}
-                  isSelected={selectedItemIds.has(resizingItem.id)}
-                  onSelect={onSelectItem}
-                  column={0}
-                  totalColumns={1}
-                  isResizeActive={false}
-                  onResizeStart={() => handleResizeStart(resizingItem.id)}
-                  onResizeEnd={handleResizeEnd}
-                  onCopyItem={onCopyItem}
-                  isCtrlPressed={isCtrlPressed}
-                  hasCollisionWarning={dragCollisions.has(resizingItem.id)}
-                />
-              );
-            }
-            return null;
-          })()}
-          
-          {provided.placeholder}
+      {/* Show ghost card when dragging */}
+      {isOver && (
+        <div className={styles.ghostCard}>
+          Drop here
         </div>
       )}
-    </Droppable>
+      
+      {/* Render calendar items */}
+      {itemsWithPositions.map((itemData, index) => {
+        const { item, column, totalColumns, startSlot } = itemData;
+        
+        // Only render the item in its starting slot to avoid duplicates
+        if (slot === startSlot) {
+          return (
+            <CalendarItemComponent
+              key={item.id}
+              item={item}
+              index={index}
+              onUpdate={(updates) => onUpdateItem(item.id, updates)}
+              onDelete={() => onDeleteItem(item.id)}
+              isSelected={selectedItemIds.has(item.id)}
+              onSelect={onSelectItem}
+              column={column}
+              totalColumns={totalColumns}
+              isResizeActive={resizingItemId !== null && resizingItemId !== item.id}
+              onResizeStart={() => handleResizeStart(item.id)}
+              onResizeEnd={handleResizeEnd}
+              onCopyItem={onCopyItem}
+              isCtrlPressed={isCtrlPressed}
+              hasCollisionWarning={dragCollisions.has(item.id)}
+            />
+          );
+        }
+        return null;
+      })}
+      
+      {/* Render resizing item separately to avoid column constraints */}
+      {resizingItemId && allDayItems.some(item => item.id === resizingItemId) && (() => {
+        const resizingItem = allDayItems.find(item => item.id === resizingItemId);
+        if (!resizingItem) return null;
+        
+        const startSlot = Math.floor(new Date(resizingItem.startTime).getHours() * 12 + new Date(resizingItem.startTime).getMinutes() / 5);
+        
+        if (slot === startSlot) {
+          return (
+            <CalendarItemComponent
+              key={`resizing-${resizingItem.id}`}
+              item={resizingItem}
+              index={999} // High index to render on top
+              onUpdate={(updates) => onUpdateItem(resizingItem.id, updates)}
+              onDelete={() => onDeleteItem(resizingItem.id)}
+              isSelected={selectedItemIds.has(resizingItem.id)}
+              onSelect={onSelectItem}
+              column={0}
+              totalColumns={1}
+              isResizeActive={false}
+              onResizeStart={() => handleResizeStart(resizingItem.id)}
+              onResizeEnd={handleResizeEnd}
+              onCopyItem={onCopyItem}
+              isCtrlPressed={isCtrlPressed}
+              hasCollisionWarning={dragCollisions.has(resizingItem.id)}
+            />
+          );
+        }
+        return null;
+      })()}
+    </div>
   );
 };
 

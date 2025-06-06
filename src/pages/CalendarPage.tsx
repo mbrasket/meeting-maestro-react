@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { DragDropContext, DropResult } from '@hello-pangea/dnd';
 import {
   makeStyles,
   tokens,
@@ -7,9 +6,10 @@ import {
 import CalendarGrid from '../components/calendar/CalendarGrid';
 import ToolsPanel from '../components/calendar/ToolsPanel';
 import { CalendarItem } from '../components/calendar/types';
-import { snapToGrid } from '../components/calendar/utils/timeUtils';
 import { useKeyboardRef } from '../hooks/useKeyboardRef';
 import { useTimeRangeSelection } from '../hooks/useTimeRangeSelection';
+import { useDragAndDrop } from '../hooks/useDragAndDrop';
+import { DragDropProvider } from '../contexts/DragDropContext';
 import { detectCollisions } from '../utils/collisionDetection';
 
 const useStyles = makeStyles({
@@ -44,7 +44,6 @@ const CalendarPage = () => {
   const [calendarItems, setCalendarItems] = useState<CalendarItem[]>([]);
   const [currentWeek, setCurrentWeek] = useState(new Date());
   const [selectedItemIds, setSelectedItemIds] = useState<Set<string>>(new Set());
-  const [copyingItem, setCopyingItem] = useState<CalendarItem | null>(null);
   const [dragCollisions, setDragCollisions] = useState<Set<string>>(new Set());
   
   const keyboardRef = useKeyboardRef();
@@ -127,198 +126,23 @@ const CalendarPage = () => {
 
   const handleCopyItem = (item: CalendarItem) => {
     console.log('Copy item requested:', item.id);
-    setCopyingItem(item);
   };
 
-  const handleBeforeDragStart = (initial: any) => {
-    const ctrlState = keyboardRef.current.ctrlKey;
-    console.log('BeforeDragStart - CTRL Debug:', {
-      ctrlPressed: ctrlState,
-      draggableId: initial.draggableId,
-      source: initial.source,
-      timestamp: new Date().toLocaleTimeString()
-    });
-  };
-
-  const handleDragStart = (initial: any) => {
-    const { draggableId, source } = initial;
-    
-    // Get the current CTRL state at the moment of drag start
-    const isCtrlPressed = keyboardRef.current.ctrlKey;
-    console.log('DragStart - CTRL Clone Debug:', {
-      ctrlPressed: isCtrlPressed,
-      draggableId: draggableId,
-      sourceDroppableId: source.droppableId,
-      isFromTools: source.droppableId.startsWith('tools-'),
-      shouldClone: isCtrlPressed && !source.droppableId.startsWith('tools-'),
-      timestamp: new Date().toLocaleTimeString()
-    });
-    
-    // Only handle cloning for existing calendar items (not tools) when CTRL is pressed
-    if (isCtrlPressed && !source.droppableId.startsWith('tools-')) {
-      const originalItem = calendarItems.find(item => item.id === draggableId);
-      if (originalItem) {
-        console.log('Creating clone of item:', {
-          originalId: originalItem.id,
-          originalTitle: originalItem.title,
-          timestamp: new Date().toLocaleTimeString()
-        });
-        
-        // Create the clone immediately with a unique ID
-        const cloneId = `clone-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-        const clonedItem: CalendarItem = {
-          ...originalItem,
-          id: cloneId,
-          title: `${originalItem.title} (Copy)`,
-        };
-        
-        // Add the clone to the calendar
-        setCalendarItems(prev => {
-          console.log('Adding clone to calendar items:', cloneId);
-          return [...prev, clonedItem];
-        });
-        setCopyingItem(clonedItem);
-        console.log('Clone created successfully:', {
-          cloneId: cloneId,
-          cloneTitle: clonedItem.title
-        });
-      } else {
-        console.warn('Original item not found for cloning:', draggableId);
-      }
-    } else if (isCtrlPressed) {
-      console.log('CTRL pressed but drag is from tools - no cloning');
-    } else {
-      console.log('CTRL not pressed - normal drag operation');
-    }
-  };
-
-  const handleDragUpdate = (update: any) => {
-    const { destination, draggableId } = update;
-    
-    if (destination && !destination.droppableId.startsWith('tools-')) {
-      const [dateStr, slotStr] = destination.droppableId.split('-');
-      const targetDate = new Date(dateStr);
-      const targetSlot = parseInt(slotStr);
-      
-      // Convert slot to actual time
-      const hours = Math.floor(targetSlot / 12);
-      const minutes = (targetSlot % 12) * 5;
-      targetDate.setHours(hours, minutes, 0, 0);
-      
-      const draggedItem = calendarItems.find(item => item.id === draggableId);
-      if (draggedItem) {
-        const duration = draggedItem.endTime.getTime() - draggedItem.startTime.getTime();
-        const newStartTime = snapToGrid(targetDate);
-        const newEndTime = new Date(newStartTime.getTime() + duration);
-        
-        // Check for collisions
-        const collision = detectCollisions(draggedItem, calendarItems, newStartTime, newEndTime);
-        
-        if (collision.hasCollision) {
-          setDragCollisions(new Set(collision.conflictingItems.map(item => item.id)));
-        } else {
-          setDragCollisions(new Set());
-        }
-      }
-    } else {
-      setDragCollisions(new Set());
-    }
-  };
-
-  const handleDragEnd = (result: DropResult) => {
-    const { destination, source, draggableId } = result;
-    
-    console.log('DragEnd - Final Debug:', {
-      destination: destination?.droppableId,
-      source: source.droppableId,
-      draggableId,
-      copyingItem: copyingItem?.id,
-      timestamp: new Date().toLocaleTimeString()
-    });
-    
-    // Clear collision indicators
-    setDragCollisions(new Set());
-
-    if (!destination) {
-      // If drag was cancelled and we have a copying item (clone), remove it
-      if (copyingItem) {
-        console.log('Drag cancelled, removing clone:', copyingItem.id);
-        setCalendarItems(prev => prev.filter(item => item.id !== copyingItem.id));
-      }
-      setCopyingItem(null);
-      return;
-    }
-
-    // Handle dragging from tools panel to calendar
-    if (source.droppableId === 'tools-items' && destination.droppableId.includes('-')) {
-      const [dateStr, slotStr] = destination.droppableId.split('-');
-      const targetDate = new Date(dateStr);
-      const targetSlot = parseInt(slotStr);
-      
-      // Convert slot to actual time (each slot is 5 minutes)
-      const hours = Math.floor(targetSlot / 12);
-      const minutes = (targetSlot % 12) * 5;
-      targetDate.setHours(hours, minutes, 0, 0);
-      
-      // Determine type from draggableId
-      const type = draggableId.includes('milestone') ? 'milestone' :
-                   draggableId.includes('event') ? 'event' : 
-                   draggableId.includes('task') ? 'task' :
-                   draggableId.includes('highlight') ? 'highlight' : 'event';
-      
-      // Create new item from tool template
-      const duration = type === 'milestone' ? 0 : 60; // Default 1 hour, 0 for milestones
-      
-      const newItem: CalendarItem = {
-        id: Date.now().toString(),
-        type,
-        title: `New ${type.charAt(0).toUpperCase() + type.slice(1)}`,
-        startTime: snapToGrid(targetDate),
-        endTime: snapToGrid(new Date(targetDate.getTime() + duration * 60 * 1000)),
-        completed: false,
-      };
-      
-      handleAddItem(newItem);
-    }
-    
-    // Handle moving existing calendar items
-    if (!source.droppableId.startsWith('tools-') && !destination.droppableId.startsWith('tools-')) {
-      const item = calendarItems.find(item => item.id === draggableId);
-      if (item) {
-        const [dateStr, slotStr] = destination.droppableId.split('-');
-        const targetDate = new Date(dateStr);
-        const targetSlot = parseInt(slotStr);
-        
-        // Convert slot to actual time
-        const hours = Math.floor(targetSlot / 12);
-        const minutes = (targetSlot % 12) * 5;
-        targetDate.setHours(hours, minutes, 0, 0);
-        
-        const duration = item.endTime.getTime() - item.startTime.getTime();
-        const newStartTime = snapToGrid(targetDate);
-        const newEndTime = new Date(newStartTime.getTime() + duration);
-        
-        console.log('Moving item to new position:', item.id);
-        handleUpdateItem(item.id, {
-          startTime: newStartTime,
-          endTime: newEndTime,
-        });
-      }
-    }
-
-    // Clear copying state after drag operation
-    setCopyingItem(null);
-  };
+  const { handleDragStart, handleDragEnd } = useDragAndDrop({
+    items: calendarItems,
+    onUpdateItem: handleUpdateItem,
+    onAddItem: handleAddItem,
+    onDeleteItem: handleDeleteItem,
+    setCalendarItems,
+  });
 
   return (
-    <DragDropContext 
-      onBeforeDragStart={handleBeforeDragStart}
+    <DragDropProvider
       onDragStart={handleDragStart}
-      onDragUpdate={handleDragUpdate}
       onDragEnd={handleDragEnd}
     >
       <div className={styles.container}>
-        {/* CTRL indicator with better debug info */}
+        {/* CTRL indicator */}
         {keyboardRef.current.ctrlKey && (
           <div className={styles.ctrlIndicator}>
             CTRL: Clone Mode Active
@@ -342,7 +166,6 @@ const CalendarPage = () => {
             <div>CTRL Debug:</div>
             <div>State: {keyboardRef.current.ctrlKey ? 'PRESSED' : 'released'}</div>
             <div>Items: {calendarItems.length}</div>
-            <div>Copying: {copyingItem?.id || 'none'}</div>
           </div>
         )}
 
@@ -365,7 +188,7 @@ const CalendarPage = () => {
         </div>
         <ToolsPanel onAddItem={handleAddItem} />
       </div>
-    </DragDropContext>
+    </DragDropProvider>
   );
 };
 

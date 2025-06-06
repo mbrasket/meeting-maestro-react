@@ -1,5 +1,5 @@
 
-import { Droppable } from '@hello-pangea/dnd';
+import { useDroppable } from '@dnd-kit/core';
 import {
   makeStyles,
   tokens,
@@ -39,6 +39,12 @@ interface ToolsPanelProps {
 const ToolsPanel = ({ onAddItem }: ToolsPanelProps) => {
   const styles = useStyles();
 
+  const {
+    setNodeRef,
+  } = useDroppable({
+    id: 'tools-items',
+  });
+
   const templates: CalendarItemTemplate[] = [
     { type: 'event', title: 'Event', duration: 60 },
     { type: 'task', title: 'Task', duration: 60 },
@@ -52,20 +58,14 @@ const ToolsPanel = ({ onAddItem }: ToolsPanelProps) => {
         <Text className={styles.sectionTitle} size={400} weight="semibold">
           Calendar Items
         </Text>
-        <Droppable droppableId="tools-items">
-          {(provided) => (
-            <div
-              ref={provided.innerRef}
-              {...provided.droppableProps}
-              className={styles.toolGrid}
-            >
-              {templates.map((template, index) => (
-                <ToolItem key={template.type} template={template} index={index} />
-              ))}
-              {provided.placeholder}
-            </div>
-          )}
-        </Droppable>
+        <div
+          ref={setNodeRef}
+          className={styles.toolGrid}
+        >
+          {templates.map((template, index) => (
+            <ToolItem key={template.type} template={template} index={index} />
+          ))}
+        </div>
       </div>
     </div>
   );

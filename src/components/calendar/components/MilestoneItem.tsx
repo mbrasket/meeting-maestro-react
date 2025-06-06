@@ -1,5 +1,5 @@
 
-import { Draggable } from '@hello-pangea/dnd';
+import { useDraggable } from '@dnd-kit/core';
 import { makeStyles, tokens, Text } from '@fluentui/react-components';
 import { Flag } from 'lucide-react';
 import { CalendarItem } from '../types';
@@ -64,6 +64,16 @@ export const MilestoneItem = ({
 }: MilestoneItemProps) => {
   const styles = useStyles();
 
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    isDragging,
+  } = useDraggable({
+    id: item.id,
+  });
+
   const getItemStyles = () => {
     const baseStyle = styles.milestone;
     return isSelected ? `${baseStyle} ${styles.selected}` : baseStyle;
@@ -75,27 +85,27 @@ export const MilestoneItem = ({
     onSelect(item.id, e.ctrlKey);
   };
 
+  const dragTransform = transform ? {
+    transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
+  } : {};
+
   return (
-    <Draggable draggableId={item.id} index={index}>
-      {(provided, snapshot) => (
-        <div
-          ref={provided.innerRef}
-          {...provided.draggableProps}
-          {...provided.dragHandleProps}
-          className={`${styles.item} ${getItemStyles()} ${snapshot.isDragging ? styles.dragging : ''}`}
-          style={{
-            height: '7px',
-            ...calculateItemPosition(column, totalColumns),
-            ...provided.draggableProps.style,
-          }}
-          onClick={handleItemClick}
-        >
-          <Flag size={12} />
-          <Text size={200} style={{ marginLeft: '4px' }}>
-            {item.title}
-          </Text>
-        </div>
-      )}
-    </Draggable>
+    <div
+      ref={setNodeRef}
+      {...attributes}
+      {...listeners}
+      className={`${styles.item} ${getItemStyles()} ${isDragging ? styles.dragging : ''}`}
+      style={{
+        height: '7px',
+        ...calculateItemPosition(column, totalColumns),
+        ...dragTransform,
+      }}
+      onClick={handleItemClick}
+    >
+      <Flag size={12} />
+      <Text size={200} style={{ marginLeft: '4px' }}>
+        {item.title}
+      </Text>
+    </div>
   );
 };

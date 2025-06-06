@@ -1,5 +1,4 @@
-
-import { Draggable } from '@hello-pangea/dnd';
+import { useDraggable } from '@dnd-kit/core';
 import {
   makeStyles,
   tokens,
@@ -85,6 +84,16 @@ interface ToolItemProps {
 const ToolItem = ({ template, index }: ToolItemProps) => {
   const styles = useStyles();
 
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    isDragging,
+  } = useDraggable({
+    id: `tool-${template.type}`,
+  });
+
   const getItemStyles = () => {
     switch (template.type) {
       case 'event':
@@ -98,10 +107,6 @@ const ToolItem = ({ template, index }: ToolItemProps) => {
       default:
         return styles.event;
     }
-  };
-
-  const getDragPreviewStyle = () => {
-    return getItemStyles(); // Use same styles for drag preview
   };
 
   const renderContent = () => {
@@ -133,35 +138,20 @@ const ToolItem = ({ template, index }: ToolItemProps) => {
     }
   };
 
-  const draggableId = `tool-${template.type}`;
+  const dragTransform = transform ? {
+    transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
+  } : {};
 
   return (
-    <Draggable draggableId={draggableId} index={index}>
-      {(provided, snapshot) => (
-        <>
-          <div
-            ref={provided.innerRef}
-            {...provided.draggableProps}
-            {...provided.dragHandleProps}
-            className={`${styles.toolItem} ${getItemStyles()} ${snapshot.isDragging ? styles.dragging : ''}`}
-          >
-            {renderContent()}
-          </div>
-          
-          {/* Render drag preview */}
-          {snapshot.isDragging && (
-            <div 
-              className={`${styles.dragPreview} ${getDragPreviewStyle()}`}
-              style={{
-                transform: provided.draggableProps.style?.transform,
-              }}
-            >
-              {renderContent()}
-            </div>
-          )}
-        </>
-      )}
-    </Draggable>
+    <div
+      ref={setNodeRef}
+      {...attributes}
+      {...listeners}
+      className={`${styles.toolItem} ${getItemStyles()} ${isDragging ? styles.dragging : ''}`}
+      style={dragTransform}
+    >
+      {renderContent()}
+    </div>
   );
 };
 
