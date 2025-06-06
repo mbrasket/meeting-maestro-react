@@ -1,4 +1,3 @@
-
 import { makeStyles, tokens, Text, Checkbox } from '@fluentui/react-components';
 import { DroppableStateSnapshot } from '@hello-pangea/dnd';
 import { Flag } from 'lucide-react';
@@ -16,8 +15,8 @@ const useStyles = makeStyles({
     alignItems: 'center',
     justifyContent: 'flex-start',
     fontSize: '12px',
-    zIndex: 100, // Fixed: changed from string to number
-    opacity: 0.9, // Fixed: changed from string to number
+    zIndex: 100,
+    opacity: 0.9,
     padding: '2px 6px',
     border: `3px dashed ${tokens.colorBrandStroke1}`,
     boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
@@ -41,10 +40,9 @@ const useStyles = makeStyles({
     backgroundColor: tokens.colorPaletteRedBackground2,
     borderColor: tokens.colorPaletteRedBorder1,
     color: tokens.colorNeutralForeground1,
-    // Fixed: removed height conflict, will handle in component logic
   },
   milestoneCard: {
-    height: '16px', // Moved milestone-specific height here
+    height: '16px',
   },
   taskContent: {
     display: 'flex',
