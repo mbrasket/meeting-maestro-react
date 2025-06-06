@@ -1,4 +1,3 @@
-
 import { useState, useRef } from 'react';
 import { Draggable } from '@hello-pangea/dnd';
 import {
@@ -13,8 +12,7 @@ import { CalendarItem } from './types';
 const useStyles = makeStyles({
   item: {
     position: 'absolute',
-    left: '4px',
-    right: '4px',
+    top: '0',
     borderRadius: '4px',
     padding: '4px 8px',
     cursor: 'move',
@@ -95,9 +93,20 @@ interface CalendarItemComponentProps {
   onDelete: () => void;
   isSelected: boolean;
   onSelect: (itemId: string, ctrlKey: boolean) => void;
+  column?: number;
+  totalColumns?: number;
 }
 
-const CalendarItemComponent = ({ item, index, onUpdate, onDelete, isSelected, onSelect }: CalendarItemComponentProps) => {
+const CalendarItemComponent = ({ 
+  item, 
+  index, 
+  onUpdate, 
+  onDelete, 
+  isSelected, 
+  onSelect,
+  column = 0,
+  totalColumns = 1
+}: CalendarItemComponentProps) => {
   const styles = useStyles();
   const [isResizing, setIsResizing] = useState(false);
   const itemRef = useRef<HTMLDivElement>(null);
@@ -135,6 +144,17 @@ const CalendarItemComponent = ({ item, index, onUpdate, onDelete, isSelected, on
     const startSlot = Math.floor(new Date(item.startTime).getHours() * 12 + new Date(item.startTime).getMinutes() / 5);
     const endSlot = Math.floor(new Date(item.endTime).getHours() * 12 + new Date(item.endTime).getMinutes() / 5);
     return Math.max(1, endSlot - startSlot) * 7; // 7px per 5-minute slot (84px per hour)
+  };
+
+  const calculatePosition = () => {
+    const columnWidth = 100 / totalColumns;
+    const left = column * columnWidth;
+    return {
+      left: `${left}%`,
+      width: `${columnWidth}%`,
+      paddingLeft: column > 0 ? '2px' : '4px',
+      paddingRight: column < totalColumns - 1 ? '2px' : '4px',
+    };
   };
 
   const handleResizeMouseDown = (direction: 'top' | 'bottom') => (e: React.MouseEvent) => {
@@ -186,6 +206,7 @@ const CalendarItemComponent = ({ item, index, onUpdate, onDelete, isSelected, on
             className={`${styles.item} ${getItemStyles()} ${snapshot.isDragging ? styles.dragging : ''}`}
             style={{
               height: '7px',
+              ...calculatePosition(),
               ...provided.draggableProps.style,
             }}
             onClick={handleItemClick}
@@ -209,6 +230,7 @@ const CalendarItemComponent = ({ item, index, onUpdate, onDelete, isSelected, on
           className={`${styles.item} ${getItemStyles()} ${snapshot.isDragging ? styles.dragging : ''}`}
           style={{
             height: `${calculateHeight()}px`,
+            ...calculatePosition(),
             ...provided.draggableProps.style,
           }}
           onClick={handleItemClick}

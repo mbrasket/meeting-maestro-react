@@ -43,6 +43,7 @@ interface TimeSlotProps {
   day: Date;
   slot: number;
   items: CalendarItem[];
+  allDayItems: CalendarItem[]; // All items for the day to calculate overlaps
   onUpdateItem: (itemId: string, updates: Partial<CalendarItem>) => void;
   onDeleteItem: (itemId: string) => void;
   selectedItemIds: Set<string>;
@@ -50,7 +51,66 @@ interface TimeSlotProps {
   onClearSelection: () => void;
 }
 
-const TimeSlot = ({ day, slot, items, onUpdateItem, onDeleteItem, selectedItemIds, onSelectItem, onClearSelection }: TimeSlotProps) => {
+// Helper function to calculate overlapping items and their positions
+const calculateOverlapPositions = (items: CalendarItem[], currentSlot: number) => {
+  const itemsWithPositions: Array<{
+    item: CalendarItem;
+    column: number;
+    totalColumns: number;
+    startSlot: number;
+    endSlot: number;
+  }> = [];
+
+  // Convert items to slot ranges
+  const itemRanges = items.map(item => {
+    const startSlot = Math.floor(new Date(item.startTime).getHours() * 12 + new Date(item.startTime).getMinutes() / 5);
+    const endSlot = Math.floor(new Date(item.endTime).getHours() * 12 + new Date(item.endTime).getMinutes() / 5);
+    return { item, startSlot, endSlot };
+  });
+
+  // Find overlapping groups
+  const processedItems = new Set<string>();
+  
+  itemRanges.forEach(({ item, startSlot, endSlot }) => {
+    if (processedItems.has(item.id)) return;
+    
+    // Find all items that overlap with this one
+    const overlappingItems = itemRanges.filter(({ item: otherItem, startSlot: otherStart, endSlot: otherEnd }) => {
+      return (startSlot < otherEnd && endSlot > otherStart);
+    });
+    
+    // Sort by start time for consistent column assignment
+    overlappingItems.sort((a, b) => a.startSlot - b.startSlot);
+    
+    // Assign columns to overlapping items
+    overlappingItems.forEach(({ item: overlappingItem, startSlot: overlapStart, endSlot: overlapEnd }, index) => {
+      if (!processedItems.has(overlappingItem.id)) {
+        itemsWithPositions.push({
+          item: overlappingItem,
+          column: index,
+          totalColumns: overlappingItems.length,
+          startSlot: overlapStart,
+          endSlot: overlapEnd,
+        });
+        processedItems.add(overlappingItem.id);
+      }
+    });
+  });
+
+  return itemsWithPositions;
+};
+
+const TimeSlot = ({ 
+  day, 
+  slot, 
+  items, 
+  allDayItems, 
+  onUpdateItem, 
+  onDeleteItem, 
+  selectedItemIds, 
+  onSelectItem, 
+  onClearSelection 
+}: TimeSlotProps) => {
   const styles = useStyles();
   const droppableId = `${day.toDateString()}-${slot}`;
   
@@ -68,6 +128,9 @@ const TimeSlot = ({ day, slot, items, onUpdateItem, onDeleteItem, selectedItemId
     }
   };
 
+  // Calculate positions for overlapping items
+  const itemsWithPositions = calculateOverlapPositions(allDayItems, slot);
+
   return (
     <Droppable droppableId={droppableId}>
       {(provided, snapshot) => (
@@ -84,10 +147,11 @@ const TimeSlot = ({ day, slot, items, onUpdateItem, onDeleteItem, selectedItemId
             </div>
           )}
           
-          {items.map((item, index) => {
+          {itemsWithPositions.map((itemData, index) => {
+            const { item, column, totalColumns, startSlot } = itemData;
+            
             // Only render the item in its starting slot to avoid duplicates
-            const itemStartSlot = Math.floor(new Date(item.startTime).getHours() * 12 + new Date(item.startTime).getMinutes() / 5);
-            if (slot === itemStartSlot) {
+            if (slot === startSlot) {
               return (
                 <CalendarItemComponent
                   key={item.id}
@@ -97,6 +161,8 @@ const TimeSlot = ({ day, slot, items, onUpdateItem, onDeleteItem, selectedItemId
                   onDelete={() => onDeleteItem(item.id)}
                   isSelected={selectedItemIds.has(item.id)}
                   onSelect={onSelectItem}
+                  column={column}
+                  totalColumns={totalColumns}
                 />
               );
             }

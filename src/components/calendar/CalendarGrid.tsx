@@ -168,26 +168,39 @@ const CalendarGrid = ({
                 {halfHourSlots.includes(slot) ? slotToTime(slot) : ''}
               </div>
             </div>
-            {weekDays.map((day, dayIndex) => (
-              <div key={`${slot}-${dayIndex}`} className={styles.dayColumn}>
-                <TimeSlot
-                  day={day}
-                  slot={slot}
-                  items={items.filter(item => {
-                    const itemDay = new Date(item.startTime).toDateString();
-                    const slotDay = day.toDateString();
-                    const itemStartSlot = Math.floor(new Date(item.startTime).getHours() * 12 + new Date(item.startTime).getMinutes() / 5);
-                    const itemEndSlot = Math.floor(new Date(item.endTime).getHours() * 12 + new Date(item.endTime).getMinutes() / 5);
-                    return itemDay === slotDay && slot >= itemStartSlot && slot < itemEndSlot;
-                  })}
-                  onUpdateItem={onUpdateItem}
-                  onDeleteItem={onDeleteItem}
-                  selectedItemIds={selectedItemIds}
-                  onSelectItem={onSelectItem}
-                  onClearSelection={onClearSelection}
-                />
-              </div>
-            ))}
+            {weekDays.map((day, dayIndex) => {
+              // Get all items for this day for overlap calculation
+              const allDayItems = items.filter(item => {
+                const itemDay = new Date(item.startTime).toDateString();
+                const slotDay = day.toDateString();
+                return itemDay === slotDay;
+              });
+
+              // Get items that span this specific slot
+              const slotItems = items.filter(item => {
+                const itemDay = new Date(item.startTime).toDateString();
+                const slotDay = day.toDateString();
+                const itemStartSlot = Math.floor(new Date(item.startTime).getHours() * 12 + new Date(item.startTime).getMinutes() / 5);
+                const itemEndSlot = Math.floor(new Date(item.endTime).getHours() * 12 + new Date(item.endTime).getMinutes() / 5);
+                return itemDay === slotDay && slot >= itemStartSlot && slot < itemEndSlot;
+              });
+
+              return (
+                <div key={`${slot}-${dayIndex}`} className={styles.dayColumn}>
+                  <TimeSlot
+                    day={day}
+                    slot={slot}
+                    items={slotItems}
+                    allDayItems={allDayItems}
+                    onUpdateItem={onUpdateItem}
+                    onDeleteItem={onDeleteItem}
+                    selectedItemIds={selectedItemIds}
+                    onSelectItem={onSelectItem}
+                    onClearSelection={onClearSelection}
+                  />
+                </div>
+              );
+            })}
           </>
         ))}
       </div>
