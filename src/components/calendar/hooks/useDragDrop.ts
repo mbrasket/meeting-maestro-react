@@ -4,13 +4,20 @@ import { DropResult, DragUpdate } from '@hello-pangea/dnd';
 import { CalendarItem } from '../types';
 import { calculateDropTime } from '../utils/dropCalculations';
 
+interface DragState {
+  mouseX: number;
+  mouseY: number;
+  isDragging: boolean;
+  cleanup?: () => void;
+}
+
 export const useDragDrop = () => {
   const [calendarItems, setCalendarItems] = useState<CalendarItem[]>([]);
-  const dragStateRef = useRef<{
-    mouseX: number;
-    mouseY: number;
-    isDragging: boolean;
-  }>({ mouseX: 0, mouseY: 0, isDragging: false });
+  const dragStateRef = useRef<DragState>({ 
+    mouseX: 0, 
+    mouseY: 0, 
+    isDragging: false 
+  });
 
   const handleDragStart = useCallback(() => {
     dragStateRef.current.isDragging = true;
@@ -22,21 +29,18 @@ export const useDragDrop = () => {
 
     document.addEventListener('mousemove', handleMouseMove);
     
-    // Cleanup function will be called in handleDragEnd
     dragStateRef.current.cleanup = () => {
       document.removeEventListener('mousemove', handleMouseMove);
     };
   }, []);
 
   const handleDragUpdate = useCallback((update: DragUpdate) => {
-    // Visual feedback during drag - could be used for preview positioning
-    console.log('Drag update:', update);
+    console.log('Drag update:', update, 'Mouse position:', dragStateRef.current.mouseY);
   }, []);
 
   const handleDragEnd = useCallback((result: DropResult) => {
     const { destination, source, draggableId } = result;
     
-    // Cleanup mouse tracking
     if (dragStateRef.current.cleanup) {
       dragStateRef.current.cleanup();
     }
@@ -44,7 +48,6 @@ export const useDragDrop = () => {
 
     if (!destination) return;
 
-    // Get the drop target element
     const dropElement = document.querySelector(`[data-rbd-droppable-id="${destination.droppableId}"]`);
     if (!dropElement) return;
 
@@ -56,7 +59,6 @@ export const useDragDrop = () => {
 
     if (!dropTime) return;
 
-    // Handle toolbar item drops (creating new items)
     if (source.droppableId === 'toolbar' || draggableId.startsWith('toolbar-')) {
       const [, itemType] = draggableId.split('-');
       const duration = getDefaultDuration(itemType);
@@ -71,9 +73,7 @@ export const useDragDrop = () => {
       };
 
       setCalendarItems(prev => [...prev, newItem]);
-    }
-    // Handle existing item moves
-    else {
+    } else {
       setCalendarItems(prev => 
         prev.map(item => {
           if (item.id === draggableId) {
