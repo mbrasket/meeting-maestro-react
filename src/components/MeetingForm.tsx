@@ -16,7 +16,7 @@ const useStyles = makeStyles({
     maxWidth: '100%',
     margin: '0 auto',
     padding: tokens.spacingVerticalM,
-    paddingTop: '80px', // Add space for fixed toolbar
+    paddingTop: '80px', // Add space for fixed navigation
     paddingRight: '340px', // Add space for participants panel (320px + 20px margin)
     backgroundColor: tokens.colorNeutralBackground1,
     minHeight: '100vh',
