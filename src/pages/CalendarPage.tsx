@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { DragDropContext, DropResult } from '@hello-pangea/dnd';
 import {
@@ -47,32 +46,13 @@ const CalendarPage = () => {
   const [selectedItemIds, setSelectedItemIds] = useState<Set<string>>(new Set());
   const [copyingItem, setCopyingItem] = useState<CalendarItem | null>(null);
   const [dragCollisions, setDragCollisions] = useState<Set<string>>(new Set());
-  const [debugInfo, setDebugInfo] = useState<string>('');
   
   const keyboardRef = useKeyboardRef();
   const timeRangeSelection = useTimeRangeSelection();
 
-  // Enhanced debug logging for CTRL key
-  useEffect(() => {
-    const interval = setInterval(() => {
-      const ctrlState = keyboardRef.current.ctrlKey;
-      const timestamp = new Date().toLocaleTimeString();
-      setDebugInfo(`[${timestamp}] CTRL: ${ctrlState ? 'PRESSED' : 'released'}`);
-    }, 100);
-
-    return () => clearInterval(interval);
-  }, [keyboardRef]);
-
   // Handle keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      console.log('Global KeyDown:', {
-        key: event.key,
-        ctrlKey: event.ctrlKey,
-        refState: keyboardRef.current.ctrlKey,
-        timestamp: new Date().toLocaleTimeString()
-      });
-
       if (event.key === 'Escape') {
         setSelectedItemIds(new Set());
         timeRangeSelection.clearSelection();
@@ -152,7 +132,7 @@ const CalendarPage = () => {
 
   const handleBeforeDragStart = (initial: any) => {
     const ctrlState = keyboardRef.current.ctrlKey;
-    console.log('BeforeDragStart:', {
+    console.log('BeforeDragStart - CTRL Debug:', {
       ctrlPressed: ctrlState,
       draggableId: initial.draggableId,
       source: initial.source,
@@ -165,7 +145,7 @@ const CalendarPage = () => {
     
     // Get the current CTRL state at the moment of drag start
     const isCtrlPressed = keyboardRef.current.ctrlKey;
-    console.log('DragStart Enhanced Debug:', {
+    console.log('DragStart - CTRL Clone Debug:', {
       ctrlPressed: isCtrlPressed,
       draggableId: draggableId,
       sourceDroppableId: source.droppableId,
@@ -205,6 +185,10 @@ const CalendarPage = () => {
       } else {
         console.warn('Original item not found for cloning:', draggableId);
       }
+    } else if (isCtrlPressed) {
+      console.log('CTRL pressed but drag is from tools - no cloning');
+    } else {
+      console.log('CTRL not pressed - normal drag operation');
     }
   };
 
@@ -244,6 +228,14 @@ const CalendarPage = () => {
   const handleDragEnd = (result: DropResult) => {
     const { destination, source, draggableId } = result;
     
+    console.log('DragEnd - Final Debug:', {
+      destination: destination?.droppableId,
+      source: source.droppableId,
+      draggableId,
+      copyingItem: copyingItem?.id,
+      timestamp: new Date().toLocaleTimeString()
+    });
+    
     // Clear collision indicators
     setDragCollisions(new Set());
 
@@ -257,8 +249,6 @@ const CalendarPage = () => {
       return;
     }
 
-    console.log('Drag ended. Draggable ID:', draggableId);
-
     // Handle dragging from tools panel to calendar
     if (source.droppableId === 'tools-items' && destination.droppableId.includes('-')) {
       const [dateStr, slotStr] = destination.droppableId.split('-');
@@ -270,7 +260,7 @@ const CalendarPage = () => {
       const minutes = (targetSlot % 12) * 5;
       targetDate.setHours(hours, minutes, 0, 0);
       
-      // Determine type from draggableId - fix the milestone detection
+      // Determine type from draggableId
       const type = draggableId.includes('milestone') ? 'milestone' :
                    draggableId.includes('event') ? 'event' : 
                    draggableId.includes('task') ? 'task' :
@@ -328,17 +318,14 @@ const CalendarPage = () => {
       onDragEnd={handleDragEnd}
     >
       <div className={styles.container}>
-        {/* Enhanced CTRL indicator with debug info */}
+        {/* CTRL indicator with better debug info */}
         {keyboardRef.current.ctrlKey && (
           <div className={styles.ctrlIndicator}>
             CTRL: Clone Mode Active
-            <div style={{ fontSize: '10px', marginTop: '4px', opacity: 0.8 }}>
-              {debugInfo}
-            </div>
           </div>
         )}
         
-        {/* Debug panel in development */}
+        {/* Enhanced debug panel */}
         {process.env.NODE_ENV === 'development' && (
           <div style={{
             position: 'fixed',
@@ -352,8 +339,8 @@ const CalendarPage = () => {
             maxWidth: '200px',
             zIndex: 999
           }}>
-            <div>Debug Info:</div>
-            <div>{debugInfo}</div>
+            <div>CTRL Debug:</div>
+            <div>State: {keyboardRef.current.ctrlKey ? 'PRESSED' : 'released'}</div>
             <div>Items: {calendarItems.length}</div>
             <div>Copying: {copyingItem?.id || 'none'}</div>
           </div>
