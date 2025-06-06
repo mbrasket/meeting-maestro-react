@@ -56,6 +56,11 @@ const useStyles = makeStyles({
   resizing: {
     zIndex: '25', // Highest z-index during resize
   },
+  copying: {
+    opacity: '0.8',
+    border: `2px dashed ${tokens.colorBrandStroke1}`,
+    zIndex: '20',
+  },
 });
 
 interface CalendarItemComponentProps {
@@ -70,6 +75,7 @@ interface CalendarItemComponentProps {
   isResizeActive?: boolean;
   onResizeStart?: () => void;
   onResizeEnd?: () => void;
+  onCopyItem?: (item: CalendarItem) => void;
 }
 
 const CalendarItemComponent = ({ 
@@ -83,10 +89,12 @@ const CalendarItemComponent = ({
   totalColumns = 1,
   isResizeActive = false,
   onResizeStart,
-  onResizeEnd
+  onResizeEnd,
+  onCopyItem
 }: CalendarItemComponentProps) => {
   const styles = useStyles();
   const itemRef = useRef<HTMLDivElement>(null);
+  const [isCopying, setIsCopying] = useState(false);
   const { isResizing, handleResizeMouseDown } = useItemResize(
     item, 
     onUpdate, 
@@ -112,6 +120,9 @@ const CalendarItemComponent = ({
     if (isResizing || isResizeActive) {
       combinedStyle += ` ${styles.resizing}`;
     }
+    if (isCopying) {
+      combinedStyle += ` ${styles.copying}`;
+    }
     
     return combinedStyle;
   };
@@ -124,6 +135,18 @@ const CalendarItemComponent = ({
     e.preventDefault();
     e.stopPropagation();
     onSelect(item.id, e.ctrlKey);
+  };
+
+  const handleDragStart = (e: React.DragEvent) => {
+    if (e.ctrlKey && onCopyItem) {
+      setIsCopying(true);
+      // Create a copy of the item for dragging
+      onCopyItem(item);
+    }
+  };
+
+  const handleDragEnd = () => {
+    setIsCopying(false);
   };
 
   if (item.type === 'milestone') {
@@ -157,6 +180,8 @@ const CalendarItemComponent = ({
             ...provided.draggableProps.style,
           }}
           onClick={handleItemClick}
+          onDragStart={handleDragStart}
+          onDragEnd={handleDragEnd}
         >
           <div {...provided.dragHandleProps} style={{ height: '100%', width: '100%', position: 'relative' }}>
             <ItemContent item={item} onTaskToggle={handleTaskToggle} />

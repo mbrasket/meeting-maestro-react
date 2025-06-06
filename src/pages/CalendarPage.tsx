@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { DragDropContext, DropResult } from '@hello-pangea/dnd';
 import {
@@ -28,19 +29,32 @@ const CalendarPage = () => {
   const [calendarItems, setCalendarItems] = useState<CalendarItem[]>([]);
   const [currentWeek, setCurrentWeek] = useState(new Date());
   const [selectedItemIds, setSelectedItemIds] = useState<Set<string>>(new Set());
+  const [isCtrlPressed, setIsCtrlPressed] = useState(false);
 
-  // Handle keyboard shortcuts
+  // Handle keyboard shortcuts and CTRL key tracking
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
+      if (event.key === 'Control') {
+        setIsCtrlPressed(true);
+      } else if (event.key === 'Escape') {
         setSelectedItemIds(new Set());
       } else if (event.key === 'Delete' && selectedItemIds.size > 0) {
         handleDeleteSelected();
       }
     };
 
+    const handleKeyUp = (event: KeyboardEvent) => {
+      if (event.key === 'Control') {
+        setIsCtrlPressed(false);
+      }
+    };
+
     document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
+    document.addEventListener('keyup', handleKeyUp);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener('keyup', handleKeyUp);
+    };
   }, [selectedItemIds]);
 
   const handleAddItem = (item: CalendarItem) => {
@@ -154,10 +168,24 @@ const CalendarPage = () => {
         const newStartTime = snapToGrid(targetDate);
         const newEndTime = new Date(newStartTime.getTime() + duration);
         
-        handleUpdateItem(item.id, {
-          startTime: newStartTime,
-          endTime: newEndTime,
-        });
+        // Check if this was a copy operation (CTRL was pressed during drag start)
+        if (isCtrlPressed) {
+          // Create a copy of the item
+          const copiedItem: CalendarItem = {
+            ...item,
+            id: Date.now().toString(),
+            startTime: newStartTime,
+            endTime: newEndTime,
+            title: `${item.title} (Copy)`,
+          };
+          handleAddItem(copiedItem);
+        } else {
+          // Move the existing item
+          handleUpdateItem(item.id, {
+            startTime: newStartTime,
+            endTime: newEndTime,
+          });
+        }
       }
     }
   };
@@ -175,6 +203,7 @@ const CalendarPage = () => {
             selectedItemIds={selectedItemIds}
             onSelectItem={handleSelectItem}
             onClearSelection={handleClearSelection}
+            onAddItem={handleAddItem}
           />
         </div>
         <ToolsPanel onAddItem={handleAddItem} />

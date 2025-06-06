@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import {
   makeStyles,
   tokens,
@@ -95,6 +95,7 @@ interface CalendarGridProps {
   selectedItemIds: Set<string>;
   onSelectItem: (itemId: string, ctrlKey: boolean) => void;
   onClearSelection: () => void;
+  onAddItem: (item: CalendarItem) => void;
 }
 
 const CalendarGrid = ({
@@ -106,9 +107,11 @@ const CalendarGrid = ({
   selectedItemIds,
   onSelectItem,
   onClearSelection,
+  onAddItem,
 }: CalendarGridProps) => {
   const styles = useStyles();
   const weekDays = getWeekDays(currentWeek);
+  const [copyingItem, setCopyingItem] = useState<CalendarItem | null>(null);
 
   const handlePreviousWeek = () => {
     onWeekChange(subWeeks(currentWeek, 1));
@@ -123,6 +126,10 @@ const CalendarGrid = ({
     if (e.target === e.currentTarget) {
       onClearSelection();
     }
+  };
+
+  const handleCopyItem = (item: CalendarItem) => {
+    setCopyingItem(item);
   };
 
   // Generate time slots for every 5 minutes (288 slots in 24 hours)
@@ -208,6 +215,7 @@ const CalendarGrid = ({
                     selectedItemIds={selectedItemIds}
                     onSelectItem={onSelectItem}
                     onClearSelection={onClearSelection}
+                    onCopyItem={handleCopyItem}
                   />
                 </div>
               );
