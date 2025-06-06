@@ -51,7 +51,7 @@ const CalendarPage = () => {
     if (!destination) return;
 
     // Handle dragging from tools panel to calendar
-    if (source.droppableId.startsWith('tools-') && destination.droppableId.includes('-')) {
+    if (source.droppableId === 'tools-items' && destination.droppableId.includes('-')) {
       const [dateStr, slotStr] = destination.droppableId.split('-');
       const targetDate = new Date(dateStr);
       const targetSlot = parseInt(slotStr);
@@ -61,15 +61,20 @@ const CalendarPage = () => {
       const minutes = (targetSlot % 12) * 5;
       targetDate.setHours(hours, minutes, 0, 0);
       
+      // Determine type from draggableId
+      const type = draggableId.includes('event') ? 'event' : 
+                   draggableId.includes('task') ? 'task' :
+                   draggableId.includes('highlight') ? 'highlight' : 'milestone';
+      
       // Create new item from tool template
+      const duration = type === 'milestone' ? 0 : 60; // Default 1 hour, 0 for milestones
+      
       const newItem: CalendarItem = {
         id: Date.now().toString(),
-        type: draggableId.includes('event') ? 'event' : 
-              draggableId.includes('task') ? 'task' :
-              draggableId.includes('highlight') ? 'highlight' : 'milestone',
-        title: 'New Item',
+        type,
+        title: `New ${type.charAt(0).toUpperCase() + type.slice(1)}`,
         startTime: snapToGrid(targetDate),
-        endTime: snapToGrid(new Date(targetDate.getTime() + 30 * 60 * 1000)),
+        endTime: snapToGrid(new Date(targetDate.getTime() + duration * 60 * 1000)),
         completed: false,
       };
       

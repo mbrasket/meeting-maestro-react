@@ -23,9 +23,6 @@ const useStyles = makeStyles({
       backgroundColor: tokens.colorNeutralBackground1Hover,
     },
   },
-  dragging: {
-    opacity: '0.5' as const,
-  },
   icon: {
     color: tokens.colorNeutralForeground2,
   },
@@ -34,6 +31,9 @@ const useStyles = makeStyles({
   },
   // Calendar item styles for drag preview
   dragPreview: {
+    position: 'absolute',
+    left: '4px',
+    right: '4px',
     padding: '4px 8px',
     borderRadius: '4px',
     cursor: 'move',
@@ -42,6 +42,7 @@ const useStyles = makeStyles({
     display: 'flex',
     alignItems: 'center',
     gap: tokens.spacingHorizontalS,
+    zIndex: 1000,
   },
   eventPreview: {
     backgroundColor: tokens.colorBrandBackground,
@@ -60,6 +61,9 @@ const useStyles = makeStyles({
     backgroundColor: tokens.colorPaletteRedBackground2,
     border: `1px solid ${tokens.colorPaletteRedBorder1}`,
     height: '20px',
+  },
+  dragging: {
+    opacity: '0.5' as const,
   },
 });
 
@@ -101,29 +105,53 @@ const ToolItem = ({ template, index }: ToolItemProps) => {
     }
   };
 
-  const draggableId = `tool-${template.type}-${template.title}-${index}`;
+  const draggableId = `tool-${template.type}-${index}`;
 
   return (
     <Draggable draggableId={draggableId} index={index}>
       {(provided, snapshot) => (
-        <Card
-          ref={provided.innerRef}
-          {...provided.draggableProps}
-          {...provided.dragHandleProps}
-          className={`${snapshot.isDragging ? `${styles.dragPreview} ${getDragPreviewStyle()}` : styles.toolItem} ${snapshot.isDragging ? styles.dragging : ''}`}
-        >
-          {getIcon()}
-          <div className={styles.content}>
-            <Text size={snapshot.isDragging ? 200 : 300} weight={snapshot.isDragging ? "medium" : undefined}>
-              {template.title}
-            </Text>
-            {template.duration > 0 && !snapshot.isDragging && (
-              <Text size={200} style={{ color: tokens.colorNeutralForeground2 }}>
-                {template.duration}min
-              </Text>
-            )}
-          </div>
-        </Card>
+        <>
+          <Card
+            ref={provided.innerRef}
+            {...provided.draggableProps}
+            {...provided.dragHandleProps}
+            className={`${styles.toolItem} ${snapshot.isDragging ? styles.dragging : ''}`}
+          >
+            {getIcon()}
+            <div className={styles.content}>
+              <Text size={300}>{template.title}</Text>
+            </div>
+          </Card>
+          
+          {/* Render drag preview as a portal-like overlay */}
+          {snapshot.isDragging && (
+            <div 
+              className={`${styles.dragPreview} ${getDragPreviewStyle()}`}
+              style={{
+                transform: provided.draggableProps.style?.transform,
+                position: 'fixed',
+                pointerEvents: 'none',
+                width: '200px',
+              }}
+            >
+              {template.type === 'milestone' ? (
+                <>
+                  <Flag size={12} />
+                  <Text size={200} weight="medium">
+                    {template.title}
+                  </Text>
+                </>
+              ) : (
+                <>
+                  {getIcon()}
+                  <Text size={200} weight="medium">
+                    {template.title}
+                  </Text>
+                </>
+              )}
+            </div>
+          )}
+        </>
       )}
     </Draggable>
   );
