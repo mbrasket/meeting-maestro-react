@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { DragDropContext, DropResult } from '@hello-pangea/dnd';
 import {
@@ -31,6 +30,7 @@ const CalendarPage = () => {
   const [selectedItemIds, setSelectedItemIds] = useState<Set<string>>(new Set());
   const [copyingItem, setCopyingItem] = useState<CalendarItem | null>(null);
   const [isCtrlPressed, setIsCtrlPressed] = useState(false);
+  const [dragStartCtrlPressed, setDragStartCtrlPressed] = useState(false);
 
   // Handle keyboard shortcuts and CTRL key tracking
   useEffect(() => {
@@ -122,17 +122,54 @@ const CalendarPage = () => {
     setCopyingItem(item);
   };
 
+  const handleBeforeDragStart = (initial: any) => {
+    // Capture CTRL state at the moment drag starts
+    setDragStartCtrlPressed(isCtrlPressed);
+    console.log('Drag starting, CTRL pressed:', isCtrlPressed);
+  };
+
+  const handleDragStart = (initial: any) => {
+    const { draggableId, source } = initial;
+    
+    // Only handle cloning for existing calendar items (not tools)
+    if (dragStartCtrlPressed && !source.droppableId.startsWith('tools-')) {
+      const originalItem = calendarItems.find(item => item.id === draggableId);
+      if (originalItem) {
+        console.log('Creating immediate clone of item:', originalItem.id);
+        
+        // Create the clone immediately
+        const cloneId = `${Date.now()}-clone`;
+        const clonedItem: CalendarItem = {
+          ...originalItem,
+          id: cloneId,
+          title: `${originalItem.title} (Copy)`,
+        };
+        
+        // Add the clone to the calendar
+        setCalendarItems(prev => [...prev, clonedItem]);
+        setCopyingItem(clonedItem);
+        
+        // Update the draggable to use the clone's ID
+        // Note: This is handled by the drag system automatically since we added the clone
+      }
+    }
+  };
+
   const handleDragEnd = (result: DropResult) => {
     const { destination, source, draggableId } = result;
 
     if (!destination) {
-      // Clear copying state if drag was cancelled
+      // If drag was cancelled and we have a copying item (clone), remove it
+      if (copyingItem && dragStartCtrlPressed) {
+        console.log('Drag cancelled, removing clone:', copyingItem.id);
+        setCalendarItems(prev => prev.filter(item => item.id !== copyingItem.id));
+      }
       setCopyingItem(null);
-      console.log('Drag cancelled, clearing copy state');
+      setDragStartCtrlPressed(false);
       return;
     }
 
-    console.log('Drag ended. Copying item:', copyingItem?.id, 'Target:', destination.droppableId);
+    console.log('Drag ended. Draggable ID:', draggableId, 'Was CTRL pressed at start:', dragStartCtrlPressed);
 
     // Handle dragging from tools panel to calendar
     if (source.droppableId === 'tools-items' && destination.droppableId.includes('-')) {
@@ -183,21 +220,16 @@ const CalendarPage = () => {
         const newStartTime = snapToGrid(targetDate);
         const newEndTime = new Date(newStartTime.getTime() + duration);
         
-        // Check if this was a copy operation (copyingItem is set)
-        if (copyingItem && copyingItem.id === item.id) {
-          console.log('Creating copy of item:', item.id);
-          // Create a copy of the item
-          const copiedItem: CalendarItem = {
-            ...item,
-            id: `${Date.now()}-copy`,
+        // If this was a clone operation, just update the clone's position
+        if (dragStartCtrlPressed && copyingItem && copyingItem.id === item.id) {
+          console.log('Moving cloned item to new position:', item.id);
+          handleUpdateItem(item.id, {
             startTime: newStartTime,
             endTime: newEndTime,
-            title: `${item.title} (Copy)`,
-          };
-          handleAddItem(copiedItem);
+          });
         } else {
-          console.log('Moving item:', item.id);
-          // Move the existing item
+          console.log('Moving original item:', item.id);
+          // Move the existing item normally
           handleUpdateItem(item.id, {
             startTime: newStartTime,
             endTime: newEndTime,
@@ -208,10 +240,15 @@ const CalendarPage = () => {
 
     // Clear copying state after drag operation
     setCopyingItem(null);
+    setDragStartCtrlPressed(false);
   };
 
   return (
-    <DragDropContext onDragEnd={handleDragEnd}>
+    <DragDropContext 
+      onBeforeDragStart={handleBeforeDragStart}
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
+    >
       <div className={styles.container}>
         <div className={styles.mainContent}>
           <CalendarGrid

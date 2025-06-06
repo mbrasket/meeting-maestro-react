@@ -1,4 +1,3 @@
-
 import { useRef, useState } from 'react';
 import { Draggable } from '@hello-pangea/dnd';
 import { makeStyles, tokens } from '@fluentui/react-components';
@@ -96,7 +95,6 @@ const CalendarItemComponent = ({
 }: CalendarItemComponentProps) => {
   const styles = useStyles();
   const itemRef = useRef<HTMLDivElement>(null);
-  const [isCopying, setIsCopying] = useState(false);
   const { isResizing, handleResizeMouseDown } = useItemResize(
     item, 
     onUpdate, 
@@ -121,9 +119,6 @@ const CalendarItemComponent = ({
     let combinedStyle = isSelected ? `${baseStyle} ${styles.selected}` : baseStyle;
     if (isResizing || isResizeActive) {
       combinedStyle += ` ${styles.resizing}`;
-    }
-    if (isCopying) {
-      combinedStyle += ` ${styles.copying}`;
     }
     
     return combinedStyle;
@@ -164,28 +159,12 @@ const CalendarItemComponent = ({
       isDragDisabled={isResizing}
     >
       {(provided, snapshot) => {
-        // Check if we should copy - CTRL was pressed when drag started
-        const shouldCopy = isCtrlPressed && snapshot.isDragging;
-        
-        // Handle copying logic when drag starts with CTRL
-        if (shouldCopy && !isCopying && onCopyItem) {
-          console.log('Starting copy operation for item:', item.id);
-          setIsCopying(true);
-          onCopyItem(item);
-        }
-        
-        // Reset copying state when drag ends
-        if (!snapshot.isDragging && isCopying) {
-          console.log('Ending copy operation for item:', item.id);
-          setIsCopying(false);
-        }
-
         return (
           <div
             ref={provided.innerRef}
             {...provided.draggableProps}
             {...provided.dragHandleProps}
-            className={`${styles.item} ${getItemStyles()} ${snapshot.isDragging ? styles.dragging : ''} ${shouldCopy ? styles.copying : ''}`}
+            className={`${styles.item} ${getItemStyles()} ${snapshot.isDragging ? styles.dragging : ''}`}
             style={{
               height: `${calculateItemHeight(item)}px`,
               ...positionStyle,
