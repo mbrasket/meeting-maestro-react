@@ -1,27 +1,24 @@
 
 import { ReactNode } from 'react';
 import { DroppableProvided, DroppableStateSnapshot } from '@hello-pangea/dnd';
-import { makeStyles, tokens } from '@fluentui/react-components';
 
-const useStyles = makeStyles({
-  slot: {
-    height: '7px',
-    position: 'relative',
-    minHeight: '7px',
-    padding: '1px 0px', // 1px top and bottom padding for vertical spacing
-  },
-  halfHourBorder: {
-    borderBottom: `1px solid ${tokens.colorNeutralStroke2}`,
-  },
-  noBorder: {
-    // No border for non-half-hour slots
-  },
-  dropZone: {
-    backgroundColor: tokens.colorBrandBackground2,
-    opacity: '0.2', // Reduced opacity so it doesn't interfere with ghost card
-    zIndex: '1', // Lower z-index than ghost card
-  },
-});
+// Simple CSS styles to avoid makeStyles complexity
+const slotStyles: React.CSSProperties = {
+  height: '7px',
+  position: 'relative',
+  minHeight: '7px',
+  padding: '1px 0px',
+};
+
+const halfHourBorderStyles: React.CSSProperties = {
+  borderBottom: '1px solid #e1e1e1',
+};
+
+const dropZoneActiveStyles: React.CSSProperties = {
+  backgroundColor: '#0078d4',
+  opacity: 0.1,
+  transition: 'all 0.2s ease',
+};
 
 interface DropZoneProps {
   provided: DroppableProvided;
@@ -38,10 +35,19 @@ export const DropZone = ({
   onSlotClick, 
   children 
 }: DropZoneProps) => {
-  const styles = useStyles();
   
-  const getBorderStyle = () => {
-    return isHalfHourBoundary ? styles.halfHourBorder : styles.noBorder;
+  const getSlotStyle = (): React.CSSProperties => {
+    const baseStyle = { ...slotStyles };
+    
+    if (isHalfHourBoundary) {
+      Object.assign(baseStyle, halfHourBorderStyles);
+    }
+    
+    if (snapshot.isDraggingOver) {
+      Object.assign(baseStyle, dropZoneActiveStyles);
+    }
+    
+    return baseStyle;
   };
 
   // Debug logging for drag state
@@ -56,7 +62,7 @@ export const DropZone = ({
     <div 
       ref={provided.innerRef}
       {...provided.droppableProps}
-      className={`${styles.slot} ${getBorderStyle()} ${snapshot.isDraggingOver ? styles.dropZone : ''}`}
+      style={getSlotStyle()}
       onClick={onSlotClick}
     >
       {children}

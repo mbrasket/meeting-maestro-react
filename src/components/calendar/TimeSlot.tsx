@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, memo } from 'react';
 import { Droppable } from '@hello-pangea/dnd';
 import { CalendarItem } from './types';
 import CalendarItemComponent from './CalendarItemComponent';
@@ -17,10 +17,10 @@ interface TimeSlotProps {
   selectedItemIds: Set<string>;
   onSelectItem: (itemId: string, ctrlKey: boolean) => void;
   onClearSelection: () => void;
-  allItems?: CalendarItem[]; // Add this to get access to all items for drag preview
+  allItems?: CalendarItem[];
 }
 
-const TimeSlot = ({ 
+const TimeSlot = memo(({ 
   day, 
   slot, 
   items, 
@@ -30,7 +30,7 @@ const TimeSlot = ({
   selectedItemIds, 
   onSelectItem, 
   onClearSelection,
-  allItems = [] // Default to empty array
+  allItems = []
 }: TimeSlotProps) => {
   const [resizingItemId, setResizingItemId] = useState<string | null>(null);
   const droppableId = `${day.toDateString()}-${slot}`;
@@ -80,7 +80,10 @@ const TimeSlot = ({
           isHalfHourBoundary={isHalfHourBoundary}
           onSlotClick={handleSlotClick}
         >
-          <GhostCard snapshot={snapshot} allItems={allItems} />
+          {/* Only render ghost card when actually dragging over this slot */}
+          {snapshot.isDraggingOver && (
+            <GhostCard snapshot={snapshot} allItems={allItems} />
+          )}
           
           {itemsWithPositions.map((itemData, index) => {
             const { item, column, totalColumns, startSlot } = itemData;
@@ -108,6 +111,8 @@ const TimeSlot = ({
       )}
     </Droppable>
   );
-};
+});
+
+TimeSlot.displayName = 'TimeSlot';
 
 export default TimeSlot;
